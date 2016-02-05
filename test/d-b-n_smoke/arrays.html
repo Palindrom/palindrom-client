@@ -1,0 +1,456 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <!-- Importing Web Component's Polyfill -->
+    <script src="../../../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="../shared/polyfills.html">
+
+    <script src="../../../web-component-tester/browser.js"></script>
+
+    <!-- Step 1: import the element to test -->
+    <link rel="import" href="../../puppet-polymer-client.html">
+</head>
+
+<body>
+    <template id="fixture">
+    <template is="dom-bind" id="arrays">
+
+        <!-- Using Custom Elements -->
+        <puppet-polymer-client obj="{{organization}}"></puppet-polymer-client>
+
+        <h4>
+            <span>{{organization.name}}</span> people:</h4>
+        <ul class="">
+            <template is="dom-repeat" items="{{organization.people}}">
+                <li>
+                    <span>{{item.first}}</span>
+                </li>
+            </template>
+        </ul>
+        <ul class="primitive_people">
+            <template is="dom-repeat" items="{{organization.primitive_people}}">
+                <li>
+                    <span>{{item}}</span>
+                </li>
+            </template>
+        </ul>
+        <ul class="people_properties">
+            <li class="arr">Elements:
+                <template is="dom-repeat" items="{{organization.people_properties}}">
+                        <span>{{item}}</span>,
+                </template></li>
+            <li class="length">{{organization.people_properties.length}}</li>
+            <li class="update">{{organization.people_properties.prop}}</li>
+            <template is="dom-if" if="{{organization.people_properties.newProp}}" restamp>
+                <li class="add">Add</li>
+            </template>
+            <template is="dom-if" if="{{organization.people_properties.deletedProp}}" restamp>
+                <li class="delete">Delete</li>
+            </template>
+        </ul>
+        <ul class="push">
+            <template is="dom-repeat" items="{{organization.people_push}}">
+                <li>
+                    <span>{{item.first}}</span>
+                </li>
+            </template>
+        </ul>
+        <ul class="pop">
+            <template is="dom-repeat" items="{{organization.people_pop}}">
+                <li>
+                    <span>{{item.first}}</span>
+                </li>
+            </template>
+        </ul>
+        <ul class="splice">
+            <template is="dom-repeat" items="{{organization.people_splice}}">
+                <li>
+                    <span>{{item.first}}</span>
+                </li>
+            </template>
+        </ul>
+        <ul class="splice_n_change">
+            <template is="dom-repeat" items="{{organization.people_splice_n_change}}">
+                <li>{{item.first}}</li>
+            </template>
+        </ul>
+        <ul class="primitive_splice_n_change">
+            <template is="dom-repeat" items="{{organization.primitive_splice_n_change}}">
+                <li>{{item}}</li>
+            </template>
+        </ul>
+        <ul class="people_nested">
+            <template is="dom-repeat" items="{{organization.people_nested}}">
+                <li>
+                    <template is="dom-repeat" items="{{item}}">
+                        <span>{{item}}</span>
+                    </template>
+                </li>
+            </template>
+        </ul>
+    </template>
+    </template>
+    <script>
+        describe('puppet-polymer-client, when stamped from `dom-bind` and bound to puppet object w/ array', function() {
+            var fixture, ppclient, puppet, model;
+
+            beforeEach(function(done){
+                fixture = domBindFixture('fixture', function(){
+                    ppclient = document.querySelector("puppet-polymer-client");
+                    puppet = ppclient.puppet;
+                    puppet.obj = model;
+                    done();
+                });
+                model = {
+                    name: "Juicy",
+                    people: [{
+                        first: "Tomek"
+                    }],
+                    primitive_people: [
+                        "Australopithecus",
+                        "Paranthropus"
+                    ],
+                    people_properties: [],
+                    people_push: [{
+                        first: "Tomek"
+                    }],
+                    people_pop: [{
+                        first: "Alice"
+                    }, {
+                        first: "Bob"
+                    }],
+                    people_splice: [{
+                        first: "Alice"
+                    }, {
+                        first: "Bob"
+                    }, {
+                        first: "Celine"
+                    }],
+                    people_splice_n_change: [{
+                        first: "Alice"
+                    }, {
+                        first: "Bob"
+                    }],
+                    primitive_splice_n_change: ["A", "B"],
+                    people_nested: [
+                        ["Sherlock", "Holmes"],
+                        ["John", "Watson"]
+                    ]
+                };
+                model.people_properties.prop = "custom";
+                model.people_properties.deletedProp = "not yet!";
+                domBind.organization = model;
+            });
+            afterEach(function(){
+                fixture.instance.parentNode.removeChild(fixture.instance);
+            });
+            describe('should observe changes to ', function() {
+                describe('array items,', function() {
+                    it('fire a change event, and update dom-bind', function(done) {
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                            expect(document.querySelector("ul.primitive_people>li>span").innerHTML).to.equal("Homo erectus");
+                            done();
+                        });
+                        // change model
+                        puppetChange(puppet, [operationObject('replace', '/primitive_people/0', 'Homo erectus')]);
+                        console.info('Fails in Polymer 1.2.4 due to https://github.com/Polymer/polymer/issues/3377');
+
+                    });
+                });
+                describe('properties of array items,', function() {
+                    it('fire a change event, and update dom-bind', function(done) {
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                            expect(document.querySelector("ul>li>span").innerHTML).to.equal("tomalec");
+                            done();
+                        });
+                        // change model
+                        debugger
+                        puppetChange(puppet, [operationObject('replace', '/people/0/first', 'tomalec')]);
+                    });
+                });
+                describe('array properties, fire a change event, and update dom-bind:', function() {
+                    it('when adding something to array `length` property should be notified', function(done) {
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                            expect(document.querySelector("ul.people_properties>li.length").innerHTML).to.equal("1");
+                            done();
+                        });
+                        // change model
+                        // puppetChange(puppet, [operationObject('add', '/people_properties/-', '1')]);
+                        puppetChange(puppet, [operationObject('add', '/people_properties/0', '1')]);
+                    });
+                    it('when updating custom property', function(done) {
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                            expect(document.querySelector("ul.people_properties>li.update").innerHTML).to.equal("changed");
+                            done();
+                        });
+                        puppetChange(puppet, [operationObject('replace', '/people_properties/prop', 'changed')]);
+                    });
+                    it('when adding custom property (dom-if restamps asynchronously)', function(done) {
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            setTimeout(function waitForStamp() {
+                                expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                                expect(document.querySelector("ul.people_properties>li.add")).to.be.not.null;
+                                console.info('hej!')
+                                done();
+                            }, 100);
+                        });
+                        // change model
+                        puppetChange(puppet, [operationObject('add', '/people_properties/newProp', 'changed')]);
+                    });
+                    it('when deleting custom property (dom-if restamps asynchronously)', function(done) {
+                    console.info('wtf!')
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            setTimeout(function waitForStamp() {
+                                debugger
+                                expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                                expect(document.querySelector("ul.people_properties>li.delete")).to.be.null;
+                                done();
+                            }, 100);
+                        });
+                        // change model
+                        puppetChange(puppet, [operationObject('remove', '/people_properties/deletedProp')]);
+                    });
+                });
+                describe('array (push),', function() {
+                    xit('fire a change event, and update dom-bind', function(done) {
+                        // change model
+                        model.people_push.push({
+                            first: "Alice"
+                        });
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                            expect(document.querySelector("ul.push>li>span").innerHTML).to.equal("Tomek");
+                            expect(document.querySelector("ul.push>li:nth-child(2)>span")).to.be.not.null;
+                            expect(document.querySelector("ul.push>li:nth-child(2)>span").innerHTML).to.equal("Alice");
+                            done();
+                        });
+                    });
+                    it('fire a change event, and EVENTUALLY update dom-bind', function(done) {
+                        // change model
+                        model.people_push.push({
+                            first: "Alice"
+                        });
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            // wait for asynchronous Polymer's _notifySplice
+                            setTimeout(function() {
+                                expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                                expect(document.querySelector("ul.push>li>span").innerHTML).to.equal("Tomek");
+                                expect(document.querySelector("ul.push>li:nth-child(2)>span")).to.be.not.null;
+                                expect(document.querySelector("ul.push>li:nth-child(2)>span").innerHTML).to.equal("Alice");
+                                done();
+                            }, 100);
+                        });
+
+                    });
+
+                    it('should start observing changes to objects added to array, and EVENTUALLY update dom-bind', function(done) {
+                        // add item to the array
+                        model.people_push.push({
+                            first: "Wizard"
+                        });
+                        // make it async, to make sure it will come as separated change
+                        setTimeout(function() {
+                            model.people_push[model.people_push.length - 1].first += " from Oz";
+                            // check the event
+                            // wait for Object.observe callback
+                            ppclient.addEventListener('patch-applied', function listener(event) {
+                                ppclient.removeEventListener('patch-applied', listener);
+                                // wait for asynchronous Polymer's _notifySplice
+                                setTimeout(function() {
+                                    expect(document.querySelector("ul.push>li:nth-child(" + model.people_push.length + ")>span").innerHTML).to.equal("Wizard from Oz");
+                                    done();
+                                }, 100);
+                            });
+                        }, 100);
+
+                    });
+                });
+
+                describe('array (pop),', function() {
+                    xit('fire a change event, and update dom-bind', function(done) {
+                        // change model
+                        model.people_pop.pop();
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                            expect(document.querySelector("ul.pop>li>span").innerHTML).to.equal("Alice");
+                            expect(document.querySelectorAll("ul.pop>li")).to.have.property("length").equal(1);
+                            done();
+                        });
+                    });
+                    it('fire a change event, and EVENTUALLY update dom-bind', function(done) {
+                        // change model
+                        model.people_pop.pop();
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            // wait for asynchronous Polymer's _notifySplice
+                            setTimeout(function() {
+                                expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                                expect(document.querySelector("ul.pop>li>span").innerHTML).to.equal("Alice");
+                                expect(document.querySelectorAll("ul.pop>li")).to.have.property("length").equal(1);
+                                done();
+                            }, 100);
+                        });
+
+                    });
+                    it('should stop observing changes to removed objects, and do NOT fire a change even', function(done) {
+                        // change model
+                        var remocedObj = model.people_pop.pop();
+                        // make it async, to make sure it will come as separated change
+                        setTimeout(function() {
+                            var numberOfCallsForChangeEvent = 0;
+                            // check the event
+                            // wait for Object.observe callback
+                            function listener() {
+                                numberOfCallsForChangeEvent++;
+                            }
+                            ppclient.addEventListener('patch-applied', listener);
+                            remocedObj.first = "removed Alice";
+                            // wait for any event to be called
+                            setTimeout(function() {
+                                ppclient.removeEventListener('patch-applied', listener);
+                                expect(numberOfCallsForChangeEvent).to.equal(0);
+                                done();
+                            }, 1000);
+                        }, 200);
+                    });
+                });
+
+                describe('array (splice),', function() {
+                    xit('fire a change event, and update dom-bind', function(done) {
+                        // change model
+                        model.people_splice.splice(1, 1, {
+                            first: "Tomek"
+                        });
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                            expect(document.querySelector("ul.splice>li>span").innerHTML).to.equal("Alice");
+                            expect(document.querySelector("ul.splice>li:nth-child(2)>span")).to.have.property("innerHTML").equal("Tomek");
+                            expect(document.querySelector("ul.splice>li:nth-child(3)>span").innerHTML).to.equal("Celine");
+                            expect(document.querySelectorAll("ul.splice>li")).to.have.property("length").equal(3);
+                            done();
+                        });
+                    });
+                    it('fire a change event, and EVENTUALLY update dom-bind', function(done) {
+                        // change model
+                        model.people_splice.splice(1, 1, {
+                            first: "Tomek"
+                        });
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            // wait for asynchronous Polymer's _notifySplice
+                            setTimeout(function() {
+                                expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                                expect(document.querySelector("ul.splice>li>span").innerHTML).to.equal("Alice");
+                                expect(document.querySelector("ul.splice>li:nth-child(2)>span")).to.have.property("innerHTML").equal("Tomek");
+                                expect(document.querySelector("ul.splice>li:nth-child(3)>span").innerHTML).to.equal("Celine");
+                                expect(document.querySelectorAll("ul.splice>li")).to.have.property("length").equal(3);
+                                done();
+                            }, 100);
+                        });
+
+                    });
+                });
+                describe('array items changed after splice, should update correct dom-repeat rows', function() {
+                    it('for nested objects', function(done) {
+                        model.people_splice_n_change.splice(1, 0, {
+                            first: "Tomek"
+                        });
+
+                        setTimeout(function() {
+                            model.people_splice_n_change[1].first = "Konstantin";
+                            ppclient.addEventListener('patch-applied', function listener(event) {
+                                // wait for asynchronous Polymer's _notifySplice
+                                ppclient.removeEventListener('patch-applied', listener);
+                                setTimeout(function() {
+                                    expect(document.querySelector("ul.splice_n_change>li").innerHTML).to.equal("Alice");
+                                    expect(document.querySelector("ul.splice_n_change>li:nth-child(2)").innerHTML).to.equal("Konstantin");
+                                    expect(document.querySelector("ul.splice_n_change>li:nth-child(3)").innerHTML).to.equal("Bob");
+                                    done();
+                                }, 100);
+                            });
+                        }, 100);
+
+                    });
+                    it('for primitive values', function(done) {
+                        model.primitive_splice_n_change.splice(1, 0, "T");
+
+                        setTimeout(function() {
+                            model.primitive_splice_n_change[1] = "K";
+                            ppclient.addEventListener('patch-applied', function listener(event) {
+                                // wait for asynchronous Polymer's _notifySplice
+                                ppclient.removeEventListener('patch-applied', listener);
+                                setTimeout(function() {
+                                    expect(document.querySelector("ul.primitive_splice_n_change>li").innerHTML).to.equal("A");
+                                    expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(2)").innerHTML).to.equal("K");
+                                    expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(3)").innerHTML).to.equal("B");
+                                    done();
+                                }, 100);
+                            });
+                        }, 100);
+
+                    });
+                });
+                describe('nested array items,', function() {
+                    xit('fire a change event, and update dom-bind', function(done) {
+                        // change model
+                        model.people_nested[0][0] = "John";
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                            expect(document.querySelector("ul.people_nested>li:nth-child(1)>span").innerHTML).to.equal("John");
+                            done();
+                        });
+                    });
+                    it('fire a change event, and EVENTUALLY update dom-bind', function(done) {
+                        // change model
+                        model.people_nested[0][0] = "John";
+                        // check and wait for the event dispatching
+                        ppclient.addEventListener('patch-applied', function listener(event) {
+                            ppclient.removeEventListener('patch-applied', listener);
+                            // wait for asynchronous Polymer's _notifySplice
+                            setTimeout(function() {
+                                expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
+                                expect(document.querySelector("ul.people_nested>li:nth-child(1)>span").innerHTML).to.equal("John");
+                                done();
+                            }, 100);
+                        });
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

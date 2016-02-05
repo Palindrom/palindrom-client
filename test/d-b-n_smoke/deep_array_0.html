@@ -1,0 +1,147 @@
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <!-- Importing Web Component's Polyfill -->
+    <script src="../../../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="../shared/polyfills.html">
+    <script src="../../../web-component-tester/browser.js"></script>
+
+    <!-- Step 1: import the element to test -->
+    <link rel="import" href="../../puppet-polymer-client.html">
+</head>
+<body>
+
+    <template is="dom-bind" id="deep_array">
+        <div id="arrayDiv">
+            <template is="dom-repeat" items="{{model.path_to.array}}">
+                <div id="nestedArrayDiv">
+                  <template is="dom-repeat" items="{{item.nested_array}}">
+                      <span>{{item.prop}}</span>
+                  </template>
+                </div>
+            </template>
+        </div>
+        <puppet-polymer-client obj="{{model}}"></puppet-polymer-client>
+    </template>
+    <script>
+        var values = {
+            firstChange: {prop: "firstChange"},
+            secondChange: {prop: "secondChange"},
+        };
+        var model = {
+            path_to: {
+                array: [
+                    {
+                        nested_array: [
+                            {//object that will be replaced
+                                prop: "initial"
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        var domBind = document.getElementById("deep_array");
+        domBind.model = model;
+
+        // setTimeout(function(){
+        //     model.path_to.array[0].nested_array[0] = {prop: "firstChange"};
+        //     domBind.notifyPath("model.path_to.array.0.nested_array.0", model.path_to.array[0].nested_array[0] );
+        //     setTimeout(function(){
+        //         model.path_to.array[0].nested_array[0] = {prop: "firstChange"};
+        //         domBind.notifyPath("model.path_to.array.0.nested_array.0", model.path_to.array[0].nested_array[0] );
+        //     },500);
+        // },500);
+        //
+        //
+        // setTimeout(function(){
+        //  // non-Polymer code changes an object
+        //  var first_value = {prop: "firstChange"};
+        //  var old_value = model.path_to.array[0].nested_array[0];
+        //  model.path_to.array[0].nested_array[0] = first_value;
+        //  // notify dom bind to reflect the change in DOM
+        //  domBind.notifySplices(
+        //    "model.path_to.array.0.nested_array",
+        //    [{
+        //      object: model.path_to.array[0].nested_array,
+        //      index: 0,
+        //      addedCount: 1,
+        //      removed: [old_value],
+        //      type: 'splice'
+        //    }]
+        //  );
+
+
+        //  // fetch the key required by .notifyPath method
+        //  old_value = model.path_to.array[0].nested_array[0]; // first_value
+         //
+        //  // non-Polymer code changes an object
+        //  var second_value = {prop: "secondChange"};
+        //  model.path_to.array[0].nested_array[0] = second_value;
+        //  // notify dom bind to reflect the change in DOM
+         //
+        //  domBind.notifySplices(
+        //    "model.path_to.array.0.nested_array",
+        //    [{
+        //      object: model.path_to.array[0].nested_array,
+        //      index: 0,
+        //      addedCount: 1,
+        //      removed: [old_value],
+        //      type: 'splice'
+        //    }]
+        //  );
+
+        //  },500);
+    </script>
+
+    <script>
+describe('puppet-polymer-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function() {
+    var notifier;
+
+    before(function waitForHTMLImportsAndDomBindChange(done){
+      setTimeout(function(){
+        // debugger
+        notifier = document.querySelector("puppet-polymer-client");
+        done();
+      });
+    });
+    describe('should notify Polymer binding so that changing nested array element will me replaced after each model replace', function(){
+        it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
+            // change model
+            model.path_to.array[0].nested_array[0] = {prop: "firstChange"};
+            // check the event
+            // wait for Object.observe callback
+            notifier.addEventListener("change", function listener(event){
+                notifier.removeEventListener("change", listener);
+                // wait for asynchronous Polymer's _notifySplice
+                setTimeout(function(){
+                    expect( event.type ).to.equal("change"); // It's kinda stupid, isn't it?
+                    expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("firstChange");
+                    // change model
+                    model.path_to.array[0].nested_array[0] = {prop: "secondChange"};
+                    // check the event
+                    // wait for Object.observe callback
+                    notifier.addEventListener("change", function listener2(event){
+                        notifier.removeEventListener("change", listener2);
+                        // wait for asynchronous Polymer's _notifySplice
+                        setTimeout(function(){
+                            expect( event.type ).to.equal("change"); // It's kinda stupid, isn't it?
+                            expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("secondChange");
+                            done();
+                        });
+                    });
+                },100);
+            });
+
+        });
+    });
+});
+    </script>
+
+  </body>
+</html>

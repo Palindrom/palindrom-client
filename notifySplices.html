@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+    <script src="../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="../polymer/polymer.html">
+</head>
+
+<body>
+
+    <template is="dom-bind" id="arrays">
+        <ul class="people">
+            <template is="dom-repeat" items="{{organization.people}}">
+                <li>
+                    <span>{{item}}</span>
+                </li>
+            </template>
+        </ul>
+    </template>
+    <script>
+        var model = {
+            name: "Juicy",
+            people: [
+                "Alice",
+                "Bob"
+            ]
+        };
+        var domBind = document.getElementById("arrays");
+        domBind.organization = model;
+
+        setTimeout(function(){
+            var removed = model.people[0];
+            model.people[0] = "Anna";
+            domBind.notifySplices('organization.people', {
+                index: 0,
+                removed: removed,
+                addedCount: 1,
+                object: model.people,
+                type: 'splice'
+            });
+        });
+    </script>
+
+</body>
+
+</html>

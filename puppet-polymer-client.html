@@ -1,0 +1,388 @@
+<!-- puppet-client version: 0.0.0 | MIT License -->
+
+<link rel="import" href="../polymer/polymer.html">
+<!-- <link rel="import" href="iron-request.html"> -->
+
+<!-- include PuppetJs with dependencies -->
+<script src="../fast-json-patch/src/json-patch-duplex.js"></script>
+<script src="../json-patch-queue/src/json-patch-queue.js"></script>
+<script src="../json-patch-ot-agent/src/json-patch-ot-agent.js"></script>
+<script src="../json-patch-ot/src/json-patch-ot.js"></script>
+<script src="../PuppetJs/src/puppet.js"></script>
+<script src="../PuppetJs/src/puppet-dom.js"></script>
+
+<!--
+The `puppet-polymer-client` element exposes network request functionality.
+
+    <puppet-polymer-client
+        auto
+        url="http://gdata.youtube.com/feeds/api/videos/"
+        params='{"alt":"json", "q":"chrome"}'
+        handle-as="json"
+        on-response="handleResponse"
+        debounce-duration="300"></puppet-polymer-client>
+
+With `auto` set to `true`, the element performs a request whenever
+its `url`, `params` or `body` properties are changed. Automatically generated
+requests will be debounced in the case that multiple attributes are changed
+sequentially.
+
+Note: The `params` attribute must be double quoted JSON.
+
+You can trigger a request explicitly by calling `generateRequest` on the
+element.
+
+@demo demo/index.html
+@hero hero.svg
+-->
+
+<script>
+(function(){
+    'use strict';
+
+    Polymer({
+
+        is: 'puppet-polymer-client',
+
+        /**
+         * Fired when a request is sent.
+         *
+         * @event request
+         */
+
+        /**
+         * Fired when a response is received.
+         *
+         * @event response
+         */
+
+        /**
+         * Fired when an error is received.
+         *
+         * @event error
+         */
+
+        hostAttributes: {
+            hidden: true
+        },
+
+        properties: {
+            /**
+             * The remote's URL
+             */
+            remoteUrl: {
+                type: String
+            },
+            /**
+             * Regular expression with local properties to ignore
+             * @see [PuppetJS.ignoreAdd](https://github.com/PuppetJs/PuppetJs#ignoring-local-changes-ignoreadd).
+             * Should be given in string format, like `"_.+"`.
+             */
+            ignoreAdd: {
+                type: RegExp,
+                value: /.*/
+            },
+            /**
+             * Set to `false` to disable WebSocket (use HTTP)
+             */
+            useWebSocket: {
+                type: Boolean,
+                value: true
+            },
+            /**
+             * Set to true to enable debugging mode
+             */
+            debug: {
+                type: Boolean,
+                value: false
+            },
+            /**
+             * {JSONPointer} local version path, set to falsy do disable Versioned JSON Patch communication
+             */
+            localVersionPath: {
+                type: String,
+                value: '/_ver#c$'
+            },
+            /**
+             * {JSONPointer} remote version path, set it to falsy to disable Double Versioned JSON Patch communication
+             */
+            remoteVersionPath: {
+                type: String,
+                value: '/_ver#s'
+            },
+            /**
+             * `false` to disable OT
+             */
+            ot: {
+                type: Boolean,
+                value: true
+            },
+            /**
+             * `true` to enable purist mode of OT
+             */
+            purity: {
+                type: Boolean,
+                value: false
+            },
+            /**
+             *  DOM node to listen to (see [PuppetDOM listenTo attribute](https://github.com/PuppetJs/PuppetJs#puppetdom))
+             */
+            listenTo: {
+                type: String
+            },
+            /**
+             *  Interval in seconds between ping patches, `0` - disable ping patches
+             */
+            pingInterval: {
+                type: Number,
+                value: '60'
+            },
+
+            /**
+             * An object that contains query parameters to be appended to the
+             * specified `url` when generating a request. If you wish to set the body
+             * content when making a POST request, you should use the `body` property
+             * instead.
+             */
+            useWebSocket: {
+                type: Object,
+                value: function() {
+                    return {};
+                }
+            },
+
+            /**
+             * The HTTP method to use such as 'GET', 'POST', 'PUT', or 'DELETE'.
+             * Default is 'GET'.
+             */
+            method: {
+                type: String,
+                value: 'GET'
+            },
+
+            /**
+             * Object that will be synced
+             */
+            obj: {
+                type: Object,
+                notify: true,
+                value: function() {
+                    return {};
+                }
+            },
+
+
+            // /**
+            //  * If true, automatically performs an Ajax request when either `url` or
+            //  * `params` changes.
+            //  */
+            // auto: {
+            //     type: Boolean,
+            //     value: false
+            // },
+
+        },
+
+        observers: [
+            '_objChanged(obj, obj.*)'
+        ],
+        //
+        // /**
+        //  * The `url` with query string (if `params` are specified), suitable for
+        //  * providing to an `iron-request` instance.
+        //  *
+        //  * @return {string}
+        //  */
+        // get requestUrl() {
+        //     var queryString = this.queryString;
+        //
+        //     if (queryString) {
+        //         var bindingChar = this.url.indexOf('?') >= 0 ? '&' : '?';
+        //         return this.url + bindingChar + queryString;
+        //     }
+        //
+        //     return this.url;
+        // },
+
+        created: function(){
+            this.onPatchReceived = this.onPatchReceived.bind(this);
+            this.onPatchSent = this.onPatchSent.bind(this);
+            this.onSocketStateChanged = this.onSocketStateChanged.bind(this);
+            this.onConnectionError = this.onConnectionError.bind(this);
+
+            this.notifyChange = this.notifyChange.bind(this);
+        },
+        /**
+         * Creates an instance of Puppet according to given params, attaches it to .pupet property
+         *
+         */
+        attached: function() {
+
+            // var whereToBind = this.getAttribute("ref");
+            var listenTo = this.listenTo;
+            var pingInterval = this.pingInterval / 1;
+            var me = this;
+
+            if (listenTo) {
+                listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
+            }
+            this.puppet = new PuppetDOM(this,{
+                // use server URL or window.location.href;
+                remoteUrl: this.remoteUrl,
+                pingInterval: pingInterval,
+                listenTo: listenTo,
+                // obj:            obj,
+                useWebSocket: this.useWebSocket,
+                ignoreAdd: this.ignoreAdd,
+                debug: this.debug,
+                // onRemoteChange: ?,
+
+                localVersionPath: this.localVersionPath,
+                remoteVersionPath: this.remoteVersionPath,
+                ot: this.ot,
+                purity: this.purity
+            });
+            this.puppet.addEventListener('patch-applied', this.notifyChange);
+        },
+        _objChanged: function(obj, changes){
+            console.log('objChanged', obj, changes)
+        },
+        onPatchReceived: function(data, url, method) {
+            console.log('onPatchReceived', arguments);
+            // TODO: this JSON.parse is redundant
+            // this.notifyChange(JSON.parse(data));
+            this.fire("patchreceived", {
+                data: data,
+                url: url,
+                method: method
+            });
+        },
+        onPatchSent: function(data, url, method) {
+            console.log('onPatchSent', arguments);
+            this.fire("patchsent", {
+                data: data,
+                url: url,
+                method: method
+            });
+        },
+        onSocketStateChanged: function(state, url, data, code, reason) {
+            console.log('onSocketStateChanged', arguments);
+            debugger
+            this.fire("socketstatechanged", {
+                state: state,
+                url: url,
+                data: data,
+                statusCode: code,
+                reason: reason
+            });
+        },
+        onConnectionError: function(data, url, method) {
+            console.log('onConnectionError', arguments);
+            var eventDetail = {
+                data: data,
+                url: url,
+                method: method,
+                handled: false
+            };
+
+
+            this.fire("connectionerror", eventDetail);
+
+            if (!eventDetail.handled) {
+                alert("Connection error, please reload page!");
+            }
+        },
+        notifyChange: function(event){
+            var operation, polymerPath;
+            for(var operationNo = 0, len = event.detail.length; operationNo < len; operationNo++){
+                operation = event.detail[operationNo];
+                polymerPath = 'obj' + translateJSONPointerToPolymerPath(operation.path);
+
+                if( false && operation.op === 'replace'){
+                    // this.set(polymerPath, operation.value);
+                    this.notifyPath(polymerPath, operation.value);
+                } else if( operation.op === 'test'){
+                    // we assume that jsonpatch covered it already
+                } else if( operation.op === 'move' ||  operation.op === 'copy'){
+                    console.warn("move, and copy operations are not supported yet.")
+                } else {
+                    // for add and remove we need to check whether it's an array or not
+                    var lastSeparator = operation.path.lastIndexOf('/');
+                    var name = operation.path.substr(lastSeparator + 1);
+                    var parentsPolymerPath = 'obj' + translateJSONPointerToPolymerPath(operation.path.substr(0,lastSeparator));
+
+                    var parent = this.get(parentsPolymerPath);
+                    if(Array.isArray(parent) && isNormalInteger(name)){
+                        var addedCount = 0;
+                        var removed = [];
+                        switch(operation.op){
+                            case 'add':
+                                // this.splice(parentsPolymerPath, name, 0, [operation.value]);
+                                this.notifySplices(parentsPolymerPath, [{
+                                    index: name,
+                                    removed: [],
+                                    addedCount: 1,
+                                    object: parent,
+                                    type: 'splice'
+                                }]);
+                                console.info('Add /splice in array is fergile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
+
+                                break;
+                            case 'replace':
+                                addedCount = 1;
+                                var col = Polymer.Collection.get(parent);
+                                debugger
+                                removed = col.getItem('#'+name);
+                            case 'remove':
+                                // this.splice(parentsPolymerPath, name, 1);
+                                this.notifySplices(parentsPolymerPath, [{
+                                    index: name,
+                                    removed: removed,
+                                    addedCount: addedCount,
+                                    object: parent,
+                                    type: 'splice'
+                                }]);
+                                console.info('Remove is fergile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
+                                break;
+                        }
+                    } else {
+                        switch(operation.op){
+                            case 'add':
+                            case 'replace':
+                                // this.set(polymerPath, operation.value);
+                                this.notifyPath(polymerPath, operation.value);
+                                break;
+                            case 'remove':
+                                // this.set(polymerPath, undefined);
+                                this.notifyPath(polymerPath, undefined);
+                                console.info('remove is translated to JSON incompatible set to `undefined`, as there is no remove mathond in Polymer.')
+                                break;
+                        }
+                    }
+                }
+            }
+            this.dispatchEvent(event);
+        }
+
+    });
+
+    function translateJSONPointerToPolymerPath(pointer){
+        return pointer.replace(/\//g, '.');
+    }
+
+    function isNormalInteger(str) {
+        var n = ~~Number(str);
+        return String(n) === str && n >= 0;
+    }
+
+
+    var _isArray;
+    if (Array.isArray) {
+        _isArray = Array.isArray;
+    } else {
+        _isArray = function (obj) {
+            return obj.push && typeof obj.length === 'number';
+        };
+    }
+  }());
+</script>

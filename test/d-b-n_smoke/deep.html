@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <!-- Importing Web Component's Polyfill -->
+    <script src="../../../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="../shared/polyfills.html">
+    <script src="../../../web-component-tester/browser.js"></script>
+
+    <!-- Step 1: import the element to test -->
+    <link rel="import" href="../../puppet-polymer-client.html">
+</head>
+
+<body>
+
+    <template is="dom-bind" id="deep">
+
+        <!-- Using Custom Elements -->
+        <puppet-polymer-client obj="{{repo}}"></puppet-polymer-client>
+
+        <h3>{{repo.name}}</h3>
+        by
+        <span>{{repo.author.first}}</span>
+
+    </template>
+    <script>
+        var model = {
+            name: "<puppet-polymer-client>",
+            author: {
+                first: "Tomek",
+                last: "Wytrębowicz"
+            }
+        };
+        var domBind = document.getElementById("deep");
+        domBind.repo = model;
+    </script>
+
+    <script>
+        describe('puppet-polymer-client, when stamped from `dom-bind` with deep attribute and bound to object', function() {
+            var ppclient, puppet;
+            before(function waitForHTMLImportsAndDomBindChange(done) {
+                setTimeout(function() {
+                    ppclient = document.querySelector("puppet-polymer-client");
+                    puppet = ppclient.puppet;
+                    done();
+                });
+            });
+            describe('should observe changes to it,', function() {
+                it('fire a change event, and update dom-bind', function(done) {
+                    // check and wait for event dispatch
+                    ppclient.addEventListener("patch-applied", function listener(event) {
+                        ppclient.removeEventListener("patch-applied", listener);
+                        expect(event.type).to.equal("patch-applied"); // It's kinda stupid, isn't it?
+                        expect(document.querySelector("span").innerHTML).to.equal("tomalec");
+                        done();
+                    });
+                    // change model
+                    puppetChange(puppet, [operationObject('replace','/author/first', 'tomalec')]);
+
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

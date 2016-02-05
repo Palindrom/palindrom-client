@@ -1,0 +1,34 @@
+<!-- mock server responses -->
+<script src="../../../jasmine/lib/jasmine-core/jasmine.js"></script>
+<script>
+    window.jasmine = jasmineRequire.core(jasmineRequire);
+</script>
+<script src="../../../jasmine-ajax/lib/mock-ajax.js"></script>
+<script src="../../demo/mockServer.js"></script>
+<script>
+    window.operationObject = function(op, path, value) {
+        var o = {
+            op: op,
+            path: path
+        };
+        if (arguments.length > 2) {
+            o.value = value;
+        }
+        return o;
+    }
+    window.puppetChange = function(puppet, sequence) {
+        puppet.validateAndApplySequence(puppet.obj, sequence);
+    }
+    window.domBindFixture = function(id, done){
+        var fixture = document.getElementById(id).content;
+        var templ = document.importNode(fixture, true);
+        var domBind = templ.getElementById("arrays");
+        domBind.addEventListener('dom-change', function() {
+            setTimeout(function(){
+                done();
+            });
+        });
+        document.body.appendChild(domBind);
+        return domBind;
+    }
+</script>
