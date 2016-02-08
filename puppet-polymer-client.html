@@ -1,4 +1,4 @@
-<!-- puppet-client version: 0.0.0 | MIT License -->
+<!-- puppet-polymer-client version: 0.0.0 | MIT License -->
 
 <link rel="import" href="../polymer/polymer.html">
 <!-- <link rel="import" href="iron-request.html"> -->
@@ -27,6 +27,7 @@ in browser are sent to the server via WebSocket or HTTP, as
 [JSON Patch](https://tools.ietf.org/html/rfc6902)es.
 All the changes from server are also received and propagated to your HTML.
 
+@demo demo/index.html
 -->
 
 <script>
@@ -142,27 +143,15 @@ All the changes from server are also received and propagated to your HTML.
             },
 
             /**
-             * An object that contains query parameters to be appended to the
-             * specified `url` when generating a request. If you wish to set the body
-             * content when making a POST request, you should use the `body` property
-             * instead.
-             */
-            useWebSocket: {
-                type: Object,
-                value: function() {
-                    return {};
-                }
-            },
-
-            /**
              * Object that will be synced
              */
             obj: {
                 type: Object,
-                notify: true,
-                value: function() {
-                    return {};
-                }
+                notify: true
+                // ,
+                // value: function() {
+                //     return {};
+                // }
             },
 
             /**
@@ -210,6 +199,17 @@ All the changes from server are also received and propagated to your HTML.
             if (listenTo) {
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
+            function onDataReady(obj){
+
+
+                // TODO tomalec: consider changing it in PuppetJS so it starts observing after this callback
+                this.unobserve();
+                // XXX: will do nothing, if this.obj was defined on attached callback!
+                // as old obj === new obj :( recursiveExtend tricked us
+                me.notifyPath('obj', obj);
+
+                this.observe();
+            }
 
             this.puppet = new PuppetDOM({
             // PuppetDOM.call(this,{
@@ -222,6 +222,9 @@ All the changes from server are also received and propagated to your HTML.
                 ignoreAdd: this.ignoreAdd,
                 debug: this.debug,
                 // onRemoteChange: ?,
+
+                callback: onDataReady,
+                onDataReady: onDataReady,
 
                 localVersionPath: this.localVersionPath,
                 remoteVersionPath: this.remoteVersionPath,
@@ -378,23 +381,22 @@ All the changes from server are also received and propagated to your HTML.
             this.dispatchEvent(new CustomEvent("patch-applied", {bubbles: true, cancelable: true, detail: sequence}));
         },
         validateJSONPatch: function(){
-            console.info('inherit from fast-json-patch');
-
+            console.info('inherit  validateJSONPatch from fast-json-patch');
         },
         observeJSONPatch: function(obj, callback){
             this.puppetObserver = callback;
-            console.log('attach Listeners', this,  obj, callback);
+            console.log('attach Listeners');
             return callback;
         },
         unobserveJSONPatch: function(){
-            console.info('detach listeners');
+            console.log('detach listeners');
             // FIXME this is dummy as hell
             this.puppetObserver = noop;
         }
 
 
     });
-    function noop(){0}
+    function noop(){}
     function translateJSONPointerToPolymerPath(pointer){
         return pointer.replace(/\//g, '.');
     }
