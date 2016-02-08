@@ -19,16 +19,16 @@
     window.puppetChange = function(puppet, sequence) {
         puppet.validateAndApplySequence(puppet.obj, sequence);
     }
-    window.domBindFixture = function(id, done){
+    window.domBindFixture = function(id, done, where){
         var fixture = document.getElementById(id).content;
         var templ = document.importNode(fixture, true);
-        var domBind = templ.getElementById("arrays");
+        var domBind = templ.querySelector('[is="dom-bind"]');
         domBind.addEventListener('dom-change', function() {
             setTimeout(function(){
                 done();
             });
         });
-        document.body.appendChild(domBind);
+        (where || document.body).appendChild(domBind);
         return domBind;
     }
 </script>

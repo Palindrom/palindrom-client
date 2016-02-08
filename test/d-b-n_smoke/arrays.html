@@ -7,7 +7,7 @@
 
     <!-- Importing Web Component's Polyfill -->
     <script src="../../../webcomponentsjs/webcomponents.js"></script>
-    <link rel="import" href="../shared/polyfills.html">
+    <link rel="import" href="../shared/helpers.html">
 
     <script src="../../../web-component-tester/browser.js"></script>
 
@@ -49,7 +49,7 @@
                 <li class="add">Add</li>
             </template>
             <template is="dom-if" if="{{organization.people_properties.deletedProp}}" restamp>
-                <li class="delete">Delete</li>
+                <li class="delete">Deleted? - <span>{{organization.people_properties.deletedProp}}</span></li>
             </template>
         </ul>
         <ul class="push">
@@ -94,9 +94,11 @@
         </ul>
     </template>
     </template>
+    <div id="PolymerWERIRDOmBindContainer"></div>
     <script>
+    var model;
         describe('puppet-polymer-client, when stamped from `dom-bind` and bound to puppet object w/ array', function() {
-            var fixture, ppclient, puppet, model;
+            var fixture, ppclient, puppet;
 
             beforeEach(function(done){
                 fixture = domBindFixture('fixture', function(){
@@ -143,10 +145,14 @@
                 };
                 model.people_properties.prop = "custom";
                 model.people_properties.deletedProp = "not yet!";
-                domBind.organization = model;
+                fixture.organization = model;
             });
-            afterEach(function(){
-                fixture.instance.parentNode.removeChild(fixture.instance);
+            afterEach(function(done){
+                // Polymer werido(m)bind detaches from dom asynchronously
+                setTimeout(function(){
+                    fixture.parentNode.removeChild(fixture);
+                    done();
+                });
             });
             describe('should observe changes to ', function() {
                 describe('array items,', function() {
@@ -174,7 +180,6 @@
                             done();
                         });
                         // change model
-                        debugger
                         puppetChange(puppet, [operationObject('replace', '/people/0/first', 'tomalec')]);
                     });
                 });
@@ -216,12 +221,10 @@
                         puppetChange(puppet, [operationObject('add', '/people_properties/newProp', 'changed')]);
                     });
                     it('when deleting custom property (dom-if restamps asynchronously)', function(done) {
-                    console.info('wtf!')
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
                             setTimeout(function waitForStamp() {
-                                debugger
                                 expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
                                 expect(document.querySelector("ul.people_properties>li.delete")).to.be.null;
                                 done();
@@ -231,12 +234,8 @@
                         puppetChange(puppet, [operationObject('remove', '/people_properties/deletedProp')]);
                     });
                 });
-                describe('array (push),', function() {
+                describe('array add \'-\' (push),', function() {
                     xit('fire a change event, and update dom-bind', function(done) {
-                        // change model
-                        model.people_push.push({
-                            first: "Alice"
-                        });
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
@@ -246,12 +245,12 @@
                             expect(document.querySelector("ul.push>li:nth-child(2)>span").innerHTML).to.equal("Alice");
                             done();
                         });
+                        // change model
+                        puppetChange(puppet, [operationObject('add', '/people_push/-', {
+                            first: "Alice"
+                        })]);
                     });
                     it('fire a change event, and EVENTUALLY update dom-bind', function(done) {
-                        // change model
-                        model.people_push.push({
-                            first: "Alice"
-                        });
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
@@ -264,19 +263,18 @@
                                 done();
                             }, 100);
                         });
+                        // change model
+                        puppetChange(puppet, [operationObject('add', '/people_push/-', {
+                            first: "Alice"
+                        })]);
 
                     });
 
-                    it('should start observing changes to objects added to array, and EVENTUALLY update dom-bind', function(done) {
-                        // add item to the array
-                        model.people_push.push({
-                            first: "Wizard"
-                        });
+                    it('should start observing changes to objects added to array, then once thes gets changed, EVENTUALLY update dom-bind', function(done) {
+                        var newIndex = model.people_push.length;
                         // make it async, to make sure it will come as separated change
                         setTimeout(function() {
-                            model.people_push[model.people_push.length - 1].first += " from Oz";
-                            // check the event
-                            // wait for Object.observe callback
+                            // check and wait for the event dispatching
                             ppclient.addEventListener('patch-applied', function listener(event) {
                                 ppclient.removeEventListener('patch-applied', listener);
                                 // wait for asynchronous Polymer's _notifySplice
@@ -285,15 +283,20 @@
                                     done();
                                 }, 100);
                             });
+                            // change model
+                            puppetChange(puppet, [operationObject('replace', '/people_push/'+newIndex+'/first', "Wizard from Oz")]);
                         }, 100);
+                        // change model
+                        puppetChange(puppet, [operationObject('add', '/people_push/-', {
+                            first: "Wizard"
+                        })]);
 
                     });
                 });
 
-                describe('array (pop),', function() {
+                describe('array remove (last),', function() {
                     xit('fire a change event, and update dom-bind', function(done) {
-                        // change model
-                        model.people_pop.pop();
+                        var last = model.people_pop.length - 1;
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
@@ -302,10 +305,11 @@
                             expect(document.querySelectorAll("ul.pop>li")).to.have.property("length").equal(1);
                             done();
                         });
+                        // change model
+                        puppetChange(puppet, [operationObject('remove', '/people_pop/'+last)]);
                     });
                     it('fire a change event, and EVENTUALLY update dom-bind', function(done) {
-                        // change model
-                        model.people_pop.pop();
+                        var last = model.people_pop.length - 1;
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
@@ -317,11 +321,15 @@
                                 done();
                             }, 100);
                         });
+                        // change model
+                        puppetChange(puppet, [operationObject('remove', '/people_pop/'+last)]);
 
                     });
-                    it('should stop observing changes to removed objects, and do NOT fire a change even', function(done) {
+                    xit('should stop observing changes to removed objects, and do NOT fire a change event - REDEFINE with dom-bind and DOM changes', function(done) {
+                        var last = model.people_pop.length - 1;
+                        var remocedObj = model.people_pop[last];
                         // change model
-                        var remocedObj = model.people_pop.pop();
+                        puppetChange(puppet, [operationObject('remove', '/people_pop/'+last)]);
                         // make it async, to make sure it will come as separated change
                         setTimeout(function() {
                             var numberOfCallsForChangeEvent = 0;
@@ -342,12 +350,8 @@
                     });
                 });
 
-                describe('array (splice),', function() {
+                describe('array - replace node in the middle,', function() {
                     xit('fire a change event, and update dom-bind', function(done) {
-                        // change model
-                        model.people_splice.splice(1, 1, {
-                            first: "Tomek"
-                        });
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
@@ -358,12 +362,12 @@
                             expect(document.querySelectorAll("ul.splice>li")).to.have.property("length").equal(3);
                             done();
                         });
+                        // change model
+                        puppetChange(puppet, [operationObject('replace', '/people_splice/1',{
+                            first: "Tomek"
+                        })]);
                     });
                     it('fire a change event, and EVENTUALLY update dom-bind', function(done) {
-                        // change model
-                        model.people_splice.splice(1, 1, {
-                            first: "Tomek"
-                        });
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
@@ -377,20 +381,24 @@
                                 done();
                             }, 100);
                         });
+                        // change model
+                        puppetChange(puppet, [operationObject('replace', '/people_splice/1',{
+                            first: "Tomek"
+                        })]);
 
                     });
                 });
-                describe('array items changed after splice, should update correct dom-repeat rows', function() {
+                describe('inserted (add in the middle) array items, should update correct dom-repeat rows', function() {
                     it('for nested objects', function(done) {
-                        model.people_splice_n_change.splice(1, 0, {
+                        // change model
+                        puppetChange(puppet, [operationObject('add', '/people_splice_n_change/1', {
                             first: "Tomek"
-                        });
-
+                        })]);
+                        // wait to apply it in another sequence
                         setTimeout(function() {
-                            model.people_splice_n_change[1].first = "Konstantin";
                             ppclient.addEventListener('patch-applied', function listener(event) {
-                                // wait for asynchronous Polymer's _notifySplice
                                 ppclient.removeEventListener('patch-applied', listener);
+                                // wait for asynchronous Polymer's _notifySplice
                                 setTimeout(function() {
                                     expect(document.querySelector("ul.splice_n_change>li").innerHTML).to.equal("Alice");
                                     expect(document.querySelector("ul.splice_n_change>li:nth-child(2)").innerHTML).to.equal("Konstantin");
@@ -398,14 +406,16 @@
                                     done();
                                 }, 100);
                             });
+                            // change model
+                            puppetChange(puppet, [operationObject('replace', '/people_splice_n_change/1/first', 'Konstantin')]);
                         }, 100);
 
                     });
                     it('for primitive values', function(done) {
-                        model.primitive_splice_n_change.splice(1, 0, "T");
-
+                        // change model
+                        puppetChange(puppet, [operationObject('add', '/primitive_splice_n_change/1', 'T')]);
+                        // wait to apply it in another sequence
                         setTimeout(function() {
-                            model.primitive_splice_n_change[1] = "K";
                             ppclient.addEventListener('patch-applied', function listener(event) {
                                 // wait for asynchronous Polymer's _notifySplice
                                 ppclient.removeEventListener('patch-applied', listener);
@@ -416,14 +426,15 @@
                                     done();
                                 }, 100);
                             });
+                            // change model
+                            puppetChange(puppet, [operationObject('replace', '/people_splice_n_change/1', 'K')]);
                         }, 100);
+                        console.info('Fails in Polymer 1.2.4 due to https://github.com/Polymer/polymer/issues/3377');
 
                     });
                 });
                 describe('nested array items,', function() {
                     xit('fire a change event, and update dom-bind', function(done) {
-                        // change model
-                        model.people_nested[0][0] = "John";
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
@@ -431,10 +442,10 @@
                             expect(document.querySelector("ul.people_nested>li:nth-child(1)>span").innerHTML).to.equal("John");
                             done();
                         });
+                        // change model
+                        puppetChange(puppet, [operationObject('replace', '/people_nested/0/0', 'John')]);
                     });
                     it('fire a change event, and EVENTUALLY update dom-bind', function(done) {
-                        // change model
-                        model.people_nested[0][0] = "John";
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
@@ -445,6 +456,9 @@
                                 done();
                             }, 100);
                         });
+                        // change model
+                        puppetChange(puppet, [operationObject('replace', '/people_nested/0/0', 'John')]);
+                        console.info('Fails in Polymer 1.2.4 due to https://github.com/Polymer/polymer/issues/3377');
                     });
                 });
             });

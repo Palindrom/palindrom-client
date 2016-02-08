@@ -100,7 +100,7 @@
       });
 
 
-    console.info("Mock WebSocket message ",{data: outPatches});
+    console.info("Mock WebSocket message data:", outPatches);
     this.onmessage({data: JSON.stringify(outPatches) });
   };
 // };

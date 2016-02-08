@@ -7,7 +7,8 @@
 
     <!-- Importing Web Component's Polyfill -->
     <script src="../../../webcomponentsjs/webcomponents.js"></script>
-    <link rel="import" href="../shared/polyfills.html">
+    <link rel="import" href="../shared/helpers.html">
+
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
@@ -15,6 +16,7 @@
 </head>
 <body>
 
+    <template id="fixture">
     <template is="dom-bind" id="deep_array">
         <div id="arrayDiv">
             <template is="dom-repeat" items="{{model.path_to.array}}">
@@ -27,11 +29,8 @@
         </div>
         <puppet-polymer-client obj="{{model}}"></puppet-polymer-client>
     </template>
+    </template>
     <script>
-        var values = {
-            firstChange: {prop: "firstChange"},
-            secondChange: {prop: "secondChange"},
-        };
         var model = {
             path_to: {
                 array: [
@@ -45,9 +44,6 @@
                 ]
             }
         };
-
-        var domBind = document.getElementById("deep_array");
-        domBind.model = model;
 
         // setTimeout(function(){
         //     model.path_to.array[0].nested_array[0] = {prop: "firstChange"};
@@ -97,46 +93,51 @@
         //  );
 
         //  },500);
-    </script>
-
-    <script>
 describe('puppet-polymer-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function() {
-    var notifier;
+    var fixture, ppclient, puppet;
 
-    before(function waitForHTMLImportsAndDomBindChange(done){
-      setTimeout(function(){
-        // debugger
-        notifier = document.querySelector("puppet-polymer-client");
-        done();
-      });
+    beforeEach(function(done){
+        fixture = domBindFixture('fixture', function(){
+            ppclient = document.querySelector("puppet-polymer-client");
+            puppet = ppclient.puppet;
+            puppet.obj = model;
+            done();
+        });
+        fixture.model = model;
     });
+    afterEach(function(done){
+        // Polymer werido(m)bind detaches from dom asynchronously
+        setTimeout(function(){
+            fixture.parentNode.removeChild(fixture);
+            done();
+        });
+    });
+
     describe('should notify Polymer binding so that changing nested array element will me replaced after each model replace', function(){
         it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
-            // change model
-            model.path_to.array[0].nested_array[0] = {prop: "firstChange"};
-            // check the event
-            // wait for Object.observe callback
-            notifier.addEventListener("change", function listener(event){
-                notifier.removeEventListener("change", listener);
+            // check and wait for the event dispatching
+            ppclient.addEventListener("patch-applied", function listener(event){
+                ppclient.removeEventListener("patch-applied", listener);
                 // wait for asynchronous Polymer's _notifySplice
                 setTimeout(function(){
-                    expect( event.type ).to.equal("change"); // It's kinda stupid, isn't it?
+                    expect( event.type ).to.equal("patch-applied"); // It's kinda stupid, isn't it?
                     expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("firstChange");
-                    // change model
-                    model.path_to.array[0].nested_array[0] = {prop: "secondChange"};
-                    // check the event
-                    // wait for Object.observe callback
-                    notifier.addEventListener("change", function listener2(event){
-                        notifier.removeEventListener("change", listener2);
+                    // check and wait for the event dispatching
+                    ppclient.addEventListener("patch-applied", function listener2(event){
+                        ppclient.removeEventListener("patch-applied", listener2);
                         // wait for asynchronous Polymer's _notifySplice
                         setTimeout(function(){
-                            expect( event.type ).to.equal("change"); // It's kinda stupid, isn't it?
+                            expect( event.type ).to.equal("patch-applied"); // It's kinda stupid, isn't it?
                             expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("secondChange");
                             done();
                         });
                     });
+                    // change model
+                    puppetChange(puppet, [operationObject('replace', '/path_to/array/0/nested_array/0', {prop: "secondChange"})]);
                 },100);
             });
+            // change model
+            puppetChange(puppet, [operationObject('replace', '/path_to/array/0/nested_array/0', {prop: "firstChange"})]);
 
         });
     });

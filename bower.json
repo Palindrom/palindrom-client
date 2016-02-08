@@ -1,7 +1,7 @@
 {
   "name": "puppet-polymer-client",
   "version": "0.0.0",
-  "description": "Sync your Polymer template with remote server via JSON-Patch using PuppetJs flow",
+  "description": "Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.",
   "private": true,
   "authors": [
     "Tomek Wytrębowicz"
@@ -12,7 +12,10 @@
     "json-patch",
     "puppetjs",
     "binding",
-    "template"
+    "template",
+    "web-socket",
+    "http",
+    "json"
   ],
   "main": "puppet-polymer-client.html",
   "repository": {
@@ -24,7 +27,7 @@
   "ignore": [],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
-    "PuppetJs": "^1.3.4"
+    "PuppetJs": "#custom-jsonpatch"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#^1.0.0",

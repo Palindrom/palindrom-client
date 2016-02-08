@@ -12,55 +12,58 @@
 <script src="../PuppetJs/src/puppet-dom.js"></script>
 
 <!--
-The `puppet-polymer-client` element exposes network request functionality.
+The `puppet-polymer-client` element binds [PuppetJs](https://github.com/PuppetJs/PuppetJs) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
+That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
+data-model using Puppet & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
+
+You get three-way data binding server - JS - HTML, kept in flawless sync.
 
     <puppet-polymer-client
-        auto
-        url="http://gdata.youtube.com/feeds/api/videos/"
-        params='{"alt":"json", "q":"chrome"}'
-        handle-as="json"
-        on-response="handleResponse"
-        debounce-duration="300"></puppet-polymer-client>
+        obj="{{model}}"></puppet-polymer-client>
 
-With `auto` set to `true`, the element performs a request whenever
-its `url`, `params` or `body` properties are changed. Automatically generated
-requests will be debounced in the case that multiple attributes are changed
-sequentially.
 
-Note: The `params` attribute must be double quoted JSON.
+It establishes the PuppetJs connection when attached. All the changes made
+in browser are sent to the server via WebSocket or HTTP, as
+[JSON Patch](https://tools.ietf.org/html/rfc6902)es.
+All the changes from server are also received and propagated to your HTML.
 
-You can trigger a request explicitly by calling `generateRequest` on the
-element.
-
-@demo demo/index.html
-@hero hero.svg
 -->
 
 <script>
 (function(){
     'use strict';
 
+
     Polymer({
 
         is: 'puppet-polymer-client',
 
         /**
-         * Fired when a request is sent.
+         * Fired when patch gets applied
          *
-         * @event request
+         * @event patch-applied
+         */
+        /**
+         * Fired when patch gets applied
+         *
+         * @event patchreceived
+         */
+        /**
+         * Fired when patch gets applied
+         *
+         * @event patchsent
+         */
+        /**
+         * Fired when patch gets applied
+         *
+         * @event socketstatechanged
+         */
+        /**
+         * Fired when patch gets applied
+         *
+         * @event connectionerror
          */
 
-        /**
-         * Fired when a response is received.
-         *
-         * @event response
-         */
-
-        /**
-         * Fired when an error is received.
-         *
-         * @event error
-         */
 
         hostAttributes: {
             hidden: true
@@ -152,15 +155,6 @@ element.
             },
 
             /**
-             * The HTTP method to use such as 'GET', 'POST', 'PUT', or 'DELETE'.
-             * Default is 'GET'.
-             */
-            method: {
-                type: String,
-                value: 'GET'
-            },
-
-            /**
              * Object that will be synced
              */
             obj: {
@@ -169,6 +163,14 @@ element.
                 value: function() {
                     return {};
                 }
+            },
+
+            /**
+             * Path to given obj
+             */
+            path: {
+                type: String,
+                value: '/'
             },
 
 
@@ -186,23 +188,6 @@ element.
         observers: [
             '_objChanged(obj, obj.*)'
         ],
-        //
-        // /**
-        //  * The `url` with query string (if `params` are specified), suitable for
-        //  * providing to an `iron-request` instance.
-        //  *
-        //  * @return {string}
-        //  */
-        // get requestUrl() {
-        //     var queryString = this.queryString;
-        //
-        //     if (queryString) {
-        //         var bindingChar = this.url.indexOf('?') >= 0 ? '&' : '?';
-        //         return this.url + bindingChar + queryString;
-        //     }
-        //
-        //     return this.url;
-        // },
 
         created: function(){
             this.onPatchReceived = this.onPatchReceived.bind(this);
@@ -210,7 +195,6 @@ element.
             this.onSocketStateChanged = this.onSocketStateChanged.bind(this);
             this.onConnectionError = this.onConnectionError.bind(this);
 
-            this.notifyChange = this.notifyChange.bind(this);
         },
         /**
          * Creates an instance of Puppet according to given params, attaches it to .pupet property
@@ -226,12 +210,14 @@ element.
             if (listenTo) {
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
-            this.puppet = new PuppetDOM(this,{
+
+            this.puppet = new PuppetDOM({
+            // PuppetDOM.call(this,{
                 // use server URL or window.location.href;
                 remoteUrl: this.remoteUrl,
                 pingInterval: pingInterval,
                 listenTo: listenTo,
-                // obj:            obj,
+                obj:            this.obj,
                 useWebSocket: this.useWebSocket,
                 ignoreAdd: this.ignoreAdd,
                 debug: this.debug,
@@ -240,12 +226,28 @@ element.
                 localVersionPath: this.localVersionPath,
                 remoteVersionPath: this.remoteVersionPath,
                 ot: this.ot,
-                purity: this.purity
+                purity: this.purity,
+                jsonpatch: {
+                    apply: this.applyJSONPatch.bind(this),
+                    observe: this.observeJSONPatch.bind(this),
+                    unobserve: this.unobserveJSONPatch.bind(this),
+                    validate: this.validateJSONPatch.bind(this)
+                }
             });
-            this.puppet.addEventListener('patch-applied', this.notifyChange);
+            // this.puppet.addEventListener('patch-applied', this.notifyChange);
         },
         _objChanged: function(obj, changes){
-            console.log('objChanged', obj, changes)
+            if(this.puppetObserver && !this._beingSet){
+                console.log('objChanged', this, obj, changes);
+                var path = translatePolymerPathToJSONPointer(changes.path).replace(/^obj\//, this.path);
+                var patches = [{
+                    op: 'replace',
+                    path: path,
+                    value: changes.value
+                }];
+                console.info('patches', patches, 'sent to', this.puppetObserver && this.puppetObserver);
+                this.puppetObserver(patches);
+            }
         },
         onPatchReceived: function(data, url, method) {
             console.log('onPatchReceived', arguments);
@@ -267,7 +269,6 @@ element.
         },
         onSocketStateChanged: function(state, url, data, code, reason) {
             console.log('onSocketStateChanged', arguments);
-            debugger
             this.fire("socketstatechanged", {
                 state: state,
                 url: url,
@@ -292,15 +293,17 @@ element.
                 alert("Connection error, please reload page!");
             }
         },
-        notifyChange: function(event){
+        applyJSONPatch: function(tree, sequence){
+            this._beingSet = true;
+            console.info('applyJSONPatch', tree, sequence);
             var operation, polymerPath;
-            for(var operationNo = 0, len = event.detail.length; operationNo < len; operationNo++){
-                operation = event.detail[operationNo];
+            for(var operationNo = 0, len = sequence.length; operationNo < len; operationNo++){
+                operation = sequence[operationNo];
                 polymerPath = 'obj' + translateJSONPointerToPolymerPath(operation.path);
 
                 if( false && operation.op === 'replace'){
-                    // this.set(polymerPath, operation.value);
-                    this.notifyPath(polymerPath, operation.value);
+                    this.set(polymerPath, operation.value);
+                    // this.notifyPath(polymerPath, operation.value);
                 } else if( operation.op === 'test'){
                     // we assume that jsonpatch covered it already
                 } else if( operation.op === 'move' ||  operation.op === 'copy'){
@@ -312,36 +315,42 @@ element.
                     var parentsPolymerPath = 'obj' + translateJSONPointerToPolymerPath(operation.path.substr(0,lastSeparator));
 
                     var parent = this.get(parentsPolymerPath);
-                    if(Array.isArray(parent) && isNormalInteger(name)){
+                    if(Array.isArray(parent) && (name === '-' || isNormalInteger(name))){
                         var addedCount = 0;
                         var removed = [];
                         switch(operation.op){
                             case 'add':
-                                // this.splice(parentsPolymerPath, name, 0, [operation.value]);
-                                this.notifySplices(parentsPolymerPath, [{
-                                    index: name,
-                                    removed: [],
-                                    addedCount: 1,
-                                    object: parent,
-                                    type: 'splice'
-                                }]);
+                                // JSONPatch push
+                                if(name === '-'){
+                                    name = parent.length;
+                                }
+                                this.splice(parentsPolymerPath, name, 0, operation.value);
+                                // this.notifySplices(parentsPolymerPath, [{
+                                //     index: name,
+                                //     removed: [],
+                                //     addedCount: 1,
+                                //     object: parent,
+                                //     type: 'splice'
+                                // }]);
                                 console.info('Add /splice in array is fergile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
 
                                 break;
                             case 'replace':
-                                addedCount = 1;
-                                var col = Polymer.Collection.get(parent);
-                                debugger
-                                removed = col.getItem('#'+name);
+
+                                this.splice(parentsPolymerPath, name, 1, operation.value);
+                                break;
+                                // addedCount = 1;
+                                // var col = Polymer.Collection.get(parent);
+                                // removed = col.getItem('#'+name);
                             case 'remove':
-                                // this.splice(parentsPolymerPath, name, 1);
-                                this.notifySplices(parentsPolymerPath, [{
-                                    index: name,
-                                    removed: removed,
-                                    addedCount: addedCount,
-                                    object: parent,
-                                    type: 'splice'
-                                }]);
+                                this.splice(parentsPolymerPath, name, 1);
+                                // this.notifySplices(parentsPolymerPath, [{
+                                //     index: name,
+                                //     removed: removed,
+                                //     addedCount: addedCount,
+                                //     object: parent,
+                                //     type: 'splice'
+                                // }]);
                                 console.info('Remove is fergile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
                                 break;
                         }
@@ -349,25 +358,51 @@ element.
                         switch(operation.op){
                             case 'add':
                             case 'replace':
-                                // this.set(polymerPath, operation.value);
-                                this.notifyPath(polymerPath, operation.value);
+                                this.set(polymerPath, operation.value);
+                                // this.notifyPath(polymerPath, operation.value);
                                 break;
                             case 'remove':
-                                // this.set(polymerPath, undefined);
-                                this.notifyPath(polymerPath, undefined);
-                                console.info('remove is translated to JSON incompatible set to `undefined`, as there is no remove mathond in Polymer.')
+                                this.set(polymerPath, null);
+                                this.set(polymerPath, undefined);
+                                // this.notifyPath(polymerPath, undefined);
+                                console.warn('Polymer does not support unsetting properties https://github.com/Polymer/polymer/issues/2565');
+                                console.warn('remove is translated to JSON incompatible set to `undefined`, as there is no remove mathond in Polymer.')
                                 break;
                         }
                     }
                 }
             }
-            this.dispatchEvent(event);
+            this._beingSet = false;
+            //    this.dispatchEvent(event);
+            // FIXME tomalec: DRY, puppet does the same
+            this.dispatchEvent(new CustomEvent("patch-applied", {bubbles: true, cancelable: true, detail: sequence}));
+        },
+        validateJSONPatch: function(){
+            console.info('inherit from fast-json-patch');
+
+        },
+        observeJSONPatch: function(obj, callback){
+            this.puppetObserver = callback;
+            console.log('attach Listeners', this,  obj, callback);
+            return callback;
+        },
+        unobserveJSONPatch: function(){
+            console.info('detach listeners');
+            // FIXME this is dummy as hell
+            this.puppetObserver = noop;
         }
 
-    });
 
+    });
+    function noop(){0}
     function translateJSONPointerToPolymerPath(pointer){
         return pointer.replace(/\//g, '.');
+    }
+
+    function translatePolymerPathToJSONPointer(pointer){
+        return pointer.replace(/~/g, '~0')
+                        .replace(/\//g,'~1')
+                        .replace(/\./g, '/');
     }
 
     function isNormalInteger(str) {
@@ -384,5 +419,7 @@ element.
             return obj.push && typeof obj.length === 'number';
         };
     }
+
+
   }());
 </script>
