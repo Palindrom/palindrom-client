@@ -24,7 +24,14 @@
   },
   "license": "MIT",
   "homepage": "https://github.com/PuppetJs/puppet-polymer-client",
-  "ignore": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test/",
+    "demo/",
+    "Gruntfile.js"
+  ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
     "PuppetJs": "#custom-jsonpatch"
