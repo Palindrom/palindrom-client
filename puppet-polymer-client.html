@@ -302,6 +302,19 @@ All the changes from server are also received and propagated to your HTML.
             var operation, polymerPath;
             for(var operationNo = 0, len = sequence.length; operationNo < len; operationNo++){
                 operation = sequence[operationNo];
+
+			    if (operation.path == "") {
+			        //in case of root path, Polymer replaces the original obj, which detaches it from Puppet
+			        var newSequence = [];
+			        for (var prop in operation.value) {
+				        if (operation.value.hasOwnProperty(prop)) {
+					        newSequence.push({op: "add", path: "/" + prop, value: operation.value[prop]});
+						}
+					}
+					this.applyJSONPatch(tree, newSequence);
+					continue;
+				}
+
                 polymerPath = 'obj' + translateJSONPointerToPolymerPath(operation.path);
 
                 if( false && operation.op === 'replace'){
