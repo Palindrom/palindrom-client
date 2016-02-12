@@ -147,11 +147,10 @@ All the changes from server are also received and propagated to your HTML.
              */
             obj: {
                 type: Object,
-                notify: true
-                // ,
-                // value: function() {
-                //     return {};
-                // }
+                notify: true,
+				value: function() {
+                     return {};
+                }
             },
 
             /**
@@ -174,9 +173,9 @@ All the changes from server are also received and propagated to your HTML.
 
         },
 
-        observers: [
+        /*observers: [
             '_objChanged(obj, obj.*)'
-        ],
+        ],*/
 
         created: function(){
             this.onPatchReceived = this.onPatchReceived.bind(this);
@@ -200,8 +199,7 @@ All the changes from server are also received and propagated to your HTML.
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
             function onDataReady(obj){
-
-
+                /*
                 // TODO tomalec: consider changing it in PuppetJS so it starts observing after this callback
                 this.unobserve();
                 // XXX: will do nothing, if this.obj was defined on attached callback!
@@ -209,6 +207,7 @@ All the changes from server are also received and propagated to your HTML.
                 me.notifyPath('obj', obj);
 
                 this.observe();
+				*/
             }
 
             this.puppet = new PuppetDOM({
@@ -221,8 +220,7 @@ All the changes from server are also received and propagated to your HTML.
                 useWebSocket: this.useWebSocket,
                 ignoreAdd: this.ignoreAdd,
                 debug: this.debug,
-                // onRemoteChange: ?,
-
+				onRemoteChange: this._objChanged,
                 callback: onDataReady,
                 onDataReady: onDataReady,
 
@@ -232,24 +230,26 @@ All the changes from server are also received and propagated to your HTML.
                 purity: this.purity,
                 jsonpatch: {
                     apply: this.applyJSONPatch.bind(this),
-                    observe: this.observeJSONPatch.bind(this),
-                    unobserve: this.unobserveJSONPatch.bind(this),
+                    observe: jsonpatch.observe.bind(this),
+                    unobserve: jsonpatch.unobserve.bind(this),
                     validate: this.validateJSONPatch.bind(this)
                 }
             });
             // this.puppet.addEventListener('patch-applied', this.notifyChange);
         },
         _objChanged: function(obj, changes){
-            if(this.puppetObserver && !this._beingSet){
-                console.log('objChanged', this, obj, changes);
-                var path = translatePolymerPathToJSONPointer(changes.path).replace(/^obj\//, this.path);
-                var patches = [{
-                    op: 'replace',
-                    path: path,
-                    value: changes.value
-                }];
-                console.info('patches', patches, 'sent to', this.puppetObserver && this.puppetObserver);
-                this.puppetObserver(patches);
+            var templates = document.querySelectorAll("template[is=dom-bind], template[is=dom-repeat]");
+            for (var i in templates) {
+                if (templates.hasOwnProperty(i)) {
+                    if (templates[i].model) {
+                        //this is a template[is=dom-bind]
+                        templates[i]._pathEffector("model", templates[i].model);
+                    }
+                    if (templates.hasOwnProperty(i) && templates[i].items) {
+                        //this is a template[is=dom-repeat]
+                        templates[i]._pathEffector("items", templates[i].items);
+                    }
+                }
             }
         },
         onPatchReceived: function(data, url, method) {
