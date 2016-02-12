@@ -326,10 +326,7 @@ All the changes from server are also received and propagated to your HTML.
 
                 polymerPath = 'obj' + translateJSONPointerToPolymerPath(operation.path);
 
-                if( false && operation.op === 'replace'){
-                    this.set(polymerPath, operation.value);
-                    // this.notifyPath(polymerPath, operation.value);
-                } else if( operation.op === 'test'){
+                if( operation.op === 'test'){
                     // we assume that jsonpatch covered it already
                 } else if( operation.op === 'move' ||  operation.op === 'copy'){
                     console.warn("move, and copy operations are not supported yet.")
