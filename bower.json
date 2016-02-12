@@ -17,7 +17,7 @@
     "http",
     "json"
   ],
-  "main": "puppet-polymer-client.html",
+  "main": "puppet-client.html",
   "repository": {
     "type": "git",
     "url": "git://github.com/PuppetJs/puppet-polymer-client.git"

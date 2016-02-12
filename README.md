@@ -8,8 +8,8 @@ data-model using Puppet & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow
 
 You get three-way data binding server - JS - HTML, kept in flawless sync.
 
-    <puppet-polymer-client
-        obj="{{model}}"></puppet-polymer-client>
+    <puppet-client
+        obj="{{model}}"></puppet-client>
 
 
 
@@ -41,13 +41,13 @@ Or [download as ZIP](https://github.com/PuppetJs/puppet-polymer-client/archive/g
 2. Import Custom Element:
 
     ```html
-    <link rel="import" href="bower_components/puppet-polymer-client/pupppuppet-polymer-client.html">
+    <link rel="import" href="bower_components/puppet-polymer-client/puppet-client.html">
     ```
 
 3. Start using it!
 
     ```html
-    <puppet-polymer-client obj="{{model}}"></puppet-polymer-client>
+    <puppet-client obj="{{model}}"></puppet-client>
     ```
     It establishes the PuppetJs connection when attached. All the changes made
     in browser are sent to the server via WebSocket or HTTP, as

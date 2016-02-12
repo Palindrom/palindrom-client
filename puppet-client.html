@@ -12,14 +12,14 @@
 <script src="../PuppetJs/src/puppet-dom.js"></script>
 
 <!--
-The `puppet-polymer-client` element binds [PuppetJs](https://github.com/PuppetJs/PuppetJs) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
+The Polymer version of `puppet-client` element binds [PuppetJs](https://github.com/PuppetJs/PuppetJs) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
 That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
 data-model using Puppet & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
 
 You get three-way data binding server - JS - HTML, kept in flawless sync.
 
-    <puppet-polymer-client
-        obj="{{model}}"></puppet-polymer-client>
+    <puppet-client
+        obj="{{model}}"></puppet-client>
 
 
 It establishes the PuppetJs connection when attached. All the changes made
@@ -37,7 +37,7 @@ All the changes from server are also received and propagated to your HTML.
 
     Polymer({
 
-        is: 'puppet-polymer-client',
+        is: 'puppet-client',
 
         /**
          * Fired when patch gets applied

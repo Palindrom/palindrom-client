@@ -11,7 +11,7 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../puppet-polymer-client.html">
+    <link rel="import" href="../../puppet-client.html">
 </head>
 
 <body>
@@ -19,7 +19,7 @@
     <template is="dom-bind" id="deep">
 
         <!-- Using Custom Elements -->
-        <puppet-polymer-client obj="{{repo}}"></puppet-polymer-client>
+        <puppet-client obj="{{repo}}"></puppet-client>
 
         <h3>{{repo.name}}</h3>
         by
@@ -28,7 +28,7 @@
     </template>
     <script>
         var model = {
-            name: "<puppet-polymer-client>",
+            name: "<puppet-client>",
             author: {
                 first: "Tomek",
                 last: "Wytrębowicz"
@@ -39,11 +39,11 @@
     </script>
 
     <script>
-        describe('puppet-polymer-client, when stamped from `dom-bind` with deep attribute and bound to object', function() {
+        describe('puppet-client, when stamped from `dom-bind` with deep attribute and bound to object', function() {
             var ppclient, puppet;
             before(function waitForHTMLImportsAndDomBindChange(done) {
                 setTimeout(function() {
-                    ppclient = document.querySelector("puppet-polymer-client");
+                    ppclient = document.querySelector("puppet-client");
                     puppet = ppclient.puppet;
                     done();
                 });

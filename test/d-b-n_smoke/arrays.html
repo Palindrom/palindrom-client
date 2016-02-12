@@ -12,7 +12,7 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../puppet-polymer-client.html">
+    <link rel="import" href="../../puppet-client.html">
 </head>
 
 <body>
@@ -20,7 +20,7 @@
     <template is="dom-bind" id="arrays">
 
         <!-- Using Custom Elements -->
-        <puppet-polymer-client obj="{{organization}}"></puppet-polymer-client>
+        <puppet-client obj="{{organization}}"></puppet-client>
 
         <h4>
             <span>{{organization.name}}</span> people:</h4>
@@ -97,12 +97,12 @@
     <div id="PolymerWERIRDOmBindContainer"></div>
     <script>
     var model;
-        describe('puppet-polymer-client, when stamped from `dom-bind` and bound to puppet object w/ array', function() {
+        describe('puppet-client, when stamped from `dom-bind` and bound to puppet object w/ array', function() {
             var fixture, ppclient, puppet;
 
             beforeEach(function(done){
                 fixture = domBindFixture('fixture', function(){
-                    ppclient = document.querySelector("puppet-polymer-client");
+                    ppclient = document.querySelector("puppet-client");
                     puppet = ppclient.puppet;
                     puppet.obj = model;
                     done();

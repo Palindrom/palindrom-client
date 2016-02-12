@@ -12,7 +12,7 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../puppet-polymer-client.html">
+    <link rel="import" href="../../puppet-client.html">
 </head>
 <body>
 
@@ -27,7 +27,7 @@
                 </div>
             </template>
         </div>
-        <puppet-polymer-client obj="{{model}}"></puppet-polymer-client>
+        <puppet-client obj="{{model}}"></puppet-client>
     </template>
     </template>
     <script>
@@ -93,12 +93,12 @@
         //  );
 
         //  },500);
-describe('puppet-polymer-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function() {
+describe('puppet-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function() {
     var fixture, ppclient, puppet;
 
     beforeEach(function(done){
         fixture = domBindFixture('fixture', function(){
-            ppclient = document.querySelector("puppet-polymer-client");
+            ppclient = document.querySelector("puppet-client");
             puppet = ppclient.puppet;
             puppet.obj = model;
             done();

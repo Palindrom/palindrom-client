@@ -10,7 +10,7 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../puppet-polymer-client.html">
+    <link rel="import" href="../../puppet-client.html">
 </head>
 
 <body>
@@ -18,7 +18,7 @@
     <template is="dom-bind" id="simple">
 
         <!-- Using Custom Elements -->
-        <puppet-polymer-client obj="{{model}}"></puppet-polymer-client>
+        <puppet-client obj="{{model}}"></puppet-client>
 
         <h4>Welcome to
             <span>{{model.name}}</span>!</h4>
@@ -32,11 +32,11 @@
     </script>
 
     <script>
-        describe('puppet-polymer-client, when stamped from `dom-bind` bound to shallow puppet object', function() {
+        describe('puppet-client, when stamped from `dom-bind` bound to shallow puppet object', function() {
             var ppclient, puppet;
             before(function waitForHTMLImportsAndDomBindChange(done) {
                 setTimeout(function() {
-                    ppclient = document.querySelector('puppet-polymer-client');
+                    ppclient = document.querySelector('puppet-client');
                     puppet = ppclient.puppet;
                     done();
                 });
