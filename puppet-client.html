@@ -233,13 +233,14 @@ All the changes from server are also received and propagated to your HTML.
                     observe: jsonpatch.observe.bind(this),
                     unobserve: jsonpatch.unobserve.bind(this),
                     validate: this.validateJSONPatch.bind(this)
-                }
+                },
+                callback: function () {
+                    if (whereToBind) {
+                        this.bindTo(whereToBind);
+                    }
+                }.bind(this)
             });
             // this.puppet.addEventListener('patch-applied', this.notifyChange);
-
-            if(whereToBind){
-                this.bindTo(whereToBind);
-            }
         },
         bindTo: function(element){
             // use node id or node itself;
