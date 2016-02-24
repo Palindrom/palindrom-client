@@ -255,7 +255,7 @@ All the changes from server are also received and propagated to your HTML.
                         //this is a template[is=dom-bind]
                         templates[i]._pathEffector("model", templates[i].model);
                     }
-                    if (templates.hasOwnProperty(i) && templates[i].items) {
+                    if (templates[i].items) {
                         //this is a template[is=dom-repeat]
                         templates[i]._pathEffector("items", templates[i].items);
                     }
