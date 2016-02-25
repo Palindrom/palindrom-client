@@ -173,17 +173,6 @@ All the changes from server are also received and propagated to your HTML.
 
         },
 
-        /*observers: [
-            '_objChanged(obj, obj.*)'
-        ],*/
-
-        created: function(){
-            this.onPatchReceived = this.onPatchReceived.bind(this);
-            this.onPatchSent = this.onPatchSent.bind(this);
-            this.onSocketStateChanged = this.onSocketStateChanged.bind(this);
-            this.onConnectionError = this.onConnectionError.bind(this);
-
-        },
         /**
          * Creates an instance of Puppet according to given params, attaches it to .pupet property
          *
@@ -209,7 +198,11 @@ All the changes from server are also received and propagated to your HTML.
                 useWebSocket: this.useWebSocket,
                 ignoreAdd: this.ignoreAdd,
                 debug: this.debug,
-				onRemoteChange: this._objChanged,
+                onRemoteChange: this._objChanged,
+                onPatchReceived: this.onPatchReceived.bind(this),
+                onPatchSent: this.onPatchSent.bind(this),
+                onSocketStateChanged: this.onSocketStateChanged.bind(this),
+                onConnectionError: this.onConnectionError.bind(this),
 
                 localVersionPath: this.localVersionPath,
                 remoteVersionPath: this.remoteVersionPath,
