@@ -198,17 +198,6 @@ All the changes from server are also received and propagated to your HTML.
             if (listenTo) {
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
-            function onDataReady(obj){
-                /*
-                // TODO tomalec: consider changing it in PuppetJS so it starts observing after this callback
-                this.unobserve();
-                // XXX: will do nothing, if this.obj was defined on attached callback!
-                // as old obj === new obj :( recursiveExtend tricked us
-                me.notifyPath('obj', obj);
-
-                this.observe();
-				*/
-            }
 
             this.puppet = new PuppetDOM({
             // PuppetDOM.call(this,{
@@ -221,8 +210,6 @@ All the changes from server are also received and propagated to your HTML.
                 ignoreAdd: this.ignoreAdd,
                 debug: this.debug,
 				onRemoteChange: this._objChanged,
-                callback: onDataReady,
-                onDataReady: onDataReady,
 
                 localVersionPath: this.localVersionPath,
                 remoteVersionPath: this.remoteVersionPath,
