@@ -248,16 +248,32 @@ All the changes from server are also received and propagated to your HTML.
             element.model = this.obj;
         },
         _objChanged: function(obj, changes){
-            var templates = document.querySelectorAll("template[is=dom-bind], template[is=dom-repeat]");
+            var templates = document.querySelectorAll("template[is=dom-bind], template[is=dom-repeat], template[is=dom-if]");
             for (var i in templates) {
                 if (templates.hasOwnProperty(i)) {
                     if (templates[i].model) {
                         //this is a template[is=dom-bind]
-                        templates[i]._pathEffector("model", templates[i].model);
+                        templates[i]._pathEffector.call(templates[i], "model", templates[i].model);
                     }
                     if (templates[i].items) {
                         //this is a template[is=dom-repeat]
-                        templates[i]._pathEffector("items", templates[i].items);
+                        templates[i]._pathEffector.call(templates[i], "items", templates[i].items);
+                        for (var j in templates[i]._instances) {
+                            if (templates[i]._instances.hasOwnProperty(j)) {
+                                if (templates[i]._instances[j].model) {
+                                    templates[i]._instances[j]._pathEffector.call(templates[i]._instances[j], "model", templates[i]._instances[j].model);
+                                }
+                            }
+                        };
+                    }
+                    if (templates[i].if !== undefined && templates[i]._instance) {
+                        //this is a template[is=dom-if]
+                        if (templates[i]._instance.model) {
+                            templates[i]._instance._pathEffector.call(templates[i]._instance, "model", templates[i]._instance.model);
+                        }
+                        if (templates[i]._instance.item) {
+                            templates[i]._instance._pathEffector.call(templates[i]._instance, "item", templates[i]._instance.item);
+                        }
                     }
                 }
             }
