@@ -279,9 +279,6 @@ All the changes from server are also received and propagated to your HTML.
             }
         },
         onPatchReceived: function(data, url, method) {
-            console.log('onPatchReceived', arguments);
-            // TODO: this JSON.parse is redundant
-            // this.notifyChange(JSON.parse(data));
             this.fire("patchreceived", {
                 data: data,
                 url: url,
@@ -289,7 +286,6 @@ All the changes from server are also received and propagated to your HTML.
             });
         },
         onPatchSent: function(data, url, method) {
-            console.log('onPatchSent', arguments);
             this.fire("patchsent", {
                 data: data,
                 url: url,
@@ -297,7 +293,6 @@ All the changes from server are also received and propagated to your HTML.
             });
         },
         onSocketStateChanged: function(state, url, data, code, reason) {
-            console.log('onSocketStateChanged', arguments);
             this.fire("socketstatechanged", {
                 state: state,
                 url: url,
@@ -307,14 +302,12 @@ All the changes from server are also received and propagated to your HTML.
             });
         },
         onConnectionError: function(data, url, method) {
-            console.log('onConnectionError', arguments);
             var eventDetail = {
                 data: data,
                 url: url,
                 method: method,
                 handled: false
             };
-
 
             this.fire("connectionerror", eventDetail);
 
@@ -324,7 +317,6 @@ All the changes from server are also received and propagated to your HTML.
         },
         applyJSONPatch: function(tree, sequence){
             this._beingSet = true;
-            console.info('applyJSONPatch', tree, sequence);
             var operation, polymerPath;
             for(var operationNo = 0, len = sequence.length; operationNo < len; operationNo++){
 			    operation = sequence[operationNo];
@@ -421,11 +413,9 @@ All the changes from server are also received and propagated to your HTML.
         },
         observeJSONPatch: function(obj, callback){
             this.puppetObserver = callback;
-            console.log('attach Listeners');
             return callback;
         },
         unobserveJSONPatch: function(){
-            console.log('detach listeners');
             // FIXME this is dummy as hell
             this.puppetObserver = noop;
         }
