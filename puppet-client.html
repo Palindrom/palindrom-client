@@ -221,6 +221,8 @@ All the changes from server are also received and propagated to your HTML.
                 }.bind(this)
             });
             // this.puppet.addEventListener('patch-applied', this.notifyChange);
+
+            this.network = this.puppet.network;
         },
         bindTo: function(element){
             // use node id or node itself;
