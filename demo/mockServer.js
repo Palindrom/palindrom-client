@@ -101,6 +101,9 @@
 
 
     console.info("Mock WebSocket message data:", outPatches);
-    this.onmessage({data: JSON.stringify(outPatches) });
+    var that = this;
+    setTimeout(function () {
+      that.onmessage({data: JSON.stringify(outPatches) });
+    }, 10);
   };
 // };
