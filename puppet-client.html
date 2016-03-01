@@ -198,7 +198,7 @@ All the changes from server are also received and propagated to your HTML.
                 useWebSocket: this.useWebSocket,
                 ignoreAdd: this.ignoreAdd,
                 debug: this.debug,
-                onRemoteChange: this._objChanged,
+                onRemoteChange: this._objChanged.bind(this),
                 onPatchReceived: this.onPatchReceived.bind(this),
                 onPatchSent: this.onPatchSent.bind(this),
                 onSocketStateChanged: this.onSocketStateChanged.bind(this),
@@ -227,7 +227,7 @@ All the changes from server are also received and propagated to your HTML.
             element = typeof element == "string" ? document.getElementById( element ) : element;
             element.model = this.obj;
         },
-        _objChanged: function(obj, changes){
+        _objChanged: function(changes){
             var templates = document.querySelectorAll("template[is=dom-bind], template[is=dom-repeat], template[is=dom-if]");
             for (var i in templates) {
                 if (templates.hasOwnProperty(i)) {
