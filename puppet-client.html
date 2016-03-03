@@ -221,6 +221,7 @@ All the changes from server are also received and propagated to your HTML.
             // this.puppet.addEventListener('patch-applied', this.notifyChange);
 
             this.network = this.puppet.network;
+            this.morphUrl = this.puppet.morphUrl.bind(this.puppet);
         },
         bindTo: function(element) {
             // use node id or node itself;
