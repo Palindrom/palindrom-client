@@ -84,7 +84,8 @@ All the changes from server are also received and propagated to your HTML.
              */
             ignoreAdd: {
                 type: RegExp,
-                value: /.*/
+                value: /.*/,
+				observer: '_ignoreAddChanged'
             },
             /**
              * Set to `false` to disable WebSocket (use HTTP)
@@ -421,8 +422,12 @@ All the changes from server are also received and propagated to your HTML.
         unobserveJSONPatch: function() {
             // FIXME this is dummy as hell
             this.puppetObserver = noop;
-        }
-
+        },
+		_ignoreAddChanged: function(newVal, oldVal) {
+			if (typeof this.ignoreAdd === "string") {
+				this.ignoreAdd = new RegExp(this.ignoreAdd);
+			}
+		}
 
     });
 
