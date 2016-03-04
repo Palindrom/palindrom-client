@@ -351,25 +351,23 @@ All the changes from server are also received and propagated to your HTML.
 
                     var parent = templateDomBind.get(parentsPolymerPath);
                     if (Array.isArray(parent) && (name === '-' || isNormalInteger(name))) {
-                        var addedCount = 0;
-                        var removed = [];
                         switch (operation.op) {
                             case 'add':
                                 // JSONPatch push
                                 if (name === '-') {
                                     name = parent.length;
                                 }
-                                if (operation.PuppetClientParentIndex !== undefined) {
+                                if (operation.$spliceIndex !== undefined) {
                                     templateDomBind.notifySplices(parentsPolymerPath, [{
-                                        index: operation.PuppetClientParentIndex,
+                                        index: operation.$spliceIndex,
                                         removed: [],
                                         addedCount: 1,
                                         object: parent,
                                         type: 'splice'
                                     }]);
                                 } else {
-                                    operation.PuppetClientParentIndex = name;
-                                    templateDomBind.splice(parentsPolymerPath, name, 0, operation.value);
+                                    operation.$spliceIndex = parseInt(name, 10);
+                                    templateDomBind.splice(parentsPolymerPath, operation.$spliceIndex, 0, operation.value);
                                 }
                                 console.info('Add /splice in array is fragile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
 
@@ -382,14 +380,20 @@ All the changes from server are also received and propagated to your HTML.
                                 // var col = Polymer.Collection.get(parent);
                                 // removed = col.getItem('#'+name);
                             case 'remove':
-                                templateDomBind.splice(parentsPolymerPath, name, 1);
-                                // this.notifySplices(parentsPolymerPath, [{
-                                //     index: name,
-                                //     removed: removed,
-                                //     addedCount: addedCount,
-                                //     object: parent,
-                                //     type: 'splice'
-                                // }]);
+                                if (operation.$spliceIndex !== undefined) {
+                                    templateDomBind.notifySplices(parentsPolymerPath, [{
+                                        index: operation.$spliceIndex,
+                                        removed: operation.$spliceRemoved,
+                                        addedCount: 0,
+                                        object: parent,
+                                        type: 'splice'
+                                    }]);
+                                } else {
+                                    operation.$spliceIndex = parseInt(name, 10);
+                                    operation.$spliceRemoved = [parent[operation.$spliceIndex]];
+                                    templateDomBind.splice(parentsPolymerPath, name, 1);
+                                }
+
                                 console.info('Remove is fragile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
                                 break;
                         }
