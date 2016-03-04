@@ -196,7 +196,7 @@ All the changes from server are also received and propagated to your HTML.
                 useWebSocket: this.useWebSocket,
                 ignoreAdd: this.ignoreAdd,
                 debug: this.debug,
-                //onLocalChange: this.onLocalChange.bind(this), //see this.onPatchSent
+                onLocalChange: this.onLocalChange.bind(this),
                 onPatchReceived: this.onPatchReceived.bind(this),
                 onPatchSent: this.onPatchSent.bind(this),
                 onSocketStateChanged: this.onSocketStateChanged.bind(this),
@@ -261,11 +261,6 @@ All the changes from server are also received and propagated to your HTML.
             });
         },
         onPatchSent: function(data, url, method) {
-            if (data) {
-                //slow! consider moving onLocalChange PuppetJS constructor options
-                //https://github.com/PuppetJs/PuppetJs/issues/81
-                this.onLocalChange(JSON.parse(data));
-            }
             this.fire("patchsent", {
                 data: data,
                 url: url,
