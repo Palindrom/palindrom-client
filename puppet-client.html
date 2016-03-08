@@ -405,7 +405,7 @@ All the changes from server are also received and propagated to your HTML.
                                 templateDomBind.set(polymerPath, undefined);
                                 // this.notifyPath(polymerPath, undefined);
                                 console.warn('Polymer does not support unsetting properties https://github.com/Polymer/polymer/issues/2565');
-                                console.warn('remove is translated to JSON incompatible set to `undefined`, as there is no remove mathond in Polymer.')
+                                console.warn('remove is translated to JSON incompatible set to `undefined`, as there is no remove method in Polymer.')
                                 break;
                         }
                     }
@@ -413,7 +413,7 @@ All the changes from server are also received and propagated to your HTML.
             }
         },
         validateJSONPatch: function() {
-            console.info('inherit  validateJSONPatch from fast-json-patch');
+            console.info('inherit validateJSONPatch from fast-json-patch');
         },
         observeJSONPatch: function(obj, callback) {
             this.puppetObserver = callback;
