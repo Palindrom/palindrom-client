@@ -448,16 +448,6 @@ All the changes from server are also received and propagated to your HTML.
         return String(n) === str && n >= 0;
     }
 
-
-    var _isArray;
-    if (Array.isArray) {
-        _isArray = Array.isArray;
-    } else {
-        _isArray = function(obj) {
-            return obj.push && typeof obj.length === 'number';
-        };
-    }
-
     function placeMarker(subject, rootPath) {
         if (!subject.hasOwnProperty('$rootPath')) {
             Object.defineProperty(subject, '$rootPath', {
