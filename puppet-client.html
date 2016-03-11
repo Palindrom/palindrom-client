@@ -228,27 +228,14 @@ All the changes from server are also received and propagated to your HTML.
             // use node id or node itself;
             element = typeof element == "string" ? document.getElementById(element) : element;
             element.model = this.obj;
-            this.bound = true;
+            this.bound = element;
         },
         propagateDomBind: function(sequence) {
-            var that = this;
-            var templates = document.querySelectorAll("template[is=dom-bind]");
-            for (var i = 0; i < templates.length; i++) {
-                if (!templates[i]._propertyEffects) {
-                    return;
-                }
-
-                var keys = Object.keys(templates[i]._propertyEffects);
-                keys.forEach(function(key) {
-                    if (typeof templates[i][key] === "object") {
-                        if (!templates[i][key].hasOwnProperty("$rootPath")) {
-                            recursiveMarkObjProperties(that.obj, "");
-                        }
-                        if (templates[i][key].hasOwnProperty("$rootPath")) {
-                            that.notifyTemplateDomBind(templates[i][key], sequence, templates[i], key);
-                        }
-                    }
-                });
+            if (this.bound) {
+                this.notifyTemplateDomBind(this.bound.model, sequence, this.bound, "model");
+            }
+            else {
+                this.notifyTemplateDomBind(this.obj, sequence, this, "obj");
             }
         },
         onLocalChange: function(patches) {
@@ -328,12 +315,7 @@ All the changes from server are also received and propagated to your HTML.
                     continue;
                 }
 
-                if (tree.$rootPath.length > 0 && operation.path.indexOf(tree.$rootPath) !== 0) {
-                    //the path is out of scope of current templateDomBind
-                    continue;
-                }
-
-                polymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path.substring(tree.$rootPath.length));
+                polymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path);
 
                 if (operation.op === 'test') {
                     // we assume that jsonpatch covered it already
@@ -343,7 +325,7 @@ All the changes from server are also received and propagated to your HTML.
                     // for add and remove we need to check whether it's an array or not
                     var lastSeparator = operation.path.lastIndexOf('/');
                     var name = operation.path.substr(lastSeparator + 1);
-                    var parentsPolymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path.substring(tree.$rootPath.length, lastSeparator));
+                    var parentsPolymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path.substring(0, lastSeparator));
 
                     var parent = templateDomBind.get(parentsPolymerPath);
                     if (Array.isArray(parent) && (name === '-' || isNormalInteger(name))) {
@@ -353,20 +335,8 @@ All the changes from server are also received and propagated to your HTML.
                                 if (name === '-') {
                                     name = parent.length;
                                 }
-                                if (operation.$spliceIndex !== undefined) {
-                                    templateDomBind.notifySplices(parentsPolymerPath, [{
-                                        index: operation.$spliceIndex,
-                                        removed: [],
-                                        addedCount: 1,
-                                        object: parent,
-                                        type: 'splice'
-                                    }]);
-                                } else {
-                                    operation.$spliceIndex = parseInt(name, 10);
-                                    templateDomBind.splice(parentsPolymerPath, operation.$spliceIndex, 0, operation.value);
-                                }
+                                templateDomBind.splice(parentsPolymerPath, parseInt(name, 10), 0, operation.value);
                                 console.info('Add /splice in array is fragile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
-
                                 break;
                             case 'replace':
 
@@ -376,20 +346,7 @@ All the changes from server are also received and propagated to your HTML.
                                 // var col = Polymer.Collection.get(parent);
                                 // removed = col.getItem('#'+name);
                             case 'remove':
-                                if (operation.$spliceIndex !== undefined) {
-                                    templateDomBind.notifySplices(parentsPolymerPath, [{
-                                        index: operation.$spliceIndex,
-                                        removed: operation.$spliceRemoved,
-                                        addedCount: 0,
-                                        object: parent,
-                                        type: 'splice'
-                                    }]);
-                                } else {
-                                    operation.$spliceIndex = parseInt(name, 10);
-                                    operation.$spliceRemoved = [parent[operation.$spliceIndex]];
-                                    templateDomBind.splice(parentsPolymerPath, name, 1);
-                                }
-
+                                templateDomBind.splice(parentsPolymerPath, name, 1);
                                 console.info('Remove is fragile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
                                 break;
                         }
@@ -447,29 +404,5 @@ All the changes from server are also received and propagated to your HTML.
         var n = ~~Number(str);
         return String(n) === str && n >= 0;
     }
-
-    function placeMarker(subject, rootPath) {
-        if (!subject.hasOwnProperty('$rootPath')) {
-            Object.defineProperty(subject, '$rootPath', {
-                enumerable: false,
-                get: function() {
-                    return rootPath;
-                }
-            });
-        };
-    }
-
-    function recursiveMarkObjProperties(subject, rootPath) {
-        if (subject !== null && typeof subject === 'object') {
-            placeMarker(subject, rootPath);
-            for (var i in subject) {
-                if (subject.hasOwnProperty(i)) {
-                    recursiveMarkObjProperties(subject[i], rootPath + "/" + i);
-                }
-            }
-        }
-    }
-
-
 }());
 </script>
