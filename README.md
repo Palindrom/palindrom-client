@@ -91,6 +91,18 @@ connectionerror | Fired when patch gets applied
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
 
+## Development
+
+In order to develop it locally we suggest to use [polyserve](https://npmjs.com/polyserve) tool to handle bower paths gently.
+
+1. Install the global NPM modules [bower](http://bower.io/) & [polyserve](https://npmjs.com/polyserve): `npm install -g bower polyserve`
+2. Make a local clone of this repo: `git clone git@github.com:PuppetJs/puppet-polymer-client.git`
+3. Go to the directory: `cd puppet-polymer-client`
+4. Install the local dependencies: `bower install`
+5. Start the development server: `polyserve -p 8000`
+6. Open the demo: [http://localhost:8000/components/puppet-polymer-client/](http://localhost:8000/components/puppet-polymer-client/)
+7. Open the test suite: [http://localhost:8000/components/puppet-polymer-client/test/](http://localhost:8000/components/puppet-polymer-client/test/)
+
 ## History
 
 For detailed changelog, check [Releases](https://github.com/PuppetJs/puppet-polymer-client/releases).
