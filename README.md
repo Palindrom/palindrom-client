@@ -1,5 +1,5 @@
 
-# &lt;puppet-polymer-client&gt;
+# &lt;puppet-polymer-client&gt; [![Build Status](https://travis-ci.org/PuppetJs/puppet-polymer-client.svg?branch=gh-pages)](https://travis-ci.org/PuppetJs/puppet-polymer-client)
 > Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.
 
 Custom Element that binds [PuppetJs](https://github.com/PuppetJs/PuppetJs) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
