@@ -1,5 +1,4 @@
-// function createMockServer() {
-  jasmine.Ajax.install();
+(function() {
   var serverVersionNumber = 0;
 
 
@@ -31,39 +30,31 @@
   var lastUrl = window.location.href;
   handlePageLoad(lastUrl);
 
-  var stub = jasmine.Ajax.stubRequest(/(\/lab\/polymer\/?$|\/examples\/polymer\/?$|index\.html$|subpage\.html$)/);
-  stub.andReturn({
-    "responseText": "Error"
+  // pass-through all requests that are not meant for puppet
+  sinon.FakeXMLHttpRequest.useFilters = true;
+  sinon.FakeXMLHttpRequest.addFilter(function (method, url) {
+    return !(/.*puppet$/.test(url));
   });
 
-  var _old = XMLHttpRequest.prototype.send;
-  XMLHttpRequest.prototype.send = function (data) {
-    if (data == null && this.requestHeaders['Accept'] == 'application/json') {
-      stub.responseText = JSON.stringify(full);
-      stub.responseHeaders = [{name: "Location", value: this.url},{name: "X-Referer", value: lastUrl}];
-    }
-    else if (this.requestHeaders['Accept'] == 'application/json-patch+json' &&
-      this.url != lastUrl) {
+  var sinonFakeServer = sinon.fakeServer.create();
+
+  sinonFakeServer.respondWith(function(request) {
+    if(request.requestHeaders['Accept'] == 'application/json') {
+      request.respond(200, [{name: "Location", value: this.url},{name: "X-Referer", value: lastUrl}], JSON.stringify(full));
+    } else if(request.requestHeaders['Accept'] == 'application/json-patch+json') {
       var outPatches = [];
-
-        handlePageLoad(this.url);
-        // stub.responseHeaders = [{name: "Location", value: this.url},{name: "X-Referer", value: lastUrl}];
-        lastUrl = this.url;
-        serverVersionNumber++;
-        outPatches.push({op: 'replace', path: '/_ver#s', value: serverVersionNumber});
-        outPatches.push({op: 'test', path: '/_ver#c$', value: full.user.firstName$});
-        outPatches.push({op: 'replace', path: '/user/firstName$', value: full.user.firstName$});
-        outPatches.push({op: 'replace', path: '/user/lastName$', value: full.user.lastName$});
-        outPatches.push({op: 'replace', path: '/user/fullName', value: full.user.fullName});
-
-      stub.responseText = JSON.stringify(outPatches);
+      handlePageLoad(this.url);
+      serverVersionNumber++;
+      outPatches.push({op: 'replace', path: '/_ver#s', value: serverVersionNumber});
+      outPatches.push({op: 'test', path: '/_ver#c$', value: full.user.firstName$});
+      outPatches.push({op: 'replace', path: '/user/firstName$', value: full.user.firstName$});
+      outPatches.push({op: 'replace', path: '/user/lastName$', value: full.user.lastName$});
+      outPatches.push({op: 'replace', path: '/user/fullName', value: full.user.fullName});
+      request.respond(200, [], JSON.stringify(outPatches));
+    } else {
+      throw new Error("unexpected request - url matches puppet (=" + request.url + "), yet Accept header is not json nor json patch (=" + request.requestHeaders['Accept'] + ")");
     }
-    else {
-      stub.responseText = "Error";
-    }
-    console.info("Mock Server ",this.url, "\n request", data, "\n response", stub.status, stub.responseText);
-    return _old.apply(this, [].slice.call(arguments));
-  };
+  });
 
   WebSocket.prototype.send = function (data) {
     console.info("Mock WebSocket .send ",data);
@@ -106,4 +97,4 @@
       that.onmessage({data: JSON.stringify(outPatches) });
     }, 10);
   };
-// };
+})();

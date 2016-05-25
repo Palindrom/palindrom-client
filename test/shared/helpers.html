@@ -1,5 +1,6 @@
 <!-- mock server responses -->
 <script src="../../../jasmine/lib/jasmine-core/jasmine.js"></script>
+<script src="../../../sinonjs/sinon.js"></script>
 <script>
     window.jasmine = jasmineRequire.core(jasmineRequire);
 </script>
@@ -15,10 +16,10 @@
             o.value = value;
         }
         return o;
-    }
+    };
     window.puppetChange = function(puppet, sequence) {
         puppet.validateAndApplySequence(puppet.obj, sequence);
-    }
+    };
     window.domBindFixture = function(id, done, where){
         var fixture = document.getElementById(id).content;
         var templ = document.importNode(fixture, true);

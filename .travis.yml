@@ -1,5 +1,6 @@
 language: node_js
-sudo: false
+sudo: required
+dist: trusty
 before_script:
   - npm install web-component-tester
   - npm install bower
@@ -15,4 +16,3 @@ addons:
       - google-chrome-stable
 script:
   - xvfb-run wct
-  - "if [ \"${TRAVIS_PULL_REQUEST}\" = \"false\" ]; then wct -s 'default'; fi"
