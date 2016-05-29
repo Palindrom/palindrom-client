@@ -161,15 +161,13 @@
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
                             expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
-                            // We expect the change to not propagate! see https://github.com/PuppetJs/puppet-polymer-client/issues/17
-                            expect(document.querySelectorAll("ul.primitive_people>li>span")[0].innerHTML).to.equal("Australopithecus");
-
-                            // If it worked following line would pass:
-                            //  expect(document.querySelectorAll("ul.primitive_people>li>span")[0].innerHTML).to.equal("Homo erectus");
+                            expect(document.querySelector("ul.primitive_people>li>span").innerHTML).to.equal("Homo erectus");
                             done();
                         });
                         // change model
                         puppetChange(puppet, [operationObject('replace', '/primitive_people/0', 'Homo erectus')]);
+                        console.info('Fails in Polymer 1.2.4 due to https://github.com/Polymer/polymer/issues/3377');
+
                     });
                 });
                 describe('properties of array items,', function() {
@@ -237,14 +235,14 @@
                     });
                 });
                 describe('array add \'-\' (push),', function() {
-                    it('fire a change event, and update dom-bind', function(done) {
+                    xit('fire a change event, and update dom-bind', function(done) {
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
                             expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
                             expect(document.querySelector("ul.push>li>span").innerHTML).to.equal("Tomek");
-                            // If it worked it should expect 'Alice', but see https://github.com/PuppetJs/puppet-polymer-client/issues/17
-                            expect(document.querySelector("ul.push>li:nth-child(2)>span")).to.be.null;
+                            expect(document.querySelector("ul.push>li:nth-child(2)>span")).to.be.not.null;
+                            expect(document.querySelector("ul.push>li:nth-child(2)>span").innerHTML).to.equal("Alice");
                             done();
                         });
                         // change model
@@ -297,15 +295,14 @@
                 });
 
                 describe('array remove (last),', function() {
-                    it('fire a change event, and update dom-bind', function(done) {
+                    xit('fire a change event, and update dom-bind', function(done) {
                         var last = model.people_pop.length - 1;
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
                             expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
                             expect(document.querySelector("ul.pop>li>span").innerHTML).to.equal("Alice");
-                            // If it worked it should expect '1', but see https://github.com/PuppetJs/puppet-polymer-client/issues/17
-                            expect(document.querySelectorAll("ul.pop>li")).to.have.property("length").equal(2);
+                            expect(document.querySelectorAll("ul.pop>li")).to.have.property("length").equal(1);
                             done();
                         });
                         // change model
@@ -328,7 +325,7 @@
                         puppetChange(puppet, [operationObject('remove', '/people_pop/'+last)]);
 
                     });
-                    it('should stop observing changes to removed objects, and do NOT fire a change event - REDEFINE with dom-bind and DOM changes', function(done) {
+                    xit('should stop observing changes to removed objects, and do NOT fire a change event - REDEFINE with dom-bind and DOM changes', function(done) {
                         var last = model.people_pop.length - 1;
                         var remocedObj = model.people_pop[last];
                         // change model
@@ -354,14 +351,13 @@
                 });
 
                 describe('array - replace node in the middle,', function() {
-                    it('fire a change event, and update dom-bind', function(done) {
+                    xit('fire a change event, and update dom-bind', function(done) {
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
                             expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
                             expect(document.querySelector("ul.splice>li>span").innerHTML).to.equal("Alice");
-                            // If it worked it should expect 'Tomek', but see https://github.com/PuppetJs/puppet-polymer-client/issues/17
-                            expect(document.querySelector("ul.splice>li:nth-child(2)>span")).to.have.property("innerHTML").equal("Bob");
+                            expect(document.querySelector("ul.splice>li:nth-child(2)>span")).to.have.property("innerHTML").equal("Tomek");
                             expect(document.querySelector("ul.splice>li:nth-child(3)>span").innerHTML).to.equal("Celine");
                             expect(document.querySelectorAll("ul.splice>li")).to.have.property("length").equal(3);
                             done();
@@ -425,10 +421,7 @@
                                 ppclient.removeEventListener('patch-applied', listener);
                                 setTimeout(function() {
                                     expect(document.querySelector("ul.primitive_splice_n_change>li").innerHTML).to.equal("A");
-                                    // We expect the change to not propagate! see https://github.com/PuppetJs/puppet-polymer-client/issues/17
-                                    expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(2)").innerHTML).to.equal("T");
-                                    // If it worked following line would pass:
-                                    //  expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(2)").innerHTML).to.equal("K");
+                                    expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(2)").innerHTML).to.equal("K");
                                     expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(3)").innerHTML).to.equal("B");
                                     done();
                                 }, 100);
@@ -436,16 +429,17 @@
                             // change model
                             puppetChange(puppet, [operationObject('replace', '/people_splice_n_change/1', 'K')]);
                         }, 100);
+                        console.info('Fails in Polymer 1.2.4 due to https://github.com/Polymer/polymer/issues/3377');
+
                     });
                 });
                 describe('nested array items,', function() {
-                    it('fire a change event, and update dom-bind', function(done) {
+                    xit('fire a change event, and update dom-bind', function(done) {
                         // check and wait for the event dispatching
                         ppclient.addEventListener('patch-applied', function listener(event) {
                             ppclient.removeEventListener('patch-applied', listener);
                             expect(event.type).to.equal('patch-applied'); // It's kinda stupid, isn't it?
-                            // If it worked it should expect 'John', but see https://github.com/PuppetJs/puppet-polymer-client/issues/17
-                            expect(document.querySelector("ul.people_nested>li:nth-child(1)>span").innerHTML).to.equal("Sherlock");
+                            expect(document.querySelector("ul.people_nested>li:nth-child(1)>span").innerHTML).to.equal("John");
                             done();
                         });
                         // change model
@@ -464,6 +458,7 @@
                         });
                         // change model
                         puppetChange(puppet, [operationObject('replace', '/people_nested/0/0', 'John')]);
+                        console.info('Fails in Polymer 1.2.4 due to https://github.com/Polymer/polymer/issues/3377');
                     });
                 });
             });
