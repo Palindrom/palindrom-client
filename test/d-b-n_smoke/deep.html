@@ -37,24 +37,26 @@
                 };
                 domBind = document.getElementById("deep");
                 domBind.model = model;
+                ppclient = document.querySelector("puppet-client");
+                puppet = ppclient.puppet;
 
                 setTimeout(function () {
-                    ppclient = document.querySelector("puppet-client");
-                    puppet = ppclient.puppet;
                     done();
                 });
             });
             describe('should observe changes to it,', function () {
                 it('fire a change event, and update dom-bind', function (done) {
-                    // check and wait for event dispatch
-                    ppclient.addEventListener("patch-applied", function listener(event) {
-                        ppclient.removeEventListener("patch-applied", listener);
-                        expect(event.type).to.equal("patch-applied"); // It's kinda stupid, isn't it?
-                        expect(document.querySelector("span").innerHTML).to.equal("tomalec");
-                        done();
-                    });
+                    var patchAppliedEventCallback = sinon.spy();
+                    ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                     // change model
                     puppetChange(puppet, [operationObject('replace', '/author/first', 'tomalec')]);
+
+                    // check and wait for async dom-bind's stamping
+                    setTimeout(function listener() {
+                        expect(patchAppliedEventCallback).to.have.been.called;
+                        expect(document.querySelector("span").innerHTML).to.equal("tomalec");
+                        done();
+                    }, 100);
 
                 });
             });
