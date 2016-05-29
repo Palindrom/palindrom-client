@@ -54,23 +54,24 @@ Or [download as ZIP](https://github.com/PuppetJs/puppet-polymer-client/archive/g
     [JSON Patch](https://tools.ietf.org/html/rfc6902)es.
     All the changes from server are also received and propagated to your HTML.
 
-## Properties
+## Attributes & Properties
 
 
 Attribute                       | Options   | Default | Description
 ---                             | ---       | ---     | ---
-debug | Boolean | `false` | Set to `true` to enable debugging mode
-ignoreAdd | RegExp | `/.*/` | Regular expression with local properties to ignore
-listenTo | String | `document.body` | DOM node to listen to (see PuppetDOM listenTo attribute)
-localVersionPath | JSONPointer | `/_ver#c$` | local version path, set to falsy do disable Versioned JSON Patch communication
-obj | Object | `{}` | **notifies** Object that will be synced
-ot | Boolean | `true` | `false` to disable OT
-path | String | `/` | Path to given obj
-pingInterval | Number | `60` | Interval in seconds between ping patches, `0` - disable ping patches
-purity | Boolean | `false` | `true` to enable purist mode of OT
-remoteUrl | String | `window.location` | The remote's URL
-remoteVersionPath | JSONPointer | `/_ver#s` | remote version path, set it to falsy to disable Double Versioned JSON Patch communication
-useWebSocket | Boolean | `true` | Set to false to disable WebSocket (use HTTP)
+ref   | `String` or `HTMLElement` | element itself | To which element (polymer element/`template is="dom-bind"`) we should bind to.
+debug | `Boolean` | `false` | Set to `true` to enable debugging mode
+ignoreAdd | `RegExp` | `/.*/` | Regular expression with local properties to ignore
+listenTo | `String` | `document.body` | DOM node to listen to (see PuppetDOM listenTo attribute)
+localVersionPath | `JSONPointer` | `/_ver#c$` | local version path, set to falsy do disable Versioned JSON Patch communication
+obj | `Object` | `{}` | **notifies** Object that will be synced
+ot | `Boolean` | `true` | `false` to disable OT
+path | `String` | `/` | Path to given obj
+pingInterval | `Number` | `60` | Interval in seconds between ping patches, `0` - disable ping patches
+purity | `Boolean` | `false` | `true` to enable purist mode of OT
+remote-url / remoteUrl | `String` | `window.location` | The remote's URL
+remoteVersionPath | `JSONPointer` | `/_ver#s` | remote version path, set it to falsy to disable Double Versioned JSON Patch communication
+useWebSocket | `Boolean` | `true` | Set to false to disable WebSocket (use HTTP)
 
 
 ## Events
@@ -78,10 +79,12 @@ useWebSocket | Boolean | `true` | Set to false to disable WebSocket (use HTTP)
 Name                       | Description
 ---                             | ---     
 patch-applied | Fired when patch gets applied
-patchreceived | Fired when patch gets applied
-patchsent | Fired when patch gets applied
-socketstatechanged | Fired when patch gets applied
-connectionerror | Fired when patch gets applied
+patchreceived | Fired when patch gets received
+patchsent | Fired when patch gets send
+socketstatechanged | Fired when web socket state changes
+connectionerror | Fired when connection error happens
+
+:warning: Please note, that Polymer applies changes (especially array ones) asynchronously, so those could happen after `patch-applied` event was triggered.
 
 ## Contributing
 

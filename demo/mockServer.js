@@ -30,6 +30,8 @@
   var lastUrl = window.location.href;
   handlePageLoad(lastUrl);
 
+
+
   // pass-through all requests that are not meant for puppet
   sinon.FakeXMLHttpRequest.useFilters = true;
   sinon.FakeXMLHttpRequest.addFilter(function (method, url) {
@@ -37,6 +39,7 @@
   });
 
   var sinonFakeServer = sinon.fakeServer.create();
+
 
   sinonFakeServer.respondWith(function(request) {
     if(request.requestHeaders['Accept'] == 'application/json') {
@@ -55,6 +58,7 @@
       throw new Error("unexpected request - url matches puppet (=" + request.url + "), yet Accept header is not json nor json patch (=" + request.requestHeaders['Accept'] + ")");
     }
   });
+  sinonFakeServer.autoRespond = true;
 
   WebSocket.prototype.send = function (data) {
     console.info("Mock WebSocket .send ",data);

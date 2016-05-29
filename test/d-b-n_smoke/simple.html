@@ -15,10 +15,8 @@
 
 <body>
 
+    <puppet-client remote-url="/puppet" ref="simple"></puppet-client>
     <template is="dom-bind" id="simple">
-
-        <!-- Using Custom Elements -->
-        <puppet-client obj="{{model}}" remote-url="/puppet"></puppet-client>
 
         <h4>Welcome to
             <span>{{model.name}}</span>!</h4>

@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
+    <title>Test suite for deep array operations</title>
     <!-- Importing Web Component's Polyfill -->
     <script src="../../../webcomponentsjs/webcomponents.js"></script>
     <link rel="import" href="../shared/helpers.html">
@@ -16,20 +17,23 @@
 </head>
 <body>
 
-    <template id="fixture">
-    <template is="dom-bind" id="deep_array">
-        <div id="arrayDiv">
-            <template is="dom-repeat" items="{{model.path_to.array}}">
-                <div id="nestedArrayDiv">
-                  <template is="dom-repeat" items="{{item.nested_array}}">
-                      <span>{{item.prop}}</span>
-                  </template>
+    <test-fixture id="my-fixture"><template>
+        <!-- workaround for test-fixture bug -->
+        <div>
+            <puppet-client remote-url="/puppet" ref="deep_array"></puppet-client>
+            <template is="dom-bind" id="deep_array">
+                <div id="arrayDiv">
+                    <template is="dom-repeat" items="{{model.path_to.array}}">
+                        <div id="nestedArrayDiv">
+                          <template is="dom-repeat" items="{{item.nested_array}}">
+                              <span>{{item.prop}}</span>
+                          </template>
+                        </div>
+                    </template>
                 </div>
             </template>
         </div>
-        <puppet-client obj="{{model}}" remote-url="/puppet"></puppet-client>
-    </template>
-    </template>
+    </template></test-fixture>
     <script>
         var model = {
             path_to: {
@@ -45,100 +49,54 @@
             }
         };
 
-        // setTimeout(function(){
-        //     model.path_to.array[0].nested_array[0] = {prop: "firstChange"};
-        //     domBind.notifyPath("model.path_to.array.0.nested_array.0", model.path_to.array[0].nested_array[0] );
-        //     setTimeout(function(){
-        //         model.path_to.array[0].nested_array[0] = {prop: "firstChange"};
-        //         domBind.notifyPath("model.path_to.array.0.nested_array.0", model.path_to.array[0].nested_array[0] );
-        //     },500);
-        // },500);
-        //
-        //
-        // setTimeout(function(){
-        //  // non-Polymer code changes an object
-        //  var first_value = {prop: "firstChange"};
-        //  var old_value = model.path_to.array[0].nested_array[0];
-        //  model.path_to.array[0].nested_array[0] = first_value;
-        //  // notify dom bind to reflect the change in DOM
-        //  domBind.notifySplices(
-        //    "model.path_to.array.0.nested_array",
-        //    [{
-        //      object: model.path_to.array[0].nested_array,
-        //      index: 0,
-        //      addedCount: 1,
-        //      removed: [old_value],
-        //      type: 'splice'
-        //    }]
-        //  );
+describe('puppet-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function () {
+    var container, domBind, ppclient, puppet, patchAppliedEventCallback;
 
+    beforeEach(function (done) {
+        patchAppliedEventCallback = sinon.spy();
 
-        //  // fetch the key required by .notifyPath method
-        //  old_value = model.path_to.array[0].nested_array[0]; // first_value
-         //
-        //  // non-Polymer code changes an object
-        //  var second_value = {prop: "secondChange"};
-        //  model.path_to.array[0].nested_array[0] = second_value;
-        //  // notify dom bind to reflect the change in DOM
-         //
-        //  domBind.notifySplices(
-        //    "model.path_to.array.0.nested_array",
-        //    [{
-        //      object: model.path_to.array[0].nested_array,
-        //      index: 0,
-        //      addedCount: 1,
-        //      removed: [old_value],
-        //      type: 'splice'
-        //    }]
-        //  );
-
-        //  },500);
-describe('puppet-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function() {
-    var fixture, ppclient, puppet;
-
-    beforeEach(function(done){
-        fixture = domBindFixture('fixture', function(){
-            ppclient = document.querySelector("puppet-client");
+        container = fixture('my-fixture');
+        setTimeout(function () {
+            ppclient = container.querySelector("puppet-client");
             puppet = ppclient.puppet;
             puppet.obj = model;
-            done();
-        });
-        fixture.model = model;
+            domBind = container.querySelector('template[is="dom-bind"]');
+            domBind.model = model;
+            // Polymer werido(m)bind attaches to dom asynchronously
+            setTimeout(done, 100);
+        }, 100);
     });
-    afterEach(function(done){
+    afterEach(function (done) {
         // Polymer werido(m)bind detaches from dom asynchronously
-        setTimeout(function(){
-            fixture.parentNode.removeChild(fixture);
+        setTimeout(function () {
             done();
-        });
+        }, 100);
     });
 
-    describe('should notify Polymer binding so that changing nested array element will me replaced after each model replace', function(){
+    describe('should notify Polymer binding so that changing nested array element will me replaced after each model replace', function () {
         it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
-            // check and wait for the event dispatching
-            ppclient.addEventListener("patch-applied", function listener(event){
-                ppclient.removeEventListener("patch-applied", listener);
-                // wait for asynchronous Polymer's _notifySplice
-                setTimeout(function(){
-                    expect( event.type ).to.equal("patch-applied"); // It's kinda stupid, isn't it?
-                    expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("firstChange");
-                    // check and wait for the event dispatching
-                    ppclient.addEventListener("patch-applied", function listener2(event){
-                        ppclient.removeEventListener("patch-applied", listener2);
-                        // wait for asynchronous Polymer's _notifySplice
-                        setTimeout(function(){
-                            expect( event.type ).to.equal("patch-applied"); // It's kinda stupid, isn't it?
-                            expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("secondChange");
-                            done();
-                        });
-                    });
-                    // change model
-                    puppetChange(puppet, [operationObject('replace', '/path_to/array/0/nested_array/0', {prop: "secondChange"})]);
-                },100);
-            });
+            ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
             // change model
             puppetChange(puppet, [operationObject('replace', '/path_to/array/0/nested_array/0', {prop: "firstChange"})]);
 
+            // check and wait for async dom-bind's stamping
+            setTimeout(function listener() {
+                expect(patchAppliedEventCallback).to.have.been.called;
+                expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("firstChange");
+
+                var patchAppliedEventCallback2 = sinon.spy();
+                ppclient.addEventListener('patch-applied', patchAppliedEventCallback2);
+                // change model
+                puppetChange(puppet, [operationObject('replace', '/path_to/array/0/nested_array/0', {prop: "secondChange"})]);
+
+                // check and wait for async dom-bind's stamping
+                setTimeout(function listener2() {
+                    expect(patchAppliedEventCallback2).to.have.been.called;
+                    expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("secondChange");
+                    done();
+                }, 100);
+
+            }, 100);
         });
     });
 });

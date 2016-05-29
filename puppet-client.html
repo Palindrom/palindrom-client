@@ -339,13 +339,13 @@ All the changes from server are also received and propagated to your HTML.
                                 //console.info('Add /splice in array is fragile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
                                 break;
                             case 'replace':
-                                templateDomBind.splice(parentsPolymerPath, name, 1, operation.value);
+                                templateDomBind.splice(parentsPolymerPath, parseInt(name, 10), 1, operation.value);
                                 break;
                                 // addedCount = 1;
                                 // var col = Polymer.Collection.get(parent);
                                 // removed = col.getItem('#'+name);
                             case 'remove':
-                                templateDomBind.splice(parentsPolymerPath, name, 1);
+                                templateDomBind.splice(parentsPolymerPath, parseInt(name, 10), 1);
                                 //console.info('Remove is fragile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
                                 break;
                         }

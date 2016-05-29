@@ -16,40 +16,36 @@
 
 <body>
 
+    <puppet-client ref="deep" remote-url="/puppet"></puppet-client>
     <template is="dom-bind" id="deep">
 
-        <!-- Using Custom Elements -->
-        <puppet-client obj="{{repo}}" remote-url="/puppet"></puppet-client>
-
-        <h3>{{repo.name}}</h3>
+        <h3>{{model.name}}</h3>
         by
-        <span>{{repo.author.first}}</span>
+        <span>{{model.author.first}}</span>
 
     </template>
     <script>
-        var model = {
-            name: "<puppet-client>",
-            author: {
-                first: "Tomek",
-                last: "Wytrębowicz"
-            }
-        };
-        var domBind = document.getElementById("deep");
-        domBind.repo = model;
-    </script>
+        describe('puppet-client, when stamped from `dom-bind` with deep attribute and bound to object', function () {
+            var model, domBind, ppclient, puppet;
+            beforeEach(function waitForHTMLImportsAndDomBindChange(done) {
+                model = {
+                    name: "<puppet-client>",
+                    author: {
+                        first: "Tomek",
+                        last: "Wytrębowicz"
+                    }
+                };
+                domBind = document.getElementById("deep");
+                domBind.model = model;
 
-    <script>
-        describe('puppet-client, when stamped from `dom-bind` with deep attribute and bound to object', function() {
-            var ppclient, puppet;
-            before(function waitForHTMLImportsAndDomBindChange(done) {
-                setTimeout(function() {
+                setTimeout(function () {
                     ppclient = document.querySelector("puppet-client");
                     puppet = ppclient.puppet;
                     done();
                 });
             });
-            describe('should observe changes to it,', function() {
-                it('fire a change event, and update dom-bind', function(done) {
+            describe('should observe changes to it,', function () {
+                it('fire a change event, and update dom-bind', function (done) {
                     // check and wait for event dispatch
                     ppclient.addEventListener("patch-applied", function listener(event) {
                         ppclient.removeEventListener("patch-applied", listener);
@@ -58,7 +54,7 @@
                         done();
                     });
                     // change model
-                    puppetChange(puppet, [operationObject('replace','/author/first', 'tomalec')]);
+                    puppetChange(puppet, [operationObject('replace', '/author/first', 'tomalec')]);
 
                 });
             });
