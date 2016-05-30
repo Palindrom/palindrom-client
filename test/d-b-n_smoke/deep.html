@@ -45,20 +45,33 @@
                 });
             });
             describe('should observe changes to it,', function () {
-                it('fire a change event, and update dom-bind', function (done) {
-                    var patchAppliedEventCallback = sinon.spy();
-                    ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
-                    // change model
-                    puppetChange(puppet, [operationObject('replace', '/author/first', 'tomalec')]);
+                if (navigator.vendor && navigator.vendor.indexOf('Apple') > -1) {
+                    it.skip('fire a change event, and update dom-bind - IGNORED ON SAFARI #24');
+                } else {
+                    it('fire a change event, and update dom-bind', function (done) {
+                        var patchAppliedEventCallback = sinon.spy();
+                        ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
+                        // change model
+                        puppetChange(puppet, [operationObject('replace', '/author/first', 'tomalec')]);
 
-                    // check and wait for async dom-bind's stamping
-                    setTimeout(function listener() {
-                        expect(patchAppliedEventCallback).to.have.been.called;
-                        expect(document.querySelector("span").innerHTML).to.equal("tomalec");
-                        done();
-                    }, 100);
+                        // check and wait for async dom-bind's stamping
+                        var retriesLeft = 100;
+                        // temporary construct. See #23
+                        function tryAssertion() {
+                            if (retriesLeft == 0) {
+                                fail("Exceeded timeout waiting for condition");
+                            } else if (patchAppliedEventCallback.called
+                                    && document.querySelector("span").innerHTML == "tomalec") {
+                                done();
+                            } else {
+                                retriesLeft--;
+                                setTimeout(tryAssertion, 100)
+                            }
+                        }
 
-                });
+                        tryAssertion();
+                    });
+                }
             });
         });
     </script>
