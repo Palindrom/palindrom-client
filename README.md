@@ -73,7 +73,6 @@ remote-url / remoteUrl | `String` | `window.location` | The remote's URL
 remoteVersionPath | `JSONPointer` | `/_ver#s` | remote version path, set it to falsy to disable Double Versioned JSON Patch communication
 useWebSocket | `Boolean` | `true` | Set to false to disable WebSocket (use HTTP)
 
-
 ## Events
 
 Name                       | Description
@@ -85,6 +84,10 @@ socketstatechanged | Fired when web socket state changes
 connectionerror | Fired when connection error happens
 
 :warning: Please note, that Polymer applies changes (especially array ones) asynchronously, so those could happen after `patch-applied` event was triggered.
+
+## Template binding issues
+
+Polymer template binding is [known to have problems with arrays](https://github.com/Polymer/polymer/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+splice). They do not affect communication/syncing data with Puppet. However, we found out that one affecting arrays of primitives (like [Polymer/polymer#3682](https://github.com/Polymer/polymer/issues/3682)) results in surprising artifacts with HTML rendering. Therefore, until Polymer fixes that, we suggest to avoid manipulations on such arrays.
 
 ## Contributing
 
