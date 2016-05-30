@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <title>Test behavior expected due to Polymer bugs</title>
+    <!-- Importing Web Component's Polyfill -->
+    <script src="../../../webcomponentsjs/webcomponents.js"></script>
+    <link rel="import" href="../shared/helpers.html">
+
+    <script src="../../../web-component-tester/browser.js"></script>
+
+    <!-- Step 1: import the element to test -->
+    <link rel="import" href="../../puppet-client.html">
+</head>
+
+<body>
+    <test-fixture id="puppet-polymer-array"><template>
+        <!-- workaround for test-fixture bug -->
+        <div>
+            <puppet-client remote-url="/puppet" ref="domBind"></puppet-client>
+            <template is="dom-bind" id="domBind">
+                <ul>
+                    <template is="dom-repeat" items="{{model.array}}">
+                        <li>{{item}}</li>
+                    </template>
+                </ul>
+            </template>
+        </div>
+    </template></test-fixture>
+    <test-fixture id="polymer-array"><template>
+        <!-- workaround for test-fixture bug -->
+        <div>
+            <template is="dom-bind" id="domBind">
+                <ul>
+                    <template is="dom-repeat" items="{{array}}">
+                        <li>{{item}}</li>
+                    </template>
+                </ul>
+            </template>
+        </div>
+    </template></test-fixture>
+    <script>
+        var model;
+        describe('not desired but expected behavior, caused by Polymer bugs', function () {
+            describe('when stamped with reference to `dom-bind` and bound to puppet object w/ array of primitives', function () {
+                describe('once two consecutive changes are made and first one sets a value to one of existing ones - #14 (Polymer/polymer#3682)', function () {
+                    var container, domBind, ppclient, puppet, patchAppliedEventCallback;
+
+                    beforeEach(function (done) {
+                        patchAppliedEventCallback = sinon.spy();
+                        model = {array: [0,1]};
+
+
+                        container = fixture('puppet-polymer-array');
+                        setTimeout(function () {
+                            ppclient = container.querySelector("puppet-client");
+                            puppet = ppclient.puppet;
+                            puppet.obj = model;
+                            domBind = container.querySelector('template[is="dom-bind"]');
+                            domBind.model = model;
+                            // Polymer werido(m)bind attaches to dom asynchronously
+                            setTimeout(done, 10);
+                        }, 10);
+
+                    });
+                    afterEach(function (done) {
+                        // Polymer werido(m)bind detaches from dom asynchronously
+                        setTimeout(function () {
+                            done();
+                        }, 10);
+                    });
+                    it('eventually first item is rendered as `""` and second one is updated correctly (`patch-applied` event is called as usual)', function (done) {
+                        console.log('This behavior is tracked in https://github.com/PuppetJs/puppet-polymer-client/issues/14 and is caused by https://github.com/Polymer/polymer/issues/3682');
+                        ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
+                        // change model
+                        puppetChange(puppet, [operationObject('replace', '/array/0', 1), operationObject('replace', '/array/1', 2)]);
+
+                        // check and wait for the event dispatching
+                        setTimeout(function listener() {
+                            expect(patchAppliedEventCallback).to.have.been.called;
+                            expect(container.querySelector("ul>li:first-child").innerHTML).to.equal('');
+                            expect(container.querySelector("ul>li:nth-child(2)").innerHTML).to.equal('2');
+                            done();
+                        }, 10);
+                    });
+                });
+            });
+            describe('`dom-bind` when bound to an array of primitives', function () {
+                describe('once two consecutive `splice`s are made and first one sets a value to one of existing ones - Polymer/polymer#3682', function () {
+                    var container, domBind;
+
+                    beforeEach(function (done) {
+                        model = {array: [0,1]};
+
+
+                        container = fixture('polymer-array');
+                        setTimeout(function () {
+                            domBind = container.querySelector('template[is="dom-bind"]');
+                            domBind.array = model.array;
+                            // Polymer werido(m)bind attaches to dom asynchronously
+                            setTimeout(done, 10);
+                        }, 10);
+
+                    });
+                    afterEach(function (done) {
+                        // Polymer werido(m)bind detaches from dom asynchronously
+                        setTimeout(function () {
+                            done();
+                        }, 10);
+                    });
+                    it('eventually first item is rendered as `""` and second one is updated correctly', function (done) {
+                        console.log('This behavior is tracked in https://github.com/Polymer/polymer/issues/3682');
+                        // change model
+                        domBind.splice("array", 0, 1, 1);
+                        domBind.splice("array", 1, 1, 2);
+
+                        // check and wait for the event dispatching
+                        setTimeout(function listener() {
+                            expect(container.querySelector("ul>li:first-child").innerHTML).to.equal('');
+                            expect(container.querySelector("ul>li:nth-child(2)").innerHTML).to.equal('2');
+                            done();
+                        }, 10);
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
