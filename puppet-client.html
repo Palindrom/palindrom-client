@@ -35,6 +35,11 @@ All the changes from server are also received and propagated to your HTML.
     'use strict';
     function extend(destination, source) {
         for (var k in source) {
+            if (["constructor", "apply", "addEventListener", "hasEventListener", "removeEventListener", "dispatchEvent"].indexOf(k) > -1) {
+                //skip EventDispatcher methods
+                //can be removed after https://github.com/PuppetJs/PuppetJs/issues/78
+                continue;
+            }
             //noinspection JSUnfilteredForInLoop
             destination[k] = source[k];
         }
