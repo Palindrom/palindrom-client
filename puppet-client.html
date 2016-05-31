@@ -33,9 +33,18 @@ All the changes from server are also received and propagated to your HTML.
 <script>
 (function() {
     'use strict';
+    function extend(destination, source) {
+        for (var k in source) {
+            //noinspection JSUnfilteredForInLoop
+            destination[k] = source[k];
+        }
+        return destination;
+    }
+
+    var clone = extend({}, PuppetDOM.prototype);
 
 
-    Polymer({
+    Polymer(extend(clone, {
 
         is: 'puppet-client',
 
@@ -160,7 +169,7 @@ All the changes from server are also received and propagated to your HTML.
             path: {
                 type: String,
                 value: '/'
-            },
+            }
 
 
             // /**
@@ -189,7 +198,7 @@ All the changes from server are also received and propagated to your HTML.
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
 
-            this.puppet = new PuppetDOM({
+            PuppetDOM.call(this, {
                 remoteUrl: this.remoteUrl,
                 pingInterval: pingInterval,
                 listenTo: listenTo,
@@ -221,8 +230,6 @@ All the changes from server are also received and propagated to your HTML.
             });
             // this.puppet.addEventListener('patch-applied', this.notifyChange);
 
-            this.network = this.puppet.network;
-            this.morphUrl = this.puppet.morphUrl.bind(this.puppet);
         },
         bindTo: function(element) {
             // use node id or node itself;
@@ -385,7 +392,7 @@ All the changes from server are also received and propagated to your HTML.
 			}
 		}
 
-    });
+    }));
 
     function noop() {}
 

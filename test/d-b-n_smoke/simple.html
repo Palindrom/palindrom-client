@@ -35,7 +35,7 @@
             before(function waitForHTMLImportsAndDomBindChange(done) {
                 setTimeout(function() {
                     ppclient = document.querySelector('puppet-client');
-                    puppet = ppclient.puppet;
+                    puppet = ppclient;
                     done();
                 });
             });

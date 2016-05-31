@@ -147,7 +147,7 @@
                 container = fixture('my-fixture');
                 setTimeout(function () {
                     ppclient = container.querySelector("puppet-client");
-                    puppet = ppclient.puppet;
+                    puppet = ppclient;
                     puppet.obj = model;
                     domBind = container.querySelector('template[is="dom-bind"]');
                     domBind.model = model;
