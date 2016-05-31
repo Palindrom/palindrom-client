@@ -16,7 +16,7 @@ You get three-way data binding server - JS - HTML, kept in flawless sync.
 
 ## Demo
 
-- [Check it live!](http://PuppetJs.github.io/puppet-polymer-client)
+- [Check it live!](http://PuppetJs.github.io/puppet-polymer-client/demo)
 - [test suite](http://PuppetJs.github.io/puppet-polymer-client/test)
 
 
