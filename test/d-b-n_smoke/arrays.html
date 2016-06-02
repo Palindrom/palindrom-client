@@ -212,7 +212,7 @@
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
                         // puppetChange(puppet, [operationObject('add', '/people_properties/-', '1')]);
-                        puppetChange(puppet, [operationObject('add', '/people_properties/0', '1')]);
+                        puppetChange(puppet, [operationObject('add', '/people_properties/0', 'property')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {

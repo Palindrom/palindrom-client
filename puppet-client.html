@@ -198,6 +198,7 @@ All the changes from server are also received and propagated to your HTML.
                 ignoreAdd: this.ignoreAdd,
                 debug: this.debug,
                 onLocalChange: this.onLocalChange.bind(this),
+                onRemoteChange: this.notifyPolymer.bind(this),
                 onPatchReceived: this.onPatchReceived.bind(this),
                 onPatchSent: this.onPatchSent.bind(this),
                 onSocketStateChanged: this.onSocketStateChanged.bind(this),
@@ -207,12 +208,12 @@ All the changes from server are also received and propagated to your HTML.
                 remoteVersionPath: this.remoteVersionPath,
                 ot: this.ot,
                 purity: this.purity,
-                jsonpatch: {
-                    apply: this.applyJSONPatch.bind(this),
-                    observe: jsonpatch.observe.bind(this),
-                    unobserve: jsonpatch.unobserve.bind(this),
-                    validate: this.validateJSONPatch.bind(this)
-                },
+//                jsonpatch: {
+//                    apply: this.applyJSONPatch.bind(this),
+//                    observe: jsonpatch.observe.bind(this),
+//                    unobserve: jsonpatch.unobserve.bind(this),
+//                    validate: this.validateJSONPatch.bind(this)
+//                },
                 callback: function() {
                     if (whereToBind) {
                         this.bindTo(whereToBind);
@@ -300,6 +301,7 @@ All the changes from server are also received and propagated to your HTML.
                 operation = sequence[operationNo];
 
                 if (operation.path == "") {
+                    throw new NotRightNowError();
                     //in case of root path, Polymer replaces the original obj, which detaches it from Puppet
                     var newSequence = [];
                     for (var prop in operation.value) {
@@ -386,6 +388,98 @@ All the changes from server are also received and propagated to your HTML.
 		}
 
     });
+
+    var jsonPatchApplier = {
+        patchObject: function applySingleJsonPatchObject(patch, target) {
+            if (patch.op === 'add' || patch.op === 'replace') {
+                setPropertyByPolymerPath(translateJSONPointerToPolymerPath(patch.path), target, patch.value);
+            } else if (patch.op === 'remove') {
+                setPropertyByPolymerPath(translateJSONPointerToPolymerPath(patch.path), target, undefined);
+            }
+        },
+        patchArray: function(patch, target, templateDomBind, context) {
+            switch (operation.op) {
+                case 'add':
+                    // JSONPatch push
+                    var name = context.name;
+                    if (name === '-') {
+                        name = context.parent.length;
+                    }
+                    templateDomBind.splice(context.parentsPolymerPath, parseInt(name, 10), 0, operation.value);
+                    break;
+                case 'replace':
+                    templateDomBind.splice(context.parentsPolymerPath, parseInt(name, 10), 1, operation.value);
+                    break;
+                case 'remove':
+                    templateDomBind.splice(context.parentsPolymerPath, parseInt(name, 10), 1);
+                    break;
+            }
+        }
+    };
+
+    var jsonPatchNotifier = {
+        patchObject: function notifySingleJsonPatchObject(operation, target, templateDomBind) {
+            if (operation.op === 'add' || operation.op === 'replace') {
+                templateDomBind.notifyPath(translateJSONPointerToPolymerPath(operation.path), operation.value, false);
+            } else if (operation.op === 'remove') {
+                templateDomBind.notifyPath(translateJSONPointerToPolymerPath(operation.path), undefined, false);
+            }
+        },
+        patchArray: function (operation, target, templateDomBind, context) {
+            switch (operation.op) {
+                case 'add':
+                    // JSONPatch push
+                    var name = context.name;
+                    if (name === '-') {
+                        name = context.parent.length;
+                    }
+                    templateDomBind.notifyPath(context.parentsPolymerPath+'.splices',
+                            [{"keySplices":null,"indexSplices":[{
+                                "index" : parseInt(name, 10),
+                                "addedCount" : 1,
+                                "removed" : [],
+                                "object" : parent,
+                                "type" : "splice"}]}]);
+                    break;
+                case 'replace':
+                    templateDomBind.notifyPath(context.parentsPolymerPath+'.splices',
+                            [{"keySplices":null,"indexSplices":[{
+                                "index" : parseInt(name, 10),
+                                "addedCount" : 1,
+                                "removed" : [],
+                                "object" : parent,
+                                "type" : "splice"}]}]);
+                    break;
+                case 'remove':
+                    templateDomBind.notifyPath(context.parentsPolymerPath+'.splices',
+                            [{"keySplices":null,"indexSplices":[{
+                                "index" : parseInt(name, 10),
+                                "addedCount" : 1,
+                                "removed" : [operation.original],
+                                "object" : parent,
+                                "type" : "splice"}]}]);
+                    break;
+            }
+        }
+
+    };
+
+
+    function setPropertyByPolymerPath(path, target, value) {
+        if(typeof(path) === 'string') {
+            path = path.split('.');
+        }
+        if(path.length > 1) {
+            var currentPathElement = pathList.shift();
+            // reviewers PTAL
+            if(target[currentPathElement] === undefined) {
+                target[currentPathElement] = {};
+            }
+            setPropertyByPolymerPath(path, target, value);
+        } else {
+            target[path[0]] = value;
+        }
+    }
 
     function noop() {}
 
