@@ -2,21 +2,24 @@ language: node_js
 sudo: required
 dist: trusty
 before_script:
-  - npm install web-component-tester
-  - npm install bower
-  - 'export PATH=$PWD/node_modules/.bin:$PATH'
-  - bower install
+- npm install web-component-tester
+- npm install bower
+- export PATH=$PWD/node_modules/.bin:$PATH
+- bower install
 branches:
   only:
-    - gh-pages
-    - /.*/
+  - gh-pages
+  - "/.*/"
 node_js: 4
 addons:
   firefox: latest
   apt:
     sources:
-      - google-chrome
+    - google-chrome
     packages:
-      - google-chrome-stable
+    - google-chrome-stable
 script:
-  - xvfb-run wct
+- xvfb-run wct
+notifications:
+  slack:
+    secure: deFDB3rxXzZof1gKSGre9dI3Xu6UOcHfp7LRKAAh8pDQd7B96EISO6RQjwiLw/kTa3ZP4of/nvNdk/RjVF5RhGJiU7b/AkSc/Wrr+Ia7MOcTcU8ejNWrL3al1jDX6I4FFGCGKT5rsDRkiiVob6vMPn8vHXFXEEj1ZsvT+uorZc5hzL3+F9acHoN2sD4caqec+QLl8tQYrqr8kkqbqboNruhKg0LulOqwGzl8vXOD/iVx75YZlUVIa3ImRdVPMqQ8NYDgLLbdvF4pPS36A8NzKjn4Og4EE+peAy/lH99QFe79c3vawIBj9K+mKfk+uI0C1oiPhqymsPqdDbp2fSoEChBpvhDdRx0NVv+2MEyweASTRZG10/kwNMWqxvNndyH3LuDbbRl+fd6xRJSxIBzzcwel4e6hnzMb20sJ8V0v0aYDiwyIiCM8B5ADN6xW/xPWXgjC+kClBYzL3vrA5vQ1XNMZXy9WcsKdl4uS5YVghr46kmoyQZxdNrLZko27+Cnghm5eObFKBsG9INDaJENnrMy6dKJn2FHUw9IMecnrGjGOZKQvtmAhprgGpY/0+NvcliffwPjjFIlS+ISap7Q2iJqfyl9qdf7jgL0vVeV2vKPg+7w6Q5X3vxmHOegsPrhBjjfDpGTbCdCG891XpO0jVnLxSKzMYoisRmos/QcQ1uw=
