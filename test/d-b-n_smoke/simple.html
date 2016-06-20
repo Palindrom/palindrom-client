@@ -33,11 +33,11 @@
     </script>
 
     <script>
-        chai.use(puppetChaiPlugin);
         describe('puppet-client, when stamped from `dom-bind` bound to shallow puppet object', function() {
             var ppclient, puppet;
             before(function waitForHTMLImportsAndDomBindChange(done) {
                 setTimeout(function() {
+                    chai.use(puppetChaiPlugin);
                     ppclient = document.querySelector('puppet-client');
                     puppet = ppclient.puppet;
                     initPuppet(puppet, model);

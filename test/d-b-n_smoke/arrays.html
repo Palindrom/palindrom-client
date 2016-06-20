@@ -97,8 +97,11 @@
     </template></test-fixture>
     <script>
         var model;
-        chai.use(puppetChaiPlugin);
         describe('puppet-client, when stamped from `dom-bind` and bound to puppet object w/ array', function () {
+            before(function initChai(done) {
+                chai.use(puppetChaiPlugin);
+                done();
+            });
             var container, domBind, ppclient, puppet, patchAppliedEventCallback, patchSentEventCallback;
 
             beforeEach(function (done) {
