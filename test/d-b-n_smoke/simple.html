@@ -20,6 +20,9 @@
 
         <h4>Welcome to
             <span>{{model.name}}</span>!</h4>
+        <template is="dom-if" if="{{model.name}}">
+            <span id="conditional"></span>
+        </template>
     </template>
     <script>
         var model = {
@@ -30,6 +33,7 @@
     </script>
 
     <script>
+        chai.use(puppetChaiPlugin);
         describe('puppet-client, when stamped from `dom-bind` bound to shallow puppet object', function() {
             var ppclient, puppet;
             before(function waitForHTMLImportsAndDomBindChange(done) {
@@ -52,7 +56,15 @@
                     });
                     // change model
                     puppetChange(puppet, [operationObject('replace','/name', 'Polymer')]);
-
+                });
+                it('when element is removed, should notify any listeners', function(done) {
+                    // change model
+                    puppetChange(puppet, [operationObject('remove','/name')]);
+                    setTimeout(function () {
+                        // dom-if is an example of a listener
+                        expect(document.querySelector("#conditional")).to.not.be.visible;
+                        done();
+                    })
                 });
                 it('and send back changes applied to model as a reaction to changes from server', function(done) {
                     var patchSentListener = sinon.spy();
@@ -64,9 +76,7 @@
                     puppetChange(puppet, [operationObject('replace', '/name', "change #1")]);
                     triggerPuppetSend();
                     setTimeout(function() {
-                        expect(patchSentListener).to.have.been.called;
-                        // first two patches are OT-related
-                        expect(JSON.parse(patchSentListener.firstCall.args[0].detail.data)[2]).to.deep.equal(operationObject("replace", "/name", "change #2"));
+                        expect(patchSentListener).to.have.been.calledWithPatch(operationObject("replace", "/name", "change #2"));
                         done();
                     }, 100);
                 });

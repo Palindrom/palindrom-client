@@ -1,6 +1,5 @@
 <!-- mock server responses -->
 <script src="../../../sinonjs/sinon.js"></script>
-<script src="../../../underscore/underscore.js"></script>
 <script src="../../demo/mockServer.js"></script>
 <script>
     window.operationObject = function(op, path, value) {
@@ -40,5 +39,22 @@
         var clickEvent = document.createEvent('MouseEvents');
         clickEvent.initEvent("mouseup", true, true);
         window.dispatchEvent(clickEvent);
-    }
+    };
+
+    window.puppetChaiPlugin = function(chai, utils) {
+        chai.Assertion.addMethod('calledWithPatch', function (op) {
+            this.assert(this._obj.called
+                    // first arg is event, first two operations are OT-related
+                    && utils.eql(JSON.parse(this._obj.firstCall.args[0].detail.data)[2], op),
+                    "expected a spy to have been called with patch #{exp}, but it was not",
+                    "expected a spy to not have been called with patch #{exp}, but it has been",
+                    op);
+        });
+
+        chai.Assertion.addProperty('visible', function () {
+            this.assert(this._obj.offsetWidth || this._obj.offsetHeight || this._obj.getClientRects().length,
+                "expected element #{this} to be visible, but it's hidden",
+                "expected element #{this} to be hidden, but it's visible");
+        })
+    };
 </script>

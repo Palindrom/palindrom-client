@@ -97,6 +97,7 @@
     </template></test-fixture>
     <script>
         var model;
+        chai.use(puppetChaiPlugin);
         describe('puppet-client, when stamped from `dom-bind` and bound to puppet object w/ array', function () {
             var container, domBind, ppclient, puppet, patchAppliedEventCallback, patchSentEventCallback;
 
@@ -163,13 +164,6 @@
                 }, 100);
             });
 
-            /** This should be used with spy on patchsent event */
-            function expectPatchSent(operation) {
-                expect(patchSentEventCallback).to.have.been.called;
-                // first arg is event, first two operations are OT-related
-                expect(JSON.parse(patchSentEventCallback.firstCall.args[0].detail.data)[2]).to.deep.equal(operation);
-            }
-
             console.info('EVENTUALLY <= Polymer updates array related content of `dom-bind` asynchronously!');
             describe('should observe changes to ', function () {
                 describe('array items,', function () {
@@ -191,7 +185,7 @@
                         triggerPuppetSend();
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
-                            expectPatchSent(operationObject('replace', '/primitive_people/0', 'Homo erectus'));
+                            expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/primitive_people/0', 'Homo erectus'));
                             expect(document.querySelector("ul.primitive_people>li>span").innerHTML).to.equal("Homo erectus");
                             done();
                         }, 100);
@@ -218,7 +212,7 @@
                         triggerPuppetSend();
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
-                            expectPatchSent(operationObject('replace', '/people/1/first', newItem.first));
+                            expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/people/1/first', newItem.first));
                             expect(document.querySelector("ul.people>li:nth-child(2)>span").innerHTML).to.equal(newItem.first);
                             done();
                         }, 100);
@@ -243,7 +237,7 @@
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
                         // puppetChange(puppet, [operationObject('add', '/people_properties/-', '1')]);
-                        puppetChange(puppet, [operationObject('add', '/people_properties/0', 'property')]);
+                        puppetChange(puppet, [operationObject('add', '/people_properties/0', 'item')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -288,7 +282,7 @@
                         }, 100);
                     });
                 });
-                describe('array add \'-\' (push),', function () {
+                describe('array push,', function () {
                     it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
@@ -334,7 +328,7 @@
                         domBind.splice('model.people_push', 1, 0, {first: 'Abraham'});
                         triggerPuppetSend();
                         setTimeout(function listener() {
-                            expectPatchSent(operationObject('add', '/people_push/1', {first: 'Abraham'}));
+                            expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('add', '/people_push/1', {first: 'Abraham'}));
                             done();
                         }, 100);
                     });
