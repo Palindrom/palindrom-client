@@ -1,5 +1,6 @@
 <!-- mock server responses -->
 <script src="../../../sinonjs/sinon.js"></script>
+<script src="../../../underscore/underscore.js"></script>
 <script src="../../demo/mockServer.js"></script>
 <script>
     window.operationObject = function(op, path, value) {
@@ -11,10 +12,7 @@
             o.value = value;
         }
         return o;
-    }
-    window.puppetChange = function(puppet, sequence) {
-        puppet.validateAndApplySequence(puppet.obj, sequence);
-    }
+    };
     window.domBindFixture = function(id, done, where){
         var fixture = document.getElementById(id).content;
         var templ = document.importNode(fixture, true);
@@ -26,5 +24,21 @@
         });
         (where || document.body).appendChild(domBind);
         return domBind;
+    };
+    var currentVersion;
+    window.initPuppet = function(puppet, model) {
+        currentVersion = 1;
+        setMockServerModel(model);
+        disableMockServerReplies();
+        puppetChange(puppet, [operationObject('replace', '', model)]);
+    };
+    window.puppetChange = function(puppet, sequence) {
+        var setVersionOp = {op: "replace", path: "/_ver#s$", value: currentVersion++};
+        puppet.handleRemoteChange(JSON.stringify([setVersionOp,{value: 0, op:"test", path:"/_ver#c"}].concat(sequence)), '', '');
+    };
+    window.triggerPuppetSend = function() {
+        var clickEvent = document.createEvent('MouseEvents');
+        clickEvent.initEvent("mouseup", true, true);
+        window.dispatchEvent(clickEvent);
     }
 </script>

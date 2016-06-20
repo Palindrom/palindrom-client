@@ -98,10 +98,11 @@
     <script>
         var model;
         describe('puppet-client, when stamped from `dom-bind` and bound to puppet object w/ array', function () {
-            var container, domBind, ppclient, puppet, patchAppliedEventCallback;
+            var container, domBind, ppclient, puppet, patchAppliedEventCallback, patchSentEventCallback;
 
             beforeEach(function (done) {
                 patchAppliedEventCallback = sinon.spy();
+                patchSentEventCallback = sinon.spy();
                 model = {
                     name: "Juicy",
                     people: [{
@@ -148,9 +149,8 @@
                 setTimeout(function () {
                     ppclient = container.querySelector("puppet-client");
                     puppet = ppclient.puppet;
-                    puppet.obj = model;
                     domBind = container.querySelector('template[is="dom-bind"]');
-                    domBind.model = model;
+                    initPuppet(puppet, model);
                     // Polymer werido(m)bind attaches to dom asynchronously
                     setTimeout(done, 100);
                 }, 100);
@@ -162,6 +162,14 @@
                     done();
                 }, 100);
             });
+
+            /** This should be used with spy on patchsent event */
+            function expectPatchSent(operation) {
+                expect(patchSentEventCallback).to.have.been.called;
+                // first arg is event, first two operations are OT-related
+                expect(JSON.parse(patchSentEventCallback.firstCall.args[0].detail.data)[2]).to.deep.equal(operation);
+            }
+
             console.info('EVENTUALLY <= Polymer updates array related content of `dom-bind` asynchronously!');
             describe('should observe changes to ', function () {
                 describe('array items,', function () {
@@ -173,6 +181,17 @@
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
                             expect(patchAppliedEventCallback).to.have.been.called;
+                            expect(document.querySelector("ul.primitive_people>li>span").innerHTML).to.equal("Homo erectus");
+                            done();
+                        }, 100);
+                    });
+                    it('for arrays of primitives, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
+                        ppclient.addEventListener('patchsent', patchSentEventCallback);
+                        domBind.splice('model.primitive_people', 0, 1, 'Homo erectus');
+                        triggerPuppetSend();
+                        // check and wait for the event dispatching
+                        setTimeout(function listener() {
+                            expectPatchSent(operationObject('replace', '/primitive_people/0', 'Homo erectus'));
                             expect(document.querySelector("ul.primitive_people>li>span").innerHTML).to.equal("Homo erectus");
                             done();
                         }, 100);
@@ -191,6 +210,18 @@
                             done();
                         }, 100);
 
+                    });
+                    it('in arrays of objects, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
+                        var newItem = {first: 'Atomek'};
+                        ppclient.addEventListener('patchsent', patchSentEventCallback);
+                        domBind.splice('model.people', 1, 1, newItem);
+                        triggerPuppetSend();
+                        // check and wait for the event dispatching
+                        setTimeout(function listener() {
+                            expectPatchSent(operationObject('replace', '/people/1/first', newItem.first));
+                            expect(document.querySelector("ul.people>li:nth-child(2)>span").innerHTML).to.equal(newItem.first);
+                            done();
+                        }, 100);
                     });
                 });
                 describe('properties of array items,', function () {
@@ -212,7 +243,7 @@
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
                         // puppetChange(puppet, [operationObject('add', '/people_properties/-', '1')]);
-                        puppetChange(puppet, [operationObject('add', '/people_properties/0', '1')]);
+                        puppetChange(puppet, [operationObject('add', '/people_properties/0', 'property')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -275,7 +306,7 @@
                         }, 100);
                     });
 
-                    it('should start observing changes to objects added to array, then once thes gets changed, EVENTUALLY update dom-bind', function (done) {
+                    it('should start observing changes to objects added to array, then once these get changed, EVENTUALLY update dom-bind', function (done) {
                         var newIndex = model.people_push.length;
                         // make it async, to make sure it will come as separated change
                         setTimeout(function () {
@@ -286,7 +317,8 @@
                             // check and wait for async dom-binds stamping
                             setTimeout(function listener() {
                                 expect(patchAppliedEventCallback).to.have.been.called;
-                                expect(document.querySelector("ul.push>li:nth-child(" + model.people_push.length + ")>span").innerHTML).to.equal("Wizard from Oz");
+                                // nth-child is 1-indexed
+                                expect(document.querySelector("ul.push>li:nth-child(" + (newIndex+1) + ")>span").innerHTML).to.equal("Wizard from Oz");
                                 done();
                             }, 100);
                         }, 100);
@@ -295,6 +327,16 @@
                             first: "Wizard"
                         })]);
 
+                    });
+                    it('when adding element to array patch should be sent', function (done) {
+                        ppclient.addEventListener('patchsent', patchSentEventCallback);
+                        puppet.ignoreAdd = false;
+                        domBind.splice('model.people_push', 1, 0, {first: 'Abraham'});
+                        triggerPuppetSend();
+                        setTimeout(function listener() {
+                            expectPatchSent(operationObject('add', '/people_push/1', {first: 'Abraham'}));
+                            done();
+                        }, 100);
                     });
                 });
 
@@ -333,8 +375,8 @@
                                 ppclient.removeEventListener('patch-applied', listener);
                                 expect(numberOfCallsForChangeEvent).to.equal(0);
                                 done();
-                            }, 1000);
-                        }, 200);
+                            }, 100);
+                        }, 20);
                     });
                 });
 
