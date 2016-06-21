@@ -233,7 +233,7 @@ All the changes from server are also received and propagated to your HTML.
         },
         onLocalChange: function(patches) {
             // todo #26
-            this.propagateDomBind({patches: patches, results: patches.map(function() { return {};})});
+            this.propagateDomBind({patches: patches, results: patches.map(function() { })});
         },
         onPatchReceived: function(data, url, method) {
             this.fire("patchreceived", {
@@ -328,7 +328,7 @@ All the changes from server are also received and propagated to your HTML.
                             case 'add':
                                 // JSONPatch push
                                 if (name === '-') {
-                                    name = result.addedAt;
+                                    name = result;
                                 }
                                 templateDomBind.notifySplices(parentsPolymerPath,
                                         [{
@@ -343,7 +343,7 @@ All the changes from server are also received and propagated to your HTML.
                                     templateDomBind.notifySplices(parentsPolymerPath,
                                             [{
                                                 index: parseInt(name, 10),
-                                                removed: [result.removed],
+                                                removed: [result],
                                                 addedCount: 1,
                                                 object: parent,
                                                 type: 'splice' }]
@@ -353,7 +353,7 @@ All the changes from server are also received and propagated to your HTML.
                                 templateDomBind.notifySplices(parentsPolymerPath,
                                         [{
                                             index: parseInt(name, 10),
-                                            removed: [result.removed],
+                                            removed: [result],
                                             addedCount: 0,
                                             object: parent,
                                             type: 'splice' }]

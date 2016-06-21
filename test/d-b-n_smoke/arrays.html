@@ -170,7 +170,7 @@
             console.info('EVENTUALLY <= Polymer updates array related content of `dom-bind` asynchronously!');
             describe('should observe changes to ', function () {
                 describe('array items,', function () {
-                    it('for arrays of primitives, fire a change event, and EVENTUALLY update dom-bind', function (done) {
+                    it('for arrays of primitives, after a remote change fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
                         puppetChange(puppet, [operationObject('replace', '/primitive_people/0', 'Homo erectus')]);
@@ -194,7 +194,7 @@
                         }, 100);
 
                     });
-                    it('in arrays of objects, fire a change event, and EVENTUALLY update dom-bind', function (done) {
+                    it('in arrays of objects, after a remote change fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         var newItem = {first: 'Atomek'};
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
