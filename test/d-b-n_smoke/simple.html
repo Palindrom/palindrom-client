@@ -20,6 +20,9 @@
 
         <h4>Welcome to
             <span>{{model.name}}</span>!</h4>
+        <template is="dom-if" if="{{model.name}}">
+            <span id="conditional"></span>
+        </template>
     </template>
     <script>
         var model = {
@@ -34,8 +37,10 @@
             var ppclient, puppet;
             before(function waitForHTMLImportsAndDomBindChange(done) {
                 setTimeout(function() {
+                    chai.use(puppetChaiPlugin);
                     ppclient = document.querySelector('puppet-client');
                     puppet = ppclient.puppet;
+                    initPuppet(puppet, model);
                     done();
                 });
             });
@@ -51,7 +56,29 @@
                     });
                     // change model
                     puppetChange(puppet, [operationObject('replace','/name', 'Polymer')]);
-
+                });
+                it('when element is removed, should notify any listeners', function(done) {
+                    // change model
+                    puppetChange(puppet, [operationObject('remove','/name')]);
+                    setTimeout(function () {
+                        // dom-if is an example of a listener
+                        expect(document.querySelector("#conditional")).to.not.be.visible;
+                        done();
+                    })
+                });
+                it('and send back changes applied to model as a reaction to changes from server', function(done) {
+                    var patchSentListener = sinon.spy();
+                    ppclient.addEventListener('patchsent', patchSentListener);
+                    ppclient.addEventListener('patch-applied', function() {
+                        domBind.set("model.name", "change #2");
+                        triggerPuppetSend();
+                    });
+                    puppetChange(puppet, [operationObject('replace', '/name', "change #1")]);
+                    triggerPuppetSend();
+                    setTimeout(function() {
+                        expect(patchSentListener).to.have.been.calledWithPatch(operationObject("replace", "/name", "change #2"));
+                        done();
+                    }, 100);
                 });
             });
         });

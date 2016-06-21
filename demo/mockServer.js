@@ -1,5 +1,6 @@
 (function() {
   var serverVersionNumber = 0;
+  var enableServerReplies = true;
 
 
   WebSocket = function FakeWebSocket(){
@@ -12,6 +13,14 @@
       lastName$: "",
       resetNameClicked$: false
     }
+  };
+  
+  window.setMockServerModel = function (model) {
+    full = model;
+  };
+
+  window.disableMockServerReplies = function() {
+    enableServerReplies = false;
   };
 
   function handlePageLoad(url) {
@@ -97,8 +106,10 @@
 
     console.info("Mock WebSocket message data:", outPatches);
     var that = this;
-    setTimeout(function () {
-      that.onmessage({data: JSON.stringify(outPatches) });
-    }, 10);
+    if(enableServerReplies) {
+      setTimeout(function () {
+        that.onmessage({data: JSON.stringify(outPatches) });
+      }, 10);
+    }
   };
 })();

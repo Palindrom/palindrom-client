@@ -39,6 +39,7 @@
                 domBind.model = model;
                 ppclient = document.querySelector("puppet-client");
                 puppet = ppclient.puppet;
+                initPuppet(puppet, model);
 
                 setTimeout(function () {
                     done();

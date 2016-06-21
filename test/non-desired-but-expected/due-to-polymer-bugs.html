@@ -58,9 +58,8 @@
                         setTimeout(function () {
                             ppclient = container.querySelector("puppet-client");
                             puppet = ppclient.puppet;
-                            puppet.obj = model;
+                            initPuppet(puppet, model);
                             domBind = container.querySelector('template[is="dom-bind"]');
-                            domBind.model = model;
                             // Polymer werido(m)bind attaches to dom asynchronously
                             setTimeout(done, 10);
                         }, 10);

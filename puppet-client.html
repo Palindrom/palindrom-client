@@ -183,7 +183,6 @@ All the changes from server are also received and propagated to your HTML.
             var whereToBind = this.getAttribute("ref");
             var listenTo = this.listenTo;
             var pingInterval = this.pingInterval / 1;
-            var me = this;
 
             if (listenTo) {
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
@@ -207,19 +206,13 @@ All the changes from server are also received and propagated to your HTML.
                 remoteVersionPath: this.remoteVersionPath,
                 ot: this.ot,
                 purity: this.purity,
-                jsonpatch: {
-                    apply: this.applyJSONPatch.bind(this),
-                    observe: jsonpatch.observe.bind(this),
-                    unobserve: jsonpatch.unobserve.bind(this),
-                    validate: this.validateJSONPatch.bind(this)
-                },
                 callback: function() {
                     if (whereToBind) {
                         this.bindTo(whereToBind);
                     }
                 }.bind(this)
             });
-            // this.puppet.addEventListener('patch-applied', this.notifyChange);
+            this.puppet.addEventListener('patch-applied', this.onPatchApplied.bind(this));
 
             this.network = this.puppet.network;
             this.morphUrl = this.puppet.morphUrl.bind(this.puppet);
@@ -239,7 +232,8 @@ All the changes from server are also received and propagated to your HTML.
             }
         },
         onLocalChange: function(patches) {
-            this.propagateDomBind(patches);
+            // todo #26
+            this.propagateDomBind({patches: patches, results: patches.map(function() { })});
         },
         onPatchReceived: function(data, url, method) {
             this.fire("patchreceived", {
@@ -278,7 +272,7 @@ All the changes from server are also received and propagated to your HTML.
                 alert("Connection error, please reload page!");
             }
         },
-        applyJSONPatch: function(tree, sequence) {
+        onPatchApplied: function(ev) {
             if (!this.bound) {
                 var whereToBind = this.getAttribute("ref");
                 if (whereToBind) {
@@ -286,25 +280,26 @@ All the changes from server are also received and propagated to your HTML.
                 }
             }
 
-            this.propagateDomBind(sequence);
+            this.propagateDomBind(ev.detail);
             // FIXME tomalec: DRY, puppet does the same
             this.dispatchEvent(new CustomEvent("patch-applied", {
                 bubbles: true,
                 cancelable: true,
-                detail: sequence
+                detail: ev.detail.patches
             }));
         },
-        notifyTemplateDomBind: function(tree, sequence, templateDomBind, polymerPathPrefix) {
+        notifyTemplateDomBind: function(tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
             var operation, polymerPath;
-            for (var operationNo = 0, len = sequence.length; operationNo < len; operationNo++) {
-                operation = sequence[operationNo];
+            for (var operationNo = 0, len = patchesAndResults.patches.length; operationNo < len; operationNo++) {
+                operation = patchesAndResults.patches[operationNo];
+                var result = patchesAndResults.results[operationNo];
 
                 if (operation.path == "") {
                     //in case of root path, Polymer replaces the original obj, which detaches it from Puppet
-                    var newSequence = [];
+                    var newSequence = {patches:[], results: []};
                     for (var prop in operation.value) {
                         if (operation.value.hasOwnProperty(prop)) {
-                            newSequence.push({
+                            newSequence.patches.push({
                                 op: "add",
                                 path: "/" + prop,
                                 value: operation.value[prop]
@@ -333,35 +328,48 @@ All the changes from server are also received and propagated to your HTML.
                             case 'add':
                                 // JSONPatch push
                                 if (name === '-') {
-                                    name = parent.length;
+                                    name = result;
                                 }
-                                templateDomBind.splice(parentsPolymerPath, parseInt(name, 10), 0, operation.value);
-                                //console.info('Add /splice in array is fragile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
+                                templateDomBind.notifySplices(parentsPolymerPath,
+                                        [{
+                                            index: parseInt(name, 10),
+                                            removed: [],
+                                            addedCount: 1,
+                                            object: parent,
+                                            type: 'splice' }]
+                                );
                                 break;
                             case 'replace':
-                                templateDomBind.splice(parentsPolymerPath, parseInt(name, 10), 1, operation.value);
+                                    templateDomBind.notifySplices(parentsPolymerPath,
+                                            [{
+                                                index: parseInt(name, 10),
+                                                removed: [result],
+                                                addedCount: 1,
+                                                object: parent,
+                                                type: 'splice' }]
+                                    );
                                 break;
-                                // addedCount = 1;
-                                // var col = Polymer.Collection.get(parent);
-                                // removed = col.getItem('#'+name);
                             case 'remove':
-                                templateDomBind.splice(parentsPolymerPath, parseInt(name, 10), 1);
-                                //console.info('Remove is fragile, as Polymer requires something they call normalization, so splices to appear in index order, what is not guaranteed by this element.')
+                                templateDomBind.notifySplices(parentsPolymerPath,
+                                        [{
+                                            index: parseInt(name, 10),
+                                            removed: [result],
+                                            addedCount: 0,
+                                            object: parent,
+                                            type: 'splice' }]
+                                );
                                 break;
                         }
                     } else {
                         switch (operation.op) {
                             case 'add':
                             case 'replace':
-                                templateDomBind.set(polymerPath, operation.value);
-                                // this.notifyPath(polymerPath, operation.value);
+                                templateDomBind.notifyPath(polymerPath, operation.value, false);
                                 break;
                             case 'remove':
-                                templateDomBind.set(polymerPath, null);
-                                templateDomBind.set(polymerPath, undefined);
-                                // this.notifyPath(polymerPath, undefined);
                                 //console.warn('Polymer does not support unsetting properties https://github.com/Polymer/polymer/issues/2565');
                                 //console.warn('remove is translated to JSON incompatible set to `undefined`, as there is no remove method in Polymer.')
+                                templateDomBind.notifyPath(polymerPath, undefined, false);
                                 break;
                         }
                     }
@@ -391,12 +399,6 @@ All the changes from server are also received and propagated to your HTML.
 
     function translateJSONPointerToPolymerPath(pointer) {
         return pointer.replace(/\//g, '.');
-    }
-
-    function translatePolymerPathToJSONPointer(pointer) {
-        return pointer.replace(/~/g, '~0')
-            .replace(/\//g, '~1')
-            .replace(/\./g, '/');
     }
 
     function isNormalInteger(str) {
