@@ -29,6 +29,49 @@ All the changes from server are also received and propagated to your HTML.
 
 @demo demo/index.html
 -->
+<dom-module id="puppet-client">
+    <template>
+        <style>
+            .box-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+            .box-container[hidden] {
+                display: none;
+            }
+            .box {
+                width: 50%;
+                border-radius: 0 0 10px 10px;
+                border: thin solid;
+                border-top: none;
+                text-align: center;
+                padding: 5px 0;
+            }
+            @media only screen and (max-width: 640px) {
+                .box { width: 100%; }
+            }
+            .notice {
+                background-color: #fff4cc;
+                border-color: #ffe070;
+            }
+            .error {
+                background-color: #fad7d4;
+                border-color: #f08a81;
+            }
+            .error pre {
+                white-space: pre-wrap;
+                text-align: left;
+                padding: 0 15px;
+            }
+        </style>
+        <div class="box-container" hidden$="{{!showReconnectingIn}}"><div class="box notice"><strong>Not connected.</strong> Connecting in {{reconnectionSeconds}}s... <a href="" on-tap="reconnectNow">Retry now</a></div></div>
+        <div class="box-container" hidden$="{{!showReconnectingNow}}"><div class="box notice"><strong>Connecting now...</strong></div></div>
+        <div class="box-container" hidden$="{{!connectionError.length}}"><div class="box error"><strong>Connection error:</strong> <pre>{{connectionError}}</pre><a href="" on-tap="reload">Reload page</a> </div></div>
+    </template>
 
 <script>
 (function() {
@@ -64,12 +107,6 @@ All the changes from server are also received and propagated to your HTML.
          *
          * @event connectionerror
          */
-
-
-        hostAttributes: {
-            hidden: true
-        },
-
         properties: {
             /**
              * The remote's URL
@@ -140,7 +177,7 @@ All the changes from server are also received and propagated to your HTML.
              */
             pingInterval: {
                 type: Number,
-                value: '60'
+                value: '5'
             },
 
             /**
@@ -162,16 +199,46 @@ All the changes from server are also received and propagated to your HTML.
                 value: '/'
             },
 
+            /**
+             * @private
+             * show the "reconnecting in Xs..." box
+             */
+            showReconnectingIn: {
+                type: Boolean,
+                value: false
+            },
 
-            // /**
-            //  * If true, automatically performs an Ajax request when either `url` or
-            //  * `params` changes.
-            //  */
-            // auto: {
-            //     type: Boolean,
-            //     value: false
-            // },
+            /**
+             * @private
+             * show the "reconnecting now..." box
+             */
+            showReconnectingNow: {
+                type: Boolean,
+                value: false
+            },
 
+            /**
+             * @private
+             * the X in the "reconnecting in Xs..." box
+             */
+            reconnectionSeconds: {
+                type: Number
+            },
+
+            /**
+             * @private
+             * error to show in bright red box
+             */
+            connectionError: {
+                type: String,
+                value: ""
+            }
+        },
+        reconnectNow: function() {
+            this.puppet.reconnectNow();
+        },
+        reload: function() {
+            window.location.reload();
         },
 
         /**
@@ -212,7 +279,18 @@ All the changes from server are also received and propagated to your HTML.
                     }
                 }.bind(this)
             });
+            var that = this;
             this.puppet.addEventListener('patch-applied', this.onPatchApplied.bind(this));
+            this.puppet.addEventListener('reconnection-countdown', function (ev) {
+                var countdownSeconds = ev.detail.seconds;
+                that.set('showReconnectingNow', countdownSeconds == 0);
+                that.set('showReconnectingIn', countdownSeconds != 0);
+                that.set('reconnectionSeconds', countdownSeconds);
+            });
+            this.puppet.addEventListener('reconnection-end', function () {
+                that.set('showReconnectingNow', false);
+                that.set('showReconnectingIn', false);
+            });
 
             this.network = this.puppet.network;
             this.morphUrl = this.puppet.morphUrl.bind(this.puppet);
@@ -269,7 +347,7 @@ All the changes from server are also received and propagated to your HTML.
             this.fire("connectionerror", eventDetail);
 
             if (!eventDetail.handled) {
-                alert("Connection error, please reload page!");
+                this.set("connectionError", JSON.stringify(eventDetail));
             }
         },
         onPatchApplied: function(ev) {
@@ -407,3 +485,4 @@ All the changes from server are also received and propagated to your HTML.
     }
 }());
 </script>
+</dom-module>
