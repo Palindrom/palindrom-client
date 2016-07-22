@@ -1,5 +1,6 @@
 (function() {
   var serverVersionNumber = 0;
+  var clientVersionNumber = 0;
   var enableServerReplies = true;
 
 
@@ -17,6 +18,11 @@
   
   window.setMockServerModel = function (model) {
     full = model;
+  };
+  
+  window.preparePatchFromMockServer = function(patch) {
+    var setVersionOp = {op: "replace", path: "/_ver#s$", value: ++serverVersionNumber};
+    return [setVersionOp,{value: clientVersionNumber, op:"test", path:"/_ver#c"}].concat(patch);
   };
 
   window.disableMockServerReplies = function() {
@@ -52,13 +58,15 @@
 
   sinonFakeServer.respondWith(function(request) {
     if(request.requestHeaders['Accept'] == 'application/json') {
-      request.respond(200, [{name: "Location", value: this.url},{name: "X-Referer", value: lastUrl}], JSON.stringify(full));
+      var fullCopy = JSON.parse(JSON.stringify(full));
+      fullCopy['_ver#s'] = serverVersionNumber;
+      fullCopy['_ver#c'] = clientVersionNumber;
+      request.respond(200, [{name: "Location", value: this.url},{name: "X-Referer", value: lastUrl}], JSON.stringify(fullCopy));
     } else if(request.requestHeaders['Accept'] == 'application/json-patch+json') {
       var outPatches = [];
       handlePageLoad(this.url);
-      serverVersionNumber++;
-      outPatches.push({op: 'replace', path: '/_ver#s', value: serverVersionNumber});
-      outPatches.push({op: 'test', path: '/_ver#c$', value: full.user.firstName$});
+      outPatches.push({op: 'replace', path: '_ver#s', value: ++serverVersionNumber});
+      outPatches.push({op: 'test', path: '_ver#c$', value: clientVersionNumber});
       outPatches.push({op: 'replace', path: '/user/firstName$', value: full.user.firstName$});
       outPatches.push({op: 'replace', path: '/user/lastName$', value: full.user.lastName$});
       outPatches.push({op: 'replace', path: '/user/fullName', value: full.user.fullName});
@@ -74,12 +82,12 @@
       var inPatches = data ? JSON.parse(data) : [];
       var outPatches = [];
 
-      var clientReplaceVersion = inPatches.shift();
+      clientVersionNumber = inPatches.shift().value;
       var serverVersionForOT = inPatches.shift(); // disregard
 
       serverVersionNumber++;
-      outPatches.push({op: 'replace', path: '/_ver#s', value: serverVersionNumber});
-      outPatches.push({op: 'test', path: '/_ver#c$', value: clientReplaceVersion.value});
+      outPatches.push({op: 'replace', path: '_ver#s', value: serverVersionNumber});
+      outPatches.push({op: 'test', path: '_ver#c$', value: clientVersionNumber});
 
       jsonpatch.apply(full, inPatches);
 

@@ -32,8 +32,7 @@
         puppetChange(puppet, [operationObject('replace', '', model)]);
     };
     window.puppetChange = function(puppet, sequence) {
-        var setVersionOp = {op: "replace", path: "/_ver#s$", value: currentVersion++};
-        puppet.handleRemoteChange(JSON.stringify([setVersionOp,{value: 0, op:"test", path:"/_ver#c"}].concat(sequence)), '', '');
+        puppet.handleRemoteChange(JSON.stringify(preparePatchFromMockServer(sequence)), '', '');
     };
     window.triggerPuppetSend = function() {
         var clickEvent = document.createEvent('MouseEvents');
