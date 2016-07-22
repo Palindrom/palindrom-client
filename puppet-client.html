@@ -39,6 +39,7 @@ All the changes from server are also received and propagated to your HTML.
                 width: 100%;
                 display: flex;
                 justify-content: center;
+                z-index: 1000;
             }
             .box-container[hidden] {
                 display: none;
@@ -200,38 +201,42 @@ All the changes from server are also received and propagated to your HTML.
             },
 
             /**
-             * @private
              * show the "reconnecting in Xs..." box
              */
             showReconnectingIn: {
                 type: Boolean,
-                value: false
+                value: false,
+                readOnly: true,
+                notify: false
             },
 
             /**
-             * @private
              * show the "reconnecting now..." box
              */
             showReconnectingNow: {
                 type: Boolean,
-                value: false
+                value: false,
+                readOnly: true,
+                notify: false
             },
 
             /**
-             * @private
              * the X in the "reconnecting in Xs..." box
              */
             reconnectionSeconds: {
-                type: Number
+                type: Number,
+                readOnly: true,
+                notify: false
             },
 
             /**
-             * @private
              * error to show in bright red box
              */
             connectionError: {
                 type: String,
-                value: ""
+                value: "",
+                readOnly: true,
+                notify: false
             }
         },
         reconnectNow: function() {
@@ -268,6 +273,8 @@ All the changes from server are also received and propagated to your HTML.
                 onPatchSent: this.onPatchSent.bind(this),
                 onSocketStateChanged: this.onSocketStateChanged.bind(this),
                 onConnectionError: this.onConnectionError.bind(this),
+                onReconnectionCountdown: this.onReconnectionCountdown.bind(this),
+                onReconnectionEnd: this.onReconnectionEnd.bind(this),
 
                 localVersionPath: this.localVersionPath,
                 remoteVersionPath: this.remoteVersionPath,
@@ -279,18 +286,7 @@ All the changes from server are also received and propagated to your HTML.
                     }
                 }.bind(this)
             });
-            var that = this;
             this.puppet.addEventListener('patch-applied', this.onPatchApplied.bind(this));
-            this.puppet.addEventListener('reconnection-countdown', function (ev) {
-                var countdownSeconds = ev.detail.seconds;
-                that.set('showReconnectingNow', countdownSeconds == 0);
-                that.set('showReconnectingIn', countdownSeconds != 0);
-                that.set('reconnectionSeconds', countdownSeconds);
-            });
-            this.puppet.addEventListener('reconnection-end', function () {
-                that.set('showReconnectingNow', false);
-                that.set('showReconnectingIn', false);
-            });
 
             this.network = this.puppet.network;
             this.morphUrl = this.puppet.morphUrl.bind(this.puppet);
@@ -347,7 +343,33 @@ All the changes from server are also received and propagated to your HTML.
             this.fire("connectionerror", eventDetail);
 
             if (!eventDetail.handled) {
-                this.set("connectionError", JSON.stringify(eventDetail));
+                this._setConnectionError(JSON.stringify(eventDetail));
+            }
+        },
+        onReconnectionCountdown: function(seconds) {
+            var eventDetail = {
+                seconds: seconds,
+                handled: false
+            };
+
+            this.fire("reconnection-countdown", eventDetail);
+
+            if (!eventDetail.handled) {
+                this._setShowReconnectingNow(seconds == 0);
+                this._setShowReconnectingIn(seconds != 0);
+                this._setReconnectionSeconds(seconds);
+            }
+        },
+        onReconnectionEnd: function() {
+            var eventDetail = {
+                handled: false
+            };
+
+            this.fire("reconnection-end", eventDetail);
+
+            if (!eventDetail.handled) {
+                this._setShowReconnectingNow(false);
+                this._setShowReconnectingIn(false);
             }
         },
         onPatchApplied: function(ev) {
