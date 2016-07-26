@@ -20,7 +20,7 @@
     <test-fixture id="my-fixture"><template>
         <!-- workaround for test-fixture bug -->
         <div>
-            <puppet-client remote-url="/puppet" ref="deep_array" ping-interval="0"></puppet-client>
+            <puppet-client remote-url="/puppet" ref="deep_array" ping-interval-s="0"></puppet-client>
             <template is="dom-bind" id="deep_array">
                 <div id="arrayDiv">
                     <template is="dom-repeat" items="{{model.path_to.array}}">

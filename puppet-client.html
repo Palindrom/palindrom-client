@@ -176,7 +176,7 @@ All the changes from server are also received and propagated to your HTML.
             /**
              *  Interval in seconds between ping patches, `0` - disable ping patches
              */
-            pingInterval: {
+            pingIntervalS: {
                 type: Number,
                 value: '5'
             },
@@ -254,7 +254,7 @@ All the changes from server are also received and propagated to your HTML.
 
             var whereToBind = this.getAttribute("ref");
             var listenTo = this.listenTo;
-            var pingInterval = this.pingInterval / 1;
+            var pingIntervalS = this.pingIntervalS / 1;
 
             if (listenTo) {
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
@@ -262,7 +262,7 @@ All the changes from server are also received and propagated to your HTML.
 
             this.puppet = new PuppetDOM({
                 remoteUrl: this.remoteUrl,
-                pingInterval: pingInterval,
+                pingIntervalS: pingIntervalS,
                 listenTo: listenTo,
                 obj: this.obj,
                 useWebSocket: this.useWebSocket,
@@ -346,18 +346,18 @@ All the changes from server are also received and propagated to your HTML.
                 this._setConnectionError(JSON.stringify(eventDetail));
             }
         },
-        onReconnectionCountdown: function(seconds) {
+        onReconnectionCountdown: function(milliseconds) {
             var eventDetail = {
-                seconds: seconds,
+                milliseconds: milliseconds,
                 handled: false
             };
 
             this.fire("reconnection-countdown", eventDetail);
 
             if (!eventDetail.handled) {
-                this._setShowReconnectingNow(seconds == 0);
-                this._setShowReconnectingIn(seconds != 0);
-                this._setReconnectionSeconds(seconds);
+                this._setShowReconnectingNow(milliseconds == 0);
+                this._setShowReconnectingIn(milliseconds != 0);
+                this._setReconnectionSeconds(milliseconds / 1000);
             }
         },
         onReconnectionEnd: function() {

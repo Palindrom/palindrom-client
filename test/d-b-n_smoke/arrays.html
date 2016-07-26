@@ -20,7 +20,7 @@
     <test-fixture id="my-fixture"><template>
         <!-- workaround for test-fixture bug -->
         <div>
-            <puppet-client remote-url="/puppet" ref="arrays" ping-interval="0"></puppet-client>
+            <puppet-client remote-url="/puppet" ref="arrays" ping-interval-s="0"></puppet-client>
             <template is="dom-bind" id="arrays">
                 <h4>
                     <span>{{model.name}}</span> people:</h4>
