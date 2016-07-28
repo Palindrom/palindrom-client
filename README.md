@@ -67,7 +67,7 @@ localVersionPath | `JSONPointer` | `/_ver#c$` | local version path, set to falsy
 obj | `Object` | `{}` | **notifies** Object that will be synced
 ot | `Boolean` | `true` | `false` to disable OT
 path | `String` | `/` | Path to given obj
-pingInterval | `Number` | `60` | Interval in seconds between ping patches, `0` - disable ping patches
+pingIntervalS | `Number` | `5` | Interval in seconds between heartbeat patches, `0` - disable heartbeat
 purity | `Boolean` | `false` | `true` to enable purist mode of OT
 remote-url / remoteUrl | `String` | `window.location` | The remote's URL
 remoteVersionPath | `JSONPointer` | `/_ver#s` | remote version path, set it to falsy to disable Double Versioned JSON Patch communication
@@ -81,9 +81,16 @@ patch-applied | Fired when patch gets applied
 patchreceived | Fired when patch gets received
 patchsent | Fired when patch gets send
 socketstatechanged | Fired when web socket state changes
-connectionerror | Fired when connection error happens
+connectionerror | Fired when unrecoverable connection error happens
+reconnection-countdown | Fired when reconnecting. has `milliseconds` property in details, denoting number of milliseconds to scheduled reconnection
+reconnection-end | Fired after successful reconnection
 
 :warning: Please note, that Polymer applies changes (especially array ones) asynchronously, so those could happen after `patch-applied` event was triggered.
+
+## Reconnection and heartbeats
+
+See [puppetjs docs](https://github.com/puppetjs/puppetjs#heartbeat-and-reconnection).
+`pingIntervalS` is directly forwarded to puppetjs, `reconnection-countdown` and `reconnection-end` events are directly based on respective callbacks.
 
 ## Template binding issues
 
