@@ -16,7 +16,7 @@
 
 <body>
 
-    <puppet-client ref="deep" remote-url="/puppet"></puppet-client>
+    <puppet-client ref="deep" remote-url="/puppet" ping-interval-s="0"></puppet-client>
     <template is="dom-bind" id="deep">
 
         <h3>{{model.name}}</h3>
