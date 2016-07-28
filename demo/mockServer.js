@@ -1,8 +1,7 @@
 (function() {
-  var serverVersionNumber = 0;
-  var clientVersionNumber = 0;
-  var enableServerReplies = true;
-
+  var serverVersionNumber = 0,
+      clientVersionNumber = 0,
+      enableServerReplies = true;
 
   WebSocket = function FakeWebSocket(){
     this.readyState = 1;
@@ -29,6 +28,8 @@
     enableServerReplies = false;
   };
 
+  window.lastRequestContent;
+
   function handlePageLoad(url) {
     if (url.indexOf('subpage.html') > -1) {
       full.user.firstName$ = 'Nikola';
@@ -50,14 +51,18 @@
   // pass-through all requests that are not meant for puppet
   sinon.FakeXMLHttpRequest.useFilters = true;
   sinon.FakeXMLHttpRequest.addFilter(function (method, url) {
-    return !(/.*puppet$/.test(url));
+    return !(/.*puppet(\/reconnect)?$/.test(url));
   });
+
+  // default implementation fires onload event. see https://github.com/sinonjs/sinon/issues/432
+  sinon.FakeXMLHttpRequest.prototype.abort = function(){};
 
   var sinonFakeServer = sinon.fakeServer.create();
 
 
   sinonFakeServer.respondWith(function(request) {
     if(request.requestHeaders['Accept'] == 'application/json') {
+      window.lastRequestContent = request.requestBody;
       var fullCopy = JSON.parse(JSON.stringify(full));
       fullCopy['_ver#s'] = serverVersionNumber;
       fullCopy['_ver#c'] = clientVersionNumber;
@@ -120,4 +125,10 @@
       }, 10);
     }
   };
+
+  WebSocket.prototype.close = function(event) {
+    if(this.onclose) {
+      this.onclose(event);
+    }
+  }
 })();
