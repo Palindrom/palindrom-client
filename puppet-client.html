@@ -344,23 +344,28 @@ All the changes from server are also received and propagated to your HTML.
 
             if (!eventDetail.handled) {
                 if (window.console && window.console.error) {
-                  var str = "Connection error in ";
+                  var str = "Connection error: ";
+
+                  if (eventDetail.data.statusText) {
+                      str += eventDetail.data.statusText + " ";
+                  }
+
+                  if (eventDetail.data.statusCode) {
+                      str += "(" + eventDetail.data.statusCode + ") ";
+                  }
+
+                  str += "\n\n";
 
                   if (eventDetail.method) {
-                      str += "(" + eventDetail.method + ") ";
+                      str += eventDetail.method + " ";
                   }
 
                   if (eventDetail.url) {
                       str += eventDetail.url;
                   }
 
-                  if (eventDetail.data) {
-                    if (eventDetail.data.reason) {
-                        str += "\n\n" + eventDetail.data.reason;
-                    }
-                    if (eventDetail.data.text) {
-                        str += "\n\n" + eventDetail.data.text;
-                    }
+                  if (eventDetail.data.reason) {
+                     str += "\n\n" + eventDetail.data.reason;
                   }
 
                   console.error(str);
