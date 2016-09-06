@@ -7,6 +7,10 @@
     "sauce": {
       "disabled": false,
       "browsers": [{
+        "browserName": "firefox",
+        "platform": "Linux",
+        "version": ""
+      },{
         "browserName": "microsoftedge",
         "platform": "Windows 10",
         "version": ""
