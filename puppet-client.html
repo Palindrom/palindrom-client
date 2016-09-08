@@ -52,6 +52,10 @@ All the changes from server are also received and propagated to your HTML.
                 text-align: center;
                 padding: 5px 0;
             }
+            .box a {
+                color: inherit;
+                text-decoration: underline;
+            }
             @media only screen and (max-width: 640px) {
                 .box { width: 100%; }
             }
@@ -60,18 +64,14 @@ All the changes from server are also received and propagated to your HTML.
                 border-color: #ffe070;
             }
             .error {
-                background-color: #fad7d4;
-                border-color: #f08a81;
-            }
-            .error pre {
-                white-space: pre-wrap;
-                text-align: left;
-                padding: 0 15px;
+                background-color: #DB0F13;
+                border-color: #A11517;
+                color: #FFFFFF;
             }
         </style>
         <div class="box-container" hidden$="{{!showReconnectingIn}}"><div class="box notice"><strong>Not connected.</strong> Connecting in {{reconnectionSeconds}}s... <a href="" on-tap="reconnectNow">Retry now</a></div></div>
         <div class="box-container" hidden$="{{!showReconnectingNow}}"><div class="box notice"><strong>Connecting now...</strong></div></div>
-        <div class="box-container" hidden$="{{!connectionError.length}}"><div class="box error"><strong>Connection error:</strong> <pre>{{connectionError}}</pre><a href="" on-tap="reload">Reload page</a> </div></div>
+        <div class="box-container" hidden$="{{!showConnectionError}}"><div class="box error"><strong>Connection error.</strong> See console for details. <a href="" on-tap="reload">Reload page</a> </div></div>
     </template>
 
 <script>
@@ -232,9 +232,9 @@ All the changes from server are also received and propagated to your HTML.
             /**
              * error to show in bright red box
              */
-            connectionError: {
-                type: String,
-                value: "",
+            showConnectionError: {
+                type: Boolean,
+                value: false,
                 readOnly: true,
                 notify: false
             }
@@ -343,7 +343,34 @@ All the changes from server are also received and propagated to your HTML.
             this.fire("connectionerror", eventDetail);
 
             if (!eventDetail.handled) {
-                this._setConnectionError(JSON.stringify(eventDetail));
+                if (window.console && window.console.error) {
+                  var str = "Connection error: ";
+
+                  if (eventDetail.data.statusText) {
+                      str += eventDetail.data.statusText + " ";
+                  }
+
+                  if (eventDetail.data.statusCode) {
+                      str += "(" + eventDetail.data.statusCode + ") ";
+                  }
+
+                  str += "\n\n";
+
+                  if (eventDetail.method) {
+                      str += eventDetail.method + " ";
+                  }
+
+                  if (eventDetail.url) {
+                      str += eventDetail.url;
+                  }
+
+                  if (eventDetail.data.reason) {
+                     str += "\n\n" + eventDetail.data.reason;
+                  }
+
+                  console.error(str);
+                }
+                this._setShowConnectionError(true);
             }
         },
         onReconnectionCountdown: function(milliseconds) {
