@@ -1,5 +1,6 @@
 {
   "verbose": false,
+  "trackConsoleError": false,
   "plugins": {
     "local": {
       "browsers": ["chrome"]

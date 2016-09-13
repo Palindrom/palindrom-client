@@ -28,9 +28,9 @@
     </template></test-fixture>
     <script>
         var model;
+        // Do not take `console.error` as a reason to fail the test.
+        WCT._config.trackConsoleError = false;
         describe('puppet-client', function () {
-            // Do not take `console.error` as a reason to fail the test.
-            WCT.trackConsoleError = false;
             before(function initChai(done) {
                 chai.use(puppetChaiPlugin);
                 done();
