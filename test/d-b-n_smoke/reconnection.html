@@ -29,6 +29,8 @@
     <script>
         var model;
         describe('puppet-client', function () {
+            // Do not take `console.error` as a reason to fail the test.
+            WCT.trackConsoleError = false;
             before(function initChai(done) {
                 chai.use(puppetChaiPlugin);
                 done();
