@@ -35,11 +35,13 @@
                 chai.use(puppetChaiPlugin);
                 done();
             });
-            var container, domBind, ppclient, puppet, nameSpan;
+            var container, domBind, ppclient, puppet, nameSpan, consoleErrorSpy;
 
             beforeEach(function (done) {
                 patchAppliedEventCallback = sinon.spy();
                 patchSentEventCallback = sinon.spy();
+                consoleErrorSpy = sinon.spy(console, 'error');
+
                 model = {"name": "oldname"};
 
                 container = fixture('my-fixture');
@@ -55,6 +57,7 @@
 
             });
             afterEach(function (done) {
+                console.error.restore();
                 // Polymer werido(m)bind detaches from dom asynchronously
                 setTimeout(function () {
                     done();
@@ -63,8 +66,15 @@
 
             it('when connection is broken with a reason should display an error box', function () {
                 var closeEvent = {reason: 'thereason', code:1};
+                var boxErrorMsg = 'Connection error. See console for details.';
                 puppet.network._ws.close(closeEvent);
-                expect(container.querySelector("div.box.error").innerText).to.contain(closeEvent.reason);
+                expect(container.querySelector("a.box.error.reload").innerText).to.contain(boxErrorMsg);
+            });
+
+            it('and log error reason to the console', function() {
+                var closeEvent = {reason: 'thereason', code: 1};
+                puppet.network._ws.close(closeEvent);
+                expect(consoleErrorSpy.getCall(0).args[0]).to.contain(closeEvent.reason);
             });
 
             describe('when connection is broken without a reason should display a notice box', function() {
