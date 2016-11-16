@@ -56,6 +56,9 @@ All the changes from server are also received and propagated to your HTML.
                 color: inherit;
                 text-decoration: underline;
             }
+            .box.error.reload span {
+              text-decoration: underline;
+            }
             @media only screen and (max-width: 640px) {
                 .box { width: 100%; }
             }
@@ -68,10 +71,14 @@ All the changes from server are also received and propagated to your HTML.
                 border-color: #A11517;
                 color: #FFFFFF;
             }
+            .reload {
+              display: block;
+              cursor: pointer;
+            }
         </style>
         <div class="box-container" hidden$="{{!showReconnectingIn}}"><div class="box notice"><strong>Not connected.</strong> Connecting in {{reconnectionSeconds}}s... <a href="" on-tap="reconnectNow">Retry now</a></div></div>
         <div class="box-container" hidden$="{{!showReconnectingNow}}"><div class="box notice"><strong>Connecting now...</strong></div></div>
-        <div class="box-container" hidden$="{{!showConnectionError}}"><div class="box error"><strong>Connection error.</strong> See console for details. <a href="" on-tap="reload">Reload page</a> </div></div>
+        <div class="box-container" hidden$="{{!showConnectionError}}"><a class="box error reload" on-tap="reload"><strong>Connection error.</strong> See console for details. <span>Click here to reload</span></a></div>
     </template>
 
 <script>
