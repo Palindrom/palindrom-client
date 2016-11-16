@@ -21,7 +21,7 @@
 
         <h3>{{model.name}}</h3>
         by
-        <span>{{model.author.first}}</span>
+        <span id="author">{{model.author.first}}</span>
 
     </template>
     <script>
@@ -62,7 +62,7 @@
                             if (retriesLeft == 0) {
                                 fail("Exceeded timeout waiting for condition");
                             } else if (patchAppliedEventCallback.called
-                                    && document.querySelector("span").innerHTML == "tomalec") {
+                                    && document.getElementById("author").innerHTML == "tomalec") {
                                 done();
                             } else {
                                 retriesLeft--;
