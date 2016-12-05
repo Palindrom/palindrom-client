@@ -1,6 +1,6 @@
 {
   "name": "puppet-polymer-client",
-  "version": "3.1.1",
+  "version": "3.2.1",
   "description": "Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.",
   "private": true,
   "authors": [
