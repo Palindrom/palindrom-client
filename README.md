@@ -104,7 +104,7 @@ Polymer template binding is [known to have problems with arrays](https://github.
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
 
-## Development
+## Development and Testing
 
 In order to develop it locally we suggest to use [polyserve](https://npmjs.com/polyserve) tool to handle bower paths gently.
 
