@@ -52,33 +52,29 @@ All the changes from server are also received and propagated to your HTML.
                 text-align: center;
                 padding: 5px 0;
             }
-            .box a {
-                color: inherit;
-                text-decoration: underline;
-            }
-            .box.error.reload span {
-              text-decoration: underline;
-            }
             @media only screen and (max-width: 640px) {
                 .box { width: 100%; }
             }
             .notice {
                 background-color: #fff4cc;
                 border-color: #ffe070;
+                color: #000;
             }
             .error {
                 background-color: #DB0F13;
                 border-color: #A11517;
                 color: #FFFFFF;
             }
-            .reload {
-              display: block;
-              cursor: pointer;
+            .tappable {
+                cursor: pointer;
+            }
+            .tappable span {
+                text-decoration: underline;
             }
         </style>
-        <div class="box-container" hidden$="{{!showReconnectingIn}}"><div class="box notice"><strong>Not connected.</strong> Connecting in {{reconnectionSeconds}}s... <a href="" on-tap="reconnectNow">Retry now</a></div></div>
+        <div class="box-container" hidden$="{{!showReconnectingIn}}"><div class="box notice tappable" on-tap="reconnectNow"><strong>Not connected.</strong> Connecting in {{reconnectionSeconds}}s... <span>Retry now</span></div></div>
         <div class="box-container" hidden$="{{!showReconnectingNow}}"><div class="box notice"><strong>Connecting now...</strong></div></div>
-        <div class="box-container" hidden$="{{!showConnectionError}}"><a class="box error reload" on-tap="reload"><strong>Connection error.</strong> See console for details. <span>Click here to reload</span></a></div>
+        <div class="box-container" hidden$="{{!showConnectionError}}"><div class="box error tappable" on-tap="reload"><strong>Connection error.</strong> See console for details. <span>Click here to reload</span></div></div>
     </template>
 
 <script>
