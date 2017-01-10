@@ -1,5 +1,5 @@
 
-# &lt;puppet-polymer-client&gt; [![Build Status](https://travis-ci.org/PuppetJs/puppet-polymer-client.svg?branch=gh-pages)](https://travis-ci.org/PuppetJs/puppet-polymer-client)
+# &lt;puppet-polymer-client&gt; [![Build Status](https://travis-ci.org/PuppetJs/puppet-polymer-client.svg?branch=master)](https://travis-ci.org/PuppetJs/puppet-polymer-client)
 > Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.
 
 Custom Element that binds [PuppetJs](https://github.com/PuppetJs/PuppetJs) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
@@ -28,7 +28,7 @@ Install the component using [Bower](http://bower.io/):
 $ bower install puppet-polymer-client --save
 ```
 
-Or [download as ZIP](https://github.com/PuppetJs/puppet-polymer-client/archive/gh-pages.zip).
+Or [download as ZIP](https://github.com/PuppetJs/puppet-polymer-client/archive/master.zip).
 
 ## Usage
 
