@@ -3,13 +3,14 @@
     instead edit -> palindrom-client.html
 -->
 
-<!-- palindrom-polymer-client version: 3.2.2 | MIT License -->
+
+<!-- puppet-polymer-client version: 3.2.2 | MIT License -->
 
 <link rel="import" href="../polymer/polymer.html">
 <!-- <link rel="import" href="iron-request.html"> -->
 
 <!-- include Palindrom with dependencies -->
-<script src="../fast-json-patch/dist/json-patch-duplex.min.js"></script>
+<script src="../fast-json-patch/src/json-patch-duplex.js"></script>
 <script src="../json-patch-queue/src/json-patch-queue.js"></script>
 <script src="../json-patch-ot-agent/src/json-patch-ot-agent.js"></script>
 <script src="../json-patch-ot/src/json-patch-ot.js"></script>
@@ -17,14 +18,14 @@
 <script src="../Palindrom/src/palindrom-dom.js"></script>
 
 <!--
-The Polymer version of `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
+The Polymer version of `puppet-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
 That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
-data-model using Palindrom & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
+data-model using Puppet & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
 
 You get three-way data binding server - JS - HTML, kept in flawless sync.
 
-    <palindrom-client
-        obj="{{model}}"></palindrom-client>
+    <puppet-client
+        obj="{{model}}"></puppet-client>
 
 
 It establishes the Palindrom connection when attached. All the changes made
@@ -86,8 +87,8 @@ All the changes from server are also received and propagated to your HTML.
 (function() {
     'use strict';
 
-    /* Depreciation message */
     console.warn('`puppet-client` has been renamed to `palindrom-client`, please update your markup, `puppet-client` will be removed soon');
+
 
     Polymer({
 
@@ -178,7 +179,7 @@ All the changes from server are also received and propagated to your HTML.
                 value: false
             },
             /**
-             *  DOM node to listen to (see [PalindromDOM listenTo attribute](https://github.com/Palindrom/Palindrom#palindromdom))
+             *  DOM node to listen to (see [PuppetDOM listenTo attribute](https://github.com/Palindrom/Palindrom#puppetdom))
              */
             listenTo: {
                 type: String
@@ -250,14 +251,14 @@ All the changes from server are also received and propagated to your HTML.
             }
         },
         reconnectNow: function() {
-            this.palindrom.reconnectNow();
+            this.puppet.reconnectNow();
         },
         reload: function() {
             window.location.reload();
         },
 
         /**
-         * Creates an instance of Palindrom according to given params, attaches it to .pupet property
+         * Creates an instance of Puppet according to given params, attaches it to .pupet property
          *
          */
         attached: function() {
@@ -270,7 +271,7 @@ All the changes from server are also received and propagated to your HTML.
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
 
-            this.palindrom = new PalindromDOM({
+            this.puppet = new PalindromDOM({
                 remoteUrl: this.remoteUrl,
                 pingIntervalS: pingIntervalS,
                 listenTo: listenTo,
@@ -296,10 +297,10 @@ All the changes from server are also received and propagated to your HTML.
                     }
                 }.bind(this)
             });
-            this.palindrom.addEventListener('patch-applied', this.onPatchApplied.bind(this));
+            this.puppet.addEventListener('patch-applied', this.onPatchApplied.bind(this));
 
-            this.network = this.palindrom.network;
-            this.morphUrl = this.palindrom.morphUrl.bind(this.palindrom);
+            this.network = this.puppet.network;
+            this.morphUrl = this.puppet.morphUrl.bind(this.puppet);
         },
         bindTo: function(element) {
             // use node id or node itself;
@@ -418,7 +419,7 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             this.propagateDomBind(ev.detail);
-            // FIXME tomalec: DRY, palindrom does the same
+            // FIXME tomalec: DRY, puppet does the same
             this.dispatchEvent(new CustomEvent("patch-applied", {
                 bubbles: true,
                 cancelable: true,
@@ -432,7 +433,7 @@ All the changes from server are also received and propagated to your HTML.
                 var result = patchesAndResults.results[operationNo];
 
                 if (operation.path == "") {
-                    //in case of root path, Polymer replaces the original obj, which detaches it from Palindrom
+                    //in case of root path, Polymer replaces the original obj, which detaches it from Puppet
                     var newSequence = {patches:[], results: []};
                     for (var prop in operation.value) {
                         if (operation.value.hasOwnProperty(prop)) {
@@ -517,12 +518,12 @@ All the changes from server are also received and propagated to your HTML.
             console.info('inherit validateJSONPatch from fast-json-patch');
         },
         observeJSONPatch: function(obj, callback) {
-            this.palindromObserver = callback;
+            this.puppetObserver = callback;
             return callback;
         },
         unobserveJSONPatch: function() {
             // FIXME this is dummy as hell
-            this.palindromObserver = noop;
+            this.puppetObserver = noop;
         },
 		_ignoreAddChanged: function(newVal, oldVal) {
 			if (typeof this.ignoreAdd === "string") {

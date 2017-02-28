@@ -31,6 +31,12 @@
         disableMockServerReplies();
         palindromChange(palindrom, [operationObject('replace', '', model)]);
     };
+    window.initPuppet = function(puppet, model) {
+        currentVersion = 1;
+        setMockServerModel(model);
+        disableMockServerReplies();
+        palindromChange(puppet, [operationObject('replace', '', model)]);
+    };
     window.palindromChange = function(palindrom, sequence) {
         palindrom.handleRemoteChange(JSON.stringify(preparePatchFromMockServer(sequence)), '', '');
     };
