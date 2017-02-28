@@ -1,3 +1,8 @@
+<!--
+    Please don't maintain this file, it's here for mere depreciation purposes.
+    instead edit -> palindrom-client.html
+-->
+
 <!-- palindrom-polymer-client version: 3.2.2 | MIT License -->
 
 <link rel="import" href="../polymer/polymer.html">
@@ -29,7 +34,7 @@ All the changes from server are also received and propagated to your HTML.
 
 @demo demo/index.html
 -->
-<dom-module id="palindrom-client">
+<dom-module id="puppet-client">
     <template>
         <style>
             .box-container {
@@ -81,10 +86,12 @@ All the changes from server are also received and propagated to your HTML.
 (function() {
     'use strict';
 
+    /* Depreciation message */
+    console.warn('`puppet-client` has been renamed to `palindrom-client`, please update your markup, `puppet-client` will be removed soon');
 
     Polymer({
 
-        is: 'palindrom-client',
+        is: 'puppet-client',
 
         /**
          * Fired when patch gets applied
