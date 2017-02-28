@@ -1,5 +1,6 @@
 
 # &lt;palindrom-polymer-client&gt; [![Build Status](https://travis-ci.org/Palindrom/palindrom-polymer-client.svg?branch=gh-pages)](https://travis-ci.org/Palindrom/palindrom-polymer-client)
+---
 > Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.
 
 Custom Element that binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
@@ -28,7 +29,7 @@ Install the component using [Bower](http://bower.io/):
 $ bower install palindrom-polymer-client --save
 ```
 
-Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archive/gh-pages.zip).
+Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archive/master.zip).
 
 ## Usage
 
