@@ -3,10 +3,10 @@
 
 <head>
 
-    <title>puppet-polymer-client</title>
+    <title>palindrom-polymer-client</title>
 
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="../puppet-client.html">
+    <link rel="import" href="../palindrom-client.html">
     <link rel="import" href="../../paper-styles/demo-pages.html">
     <!-- mock server responses -->
     <script src="../../sinonjs/sinon.js"></script>
@@ -14,10 +14,10 @@
 </head>
 
 <body unresolved>
-    <h1>PuppetJs + Polymer</h1>
+    <h1>Palindrom + Polymer</h1>
     <div class="horizontal-section-container">
         <template is="dom-bind" id="app">
-            <puppet-client auto obj="{{model}}" remote-url="/puppet"></puppet-client>
+            <palindrom-client auto obj="{{model}}" remote-url="/palindrom"></palindrom-client>
             <template is="dom-if" if="{{!model}}" restamp>
                 <div>User data was not yet fetched from data</div>
             </template>

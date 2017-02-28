@@ -1,35 +1,35 @@
-<!-- puppet-polymer-client version: 3.2.2 | MIT License -->
+<!-- palindrom-polymer-client version: 3.2.2 | MIT License -->
 
 <link rel="import" href="../polymer/polymer.html">
 <!-- <link rel="import" href="iron-request.html"> -->
 
-<!-- include PuppetJs with dependencies -->
-<script src="../fast-json-patch/src/json-patch-duplex.js"></script>
+<!-- include Palindrom with dependencies -->
+<script src="https://rawgit.com/Starcounter-Jack/JSON-Patch/master/dist/json-patch-duplex.min.js"></script>
 <script src="../json-patch-queue/src/json-patch-queue.js"></script>
 <script src="../json-patch-ot-agent/src/json-patch-ot-agent.js"></script>
 <script src="../json-patch-ot/src/json-patch-ot.js"></script>
-<script src="../PuppetJs/src/puppet.js"></script>
-<script src="../PuppetJs/src/puppet-dom.js"></script>
+<script src="../Palindrom/src/palindrom.js"></script>
+<script src="../Palindrom/src/palindrom-dom.js"></script>
 
 <!--
-The Polymer version of `puppet-client` element binds [PuppetJs](https://github.com/PuppetJs/PuppetJs) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
+The Polymer version of `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
 That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
-data-model using Puppet & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
+data-model using Palindrom & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
 
 You get three-way data binding server - JS - HTML, kept in flawless sync.
 
-    <puppet-client
-        obj="{{model}}"></puppet-client>
+    <palindrom-client
+        obj="{{model}}"></palindrom-client>
 
 
-It establishes the PuppetJs connection when attached. All the changes made
+It establishes the Palindrom connection when attached. All the changes made
 in browser are sent to the server via WebSocket or HTTP, as
 [JSON Patch](https://tools.ietf.org/html/rfc6902)es.
 All the changes from server are also received and propagated to your HTML.
 
 @demo demo/index.html
 -->
-<dom-module id="puppet-client">
+<dom-module id="palindrom-client">
     <template>
         <style>
             .box-container {
@@ -84,7 +84,7 @@ All the changes from server are also received and propagated to your HTML.
 
     Polymer({
 
-        is: 'puppet-client',
+        is: 'palindrom-client',
 
         /**
          * Fired when patch gets applied
@@ -120,7 +120,7 @@ All the changes from server are also received and propagated to your HTML.
             },
             /**
              * Regular expression with local properties to ignore
-             * @see [PuppetJS.ignoreAdd](https://github.com/PuppetJs/PuppetJs#ignoring-local-changes-ignoreadd).
+             * @see [Palindrom.ignoreAdd](https://github.com/Palindrom/Palindrom#ignoring-local-changes-ignoreadd).
              * Should be given in string format, like `"_.+"`.
              */
             ignoreAdd: {
@@ -171,7 +171,7 @@ All the changes from server are also received and propagated to your HTML.
                 value: false
             },
             /**
-             *  DOM node to listen to (see [PuppetDOM listenTo attribute](https://github.com/PuppetJs/PuppetJs#puppetdom))
+             *  DOM node to listen to (see [PalindromDOM listenTo attribute](https://github.com/Palindrom/Palindrom#palindromdom))
              */
             listenTo: {
                 type: String
@@ -243,14 +243,14 @@ All the changes from server are also received and propagated to your HTML.
             }
         },
         reconnectNow: function() {
-            this.puppet.reconnectNow();
+            this.palindrom.reconnectNow();
         },
         reload: function() {
             window.location.reload();
         },
 
         /**
-         * Creates an instance of Puppet according to given params, attaches it to .pupet property
+         * Creates an instance of Palindrom according to given params, attaches it to .pupet property
          *
          */
         attached: function() {
@@ -263,7 +263,7 @@ All the changes from server are also received and propagated to your HTML.
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
 
-            this.puppet = new PuppetDOM({
+            this.palindrom = new PalindromDOM({
                 remoteUrl: this.remoteUrl,
                 pingIntervalS: pingIntervalS,
                 listenTo: listenTo,
@@ -289,10 +289,10 @@ All the changes from server are also received and propagated to your HTML.
                     }
                 }.bind(this)
             });
-            this.puppet.addEventListener('patch-applied', this.onPatchApplied.bind(this));
+            this.palindrom.addEventListener('patch-applied', this.onPatchApplied.bind(this));
 
-            this.network = this.puppet.network;
-            this.morphUrl = this.puppet.morphUrl.bind(this.puppet);
+            this.network = this.palindrom.network;
+            this.morphUrl = this.palindrom.morphUrl.bind(this.palindrom);
         },
         bindTo: function(element) {
             // use node id or node itself;
@@ -411,7 +411,7 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             this.propagateDomBind(ev.detail);
-            // FIXME tomalec: DRY, puppet does the same
+            // FIXME tomalec: DRY, palindrom does the same
             this.dispatchEvent(new CustomEvent("patch-applied", {
                 bubbles: true,
                 cancelable: true,
@@ -425,7 +425,7 @@ All the changes from server are also received and propagated to your HTML.
                 var result = patchesAndResults.results[operationNo];
 
                 if (operation.path == "") {
-                    //in case of root path, Polymer replaces the original obj, which detaches it from Puppet
+                    //in case of root path, Polymer replaces the original obj, which detaches it from Palindrom
                     var newSequence = {patches:[], results: []};
                     for (var prop in operation.value) {
                         if (operation.value.hasOwnProperty(prop)) {
@@ -510,12 +510,12 @@ All the changes from server are also received and propagated to your HTML.
             console.info('inherit validateJSONPatch from fast-json-patch');
         },
         observeJSONPatch: function(obj, callback) {
-            this.puppetObserver = callback;
+            this.palindromObserver = callback;
             return callback;
         },
         unobserveJSONPatch: function() {
             // FIXME this is dummy as hell
-            this.puppetObserver = noop;
+            this.palindromObserver = noop;
         },
 		_ignoreAddChanged: function(newVal, oldVal) {
 			if (typeof this.ignoreAdd === "string") {

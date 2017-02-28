@@ -13,14 +13,14 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../puppet-client.html">
+    <link rel="import" href="../../palindrom-client.html">
 </head>
 
 <body>
-    <test-fixture id="puppet-polymer-array"><template>
+    <test-fixture id="palindrom-polymer-array"><template>
         <!-- workaround for test-fixture bug -->
         <div>
-            <puppet-client remote-url="/puppet" ref="domBind"></puppet-client>
+            <palindrom-client remote-url="/palindrom" ref="domBind"></palindrom-client>
             <template is="dom-bind" id="domBind">
                 <ul>
                     <template is="dom-repeat" items="{{model.array}}">
@@ -45,20 +45,20 @@
     <script>
         var model;
         describe('not desired but expected behavior, caused by Polymer bugs', function () {
-            describe('when stamped with reference to `dom-bind` and bound to puppet object w/ array of primitives', function () {
+            describe('when stamped with reference to `dom-bind` and bound to palindrom object w/ array of primitives', function () {
                 describe('once two consecutive changes are made and first one sets a value to one of existing ones - #14 (Polymer/polymer#3682)', function () {
-                    var container, domBind, ppclient, puppet, patchAppliedEventCallback;
+                    var container, domBind, ppclient, palindrom, patchAppliedEventCallback;
 
                     beforeEach(function (done) {
                         patchAppliedEventCallback = sinon.spy();
                         model = {array: [0,1]};
 
 
-                        container = fixture('puppet-polymer-array');
+                        container = fixture('palindrom-polymer-array');
                         setTimeout(function () {
-                            ppclient = container.querySelector("puppet-client");
-                            puppet = ppclient.puppet;
-                            initPuppet(puppet, model);
+                            ppclient = container.querySelector("palindrom-client");
+                            palindrom = ppclient.palindrom;
+                            initPalindrom(palindrom, model);
                             domBind = container.querySelector('template[is="dom-bind"]');
                             // Polymer werido(m)bind attaches to dom asynchronously
                             setTimeout(done, 10);
@@ -72,10 +72,10 @@
                         }, 10);
                     });
                     it('eventually first item is rendered as `""` and second one is updated correctly (`patch-applied` event is called as usual)', function (done) {
-                        console.log('This behavior is tracked in https://github.com/PuppetJs/puppet-polymer-client/issues/14 and is caused by https://github.com/Polymer/polymer/issues/3682');
+                        console.log('This behavior is tracked in https://github.com/Palindrom/palindrom-polymer-client/issues/14 and is caused by https://github.com/Polymer/polymer/issues/3682');
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('replace', '/array/0', 1), operationObject('replace', '/array/1', 2)]);
+                        palindromChange(palindrom, [operationObject('replace', '/array/0', 1), operationObject('replace', '/array/1', 2)]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {

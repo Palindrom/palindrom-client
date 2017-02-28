@@ -13,14 +13,14 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../puppet-client.html">
+    <link rel="import" href="../../palindrom-client.html">
 </head>
 
 <body>
     <test-fixture id="my-fixture"><template>
         <!-- workaround for test-fixture bug -->
         <div>
-            <puppet-client remote-url="/puppet" ref="arrays" ping-interval-s="0"></puppet-client>
+            <palindrom-client remote-url="/palindrom" ref="arrays" ping-interval-s="0"></palindrom-client>
             <template is="dom-bind" id="arrays">
                 <h4>
                     <span>{{model.name}}</span> people:</h4>
@@ -97,12 +97,12 @@
     </template></test-fixture>
     <script>
         var model;
-        describe('puppet-client, when stamped from `dom-bind` and bound to puppet object w/ array', function () {
+        describe('palindrom-client, when stamped from `dom-bind` and bound to palindrom object w/ array', function () {
             before(function initChai(done) {
-                chai.use(puppetChaiPlugin);
+                chai.use(palindromChaiPlugin);
                 done();
             });
-            var container, domBind, ppclient, puppet, patchAppliedEventCallback, patchSentEventCallback;
+            var container, domBind, ppclient, palindrom, patchAppliedEventCallback, patchSentEventCallback;
 
             beforeEach(function (done) {
                 patchAppliedEventCallback = sinon.spy();
@@ -151,10 +151,10 @@
 
                 container = fixture('my-fixture');
                 setTimeout(function () {
-                    ppclient = container.querySelector("puppet-client");
-                    puppet = ppclient.puppet;
+                    ppclient = container.querySelector("palindrom-client");
+                    palindrom = ppclient.palindrom;
                     domBind = container.querySelector('template[is="dom-bind"]');
-                    initPuppet(puppet, model);
+                    initPalindrom(palindrom, model);
                     // Polymer werido(m)bind attaches to dom asynchronously
                     setTimeout(done, 100);
                 }, 100);
@@ -173,7 +173,7 @@
                     it('for arrays of primitives, after a remote change fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('replace', '/primitive_people/0', 'Homo erectus')]);
+                        palindromChange(palindrom, [operationObject('replace', '/primitive_people/0', 'Homo erectus')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -185,7 +185,7 @@
                     it('for arrays of primitives, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patchsent', patchSentEventCallback);
                         domBind.splice('model.primitive_people', 0, 1, 'Homo erectus');
-                        triggerPuppetSend();
+                        triggerPalindromSend();
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
                             expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/primitive_people/0', 'Homo erectus'));
@@ -198,7 +198,7 @@
                         var newItem = {first: 'Atomek'};
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('replace', '/people/1', newItem)]);
+                        palindromChange(palindrom, [operationObject('replace', '/people/1', newItem)]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -212,7 +212,7 @@
                         var newItem = {first: 'Atomek'};
                         ppclient.addEventListener('patchsent', patchSentEventCallback);
                         domBind.splice('model.people', 1, 1, newItem);
-                        triggerPuppetSend();
+                        triggerPalindromSend();
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
                             expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/people/1/first', newItem.first));
@@ -225,7 +225,7 @@
                     it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('replace', '/people/0/first', 'tomalec')]);
+                        palindromChange(palindrom, [operationObject('replace', '/people/0/first', 'tomalec')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -239,8 +239,8 @@
                     it('when adding something to array `length` property should be notified', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        // puppetChange(puppet, [operationObject('add', '/people_properties/-', '1')]);
-                        puppetChange(puppet, [operationObject('add', '/people_properties/0', 'item')]);
+                        // palindromChange(palindrom, [operationObject('add', '/people_properties/-', '1')]);
+                        palindromChange(palindrom, [operationObject('add', '/people_properties/0', 'item')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -251,7 +251,7 @@
                     });
                     it('when updating custom property', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
-                        puppetChange(puppet, [operationObject('replace', '/people_properties/prop', 'changed')]);
+                        palindromChange(palindrom, [operationObject('replace', '/people_properties/prop', 'changed')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -263,7 +263,7 @@
                     it('when adding custom property', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('add', '/people_properties/newProp', 'changed')]);
+                        palindromChange(palindrom, [operationObject('add', '/people_properties/newProp', 'changed')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -275,7 +275,7 @@
                     it('when deleting custom property (dom-if restamps asynchronously)', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('remove', '/people_properties/deletedProp')]);
+                        palindromChange(palindrom, [operationObject('remove', '/people_properties/deletedProp')]);
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
@@ -289,7 +289,7 @@
                     it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('add', '/people_push/-', {
+                        palindromChange(palindrom, [operationObject('add', '/people_push/-', {
                             first: "Alice"
                         })]);
 
@@ -309,7 +309,7 @@
                         setTimeout(function () {
                             ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                             // change model
-                            puppetChange(puppet, [operationObject('replace', '/people_push/' + newIndex + '/first', "Wizard from Oz")]);
+                            palindromChange(palindrom, [operationObject('replace', '/people_push/' + newIndex + '/first', "Wizard from Oz")]);
 
                             // check and wait for async dom-binds stamping
                             setTimeout(function listener() {
@@ -320,16 +320,16 @@
                             }, 100);
                         }, 100);
                         // change model
-                        puppetChange(puppet, [operationObject('add', '/people_push/-', {
+                        palindromChange(palindrom, [operationObject('add', '/people_push/-', {
                             first: "Wizard"
                         })]);
 
                     });
                     it('when adding element to array patch should be sent', function (done) {
                         ppclient.addEventListener('patchsent', patchSentEventCallback);
-                        puppet.ignoreAdd = false;
+                        palindrom.ignoreAdd = false;
                         domBind.splice('model.people_push', 1, 0, {first: 'Abraham'});
-                        triggerPuppetSend();
+                        triggerPalindromSend();
                         setTimeout(function listener() {
                             expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('add', '/people_push/1', {first: 'Abraham'}));
                             done();
@@ -342,7 +342,7 @@
                         var last = model.people_pop.length - 1;
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('remove', '/people_pop/' + last)]);
+                        palindromChange(palindrom, [operationObject('remove', '/people_pop/' + last)]);
 
                         // check and wait for async dom-bind's stamping
                         setTimeout(function listener() {
@@ -356,7 +356,7 @@
                         var last = model.people_pop.length - 1,
                             remocedObj = model.people_pop[last];
                         // change model
-                        puppetChange(puppet, [operationObject('remove', '/people_pop/' + last)]);
+                        palindromChange(palindrom, [operationObject('remove', '/people_pop/' + last)]);
                         // make it async, to make sure it will come as separated change
                         setTimeout(function () {
                             var numberOfCallsForChangeEvent = 0;
@@ -381,7 +381,7 @@
                     it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('replace', '/people_splice/1', {
+                        palindromChange(palindrom, [operationObject('replace', '/people_splice/1', {
                             first: "Tomek"
                         })]);
 
@@ -399,14 +399,14 @@
                 describe('inserted (add in the middle) array items, should EVENTUALLY update correct dom-repeat rows', function () {
                     it('for nested objects', function (done) {
                         // change model
-                        puppetChange(puppet, [operationObject('add', '/people_splice_n_change/1', {
+                        palindromChange(palindrom, [operationObject('add', '/people_splice_n_change/1', {
                             first: "Tomek"
                         })]);
                         // wait to apply it in another sequence
                         setTimeout(function () {
                             ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                             // change model
-                            puppetChange(puppet, [operationObject('replace', '/people_splice_n_change/1/first', 'Konstantin')]);
+                            palindromChange(palindrom, [operationObject('replace', '/people_splice_n_change/1/first', 'Konstantin')]);
 
                             // check and wait for async dom-bind's stamping
                             setTimeout(function listener() {
@@ -421,17 +421,17 @@
                     });
                     it('for primitive values', function (done) {
                         // change model
-                        puppetChange(puppet, [operationObject('add', '/primitive_splice_n_change/1', 'T')]);
+                        palindromChange(palindrom, [operationObject('add', '/primitive_splice_n_change/1', 'T')]);
                         // wait to apply it in another sequence
                         setTimeout(function () {
-                            console.log(puppet, domBind);
+                            console.log(palindrom, domBind);
                             ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                             // change model
-                            puppetChange(puppet, [operationObject('replace', '/primitive_splice_n_change/1', 'K')]);
+                            palindromChange(palindrom, [operationObject('replace', '/primitive_splice_n_change/1', 'K')]);
 
                             // check and wait for async dom-bind's stamping
                             setTimeout(function listener() {
-                                console.log(puppet, domBind);
+                                console.log(palindrom, domBind);
                                 expect(patchAppliedEventCallback).to.have.been.called;
                                 expect(document.querySelector("ul.primitive_splice_n_change>li").innerHTML).to.equal("A");
                                 expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(2)").innerHTML).to.equal("K");
@@ -445,7 +445,7 @@
                     it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('replace', '/people_nested/0/0', 'John')]);
+                        palindromChange(palindrom, [operationObject('replace', '/people_nested/0/0', 'John')]);
 
                         // check and wait for async dom-bind's stamping
                         setTimeout(function listener() {

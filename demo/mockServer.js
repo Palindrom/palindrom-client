@@ -48,10 +48,10 @@
 
 
 
-  // pass-through all requests that are not meant for puppet
+  // pass-through all requests that are not meant for palindrom
   sinon.FakeXMLHttpRequest.useFilters = true;
   sinon.FakeXMLHttpRequest.addFilter(function (method, url) {
-    return !(/.*puppet(\/reconnect)?$/.test(url));
+    return !(/.*palindrom(\/reconnect)?$/.test(url));
   });
 
   // default implementation fires onload event. see https://github.com/sinonjs/sinon/issues/432
@@ -77,7 +77,7 @@
       outPatches.push({op: 'replace', path: '/user/fullName', value: full.user.fullName});
       request.respond(200, [], JSON.stringify(outPatches));
     } else {
-      throw new Error("unexpected request - url matches puppet (=" + request.url + "), yet Accept header is not json nor json patch (=" + request.requestHeaders['Accept'] + ")");
+      throw new Error("unexpected request - url matches palindrom (=" + request.url + "), yet Accept header is not json nor json patch (=" + request.requestHeaders['Accept'] + ")");
     }
   });
   sinonFakeServer.autoRespond = true;

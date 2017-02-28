@@ -13,14 +13,14 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../puppet-client.html">
+    <link rel="import" href="../../palindrom-client.html">
 </head>
 
 <body>
     <test-fixture id="my-fixture"><template>
         <!-- workaround for test-fixture bug -->
         <div>
-            <puppet-client remote-url="/puppet" ref="bind" ping-interval-s="0"></puppet-client>
+            <palindrom-client remote-url="/palindrom" ref="bind" ping-interval-s="0"></palindrom-client>
             <template is="dom-bind" id="bind">
                 <span id="name">{{model.name}}</span>
             </template>
@@ -30,12 +30,12 @@
         var model;
         // Do not take `console.error` as a reason to fail the test.
         WCT._config.trackConsoleError = false;
-        describe('puppet-client', function () {
+        describe('palindrom-client', function () {
             before(function initChai(done) {
-                chai.use(puppetChaiPlugin);
+                chai.use(palindromChaiPlugin);
                 done();
             });
-            var container, domBind, ppclient, puppet, nameSpan, consoleErrorSpy;
+            var container, domBind, ppclient, palindrom, nameSpan, consoleErrorSpy;
 
             beforeEach(function (done) {
                 patchAppliedEventCallback = sinon.spy();
@@ -46,11 +46,11 @@
 
                 container = fixture('my-fixture');
                 setTimeout(function () {
-                    ppclient = container.querySelector("puppet-client");
-                    puppet = ppclient.puppet;
+                    ppclient = container.querySelector("palindrom-client");
+                    palindrom = ppclient.palindrom;
                     domBind = container.querySelector('template[is="dom-bind"]');
                     nameSpan = container.querySelector('#name');
-                    initPuppet(puppet, model);
+                    initPalindrom(palindrom, model);
                     // Polymer werido(m)bind attaches to dom asynchronously
                     setTimeout(done, 100);
                 }, 100);
@@ -67,20 +67,20 @@
             it('when connection is broken with a reason should display an error box', function () {
                 var closeEvent = {reason: 'thereason', code:1};
                 var boxErrorMsg = 'Connection error. See console for details.';
-                puppet.network._ws.close(closeEvent);
+                palindrom.network._ws.close(closeEvent);
                 expect(container.querySelector("div.box.error.tappable").innerText).to.contain(boxErrorMsg);
             });
 
             it('and log error reason to the console', function() {
                 var closeEvent = {reason: 'thereason', code: 1};
-                puppet.network._ws.close(closeEvent);
+                palindrom.network._ws.close(closeEvent);
                 expect(consoleErrorSpy.getCall(0).args[0]).to.contain(closeEvent.reason);
             });
 
             describe('when connection is broken without a reason should display a notice box', function() {
                 it('and reconnect after a second and use model from server', function(done) {
                     var closeEvent = {reason: undefined, code:1};
-                    puppet.network._ws.close(closeEvent);
+                    palindrom.network._ws.close(closeEvent);
                     var newName = 'newname';
                     setMockServerModel({name: newName});
                     expect(container.querySelector("div.box.notice").innerText).to.contain("Connecting in 1s...");
@@ -95,9 +95,9 @@
                 it('and send pending patches when reconnecting', function(done) {
                     var closeEvent = {reason: undefined, code:1};
                     var newName = "new-name";
-                    puppet.network._ws.close(closeEvent);
+                    palindrom.network._ws.close(closeEvent);
                     domBind.set("model.name", newName);
-                    triggerPuppetSend();
+                    triggerPalindromSend();
                     ppclient.addEventListener('reconnection-end', function () {
                         expect(JSON.parse(lastRequestContent)[0][2]).to.deep.equal(
                                 //            first patch ----^  ^---- first two operations are versions

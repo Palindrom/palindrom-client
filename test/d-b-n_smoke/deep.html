@@ -11,12 +11,12 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../puppet-client.html">
+    <link rel="import" href="../../palindrom-client.html">
 </head>
 
 <body>
 
-    <puppet-client ref="deep" remote-url="/puppet" ping-interval-s="0"></puppet-client>
+    <palindrom-client ref="deep" remote-url="/palindrom" ping-interval-s="0"></palindrom-client>
     <template is="dom-bind" id="deep">
 
         <h3>{{model.name}}</h3>
@@ -25,11 +25,11 @@
 
     </template>
     <script>
-        describe('puppet-client, when stamped from `dom-bind` with deep attribute and bound to object', function () {
-            var model, domBind, ppclient, puppet;
+        describe('palindrom-client, when stamped from `dom-bind` with deep attribute and bound to object', function () {
+            var model, domBind, ppclient, palindrom;
             beforeEach(function waitForHTMLImportsAndDomBindChange(done) {
                 model = {
-                    name: "<puppet-client>",
+                    name: "<palindrom-client>",
                     author: {
                         first: "Tomek",
                         last: "Wytrębowicz"
@@ -37,9 +37,9 @@
                 };
                 domBind = document.getElementById("deep");
                 domBind.model = model;
-                ppclient = document.querySelector("puppet-client");
-                puppet = ppclient.puppet;
-                initPuppet(puppet, model);
+                ppclient = document.querySelector("palindrom-client");
+                palindrom = ppclient.palindrom;
+                initPalindrom(palindrom, model);
 
                 setTimeout(function () {
                     done();
@@ -53,7 +53,7 @@
                         var patchAppliedEventCallback = sinon.spy();
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
-                        puppetChange(puppet, [operationObject('replace', '/author/first', 'tomalec')]);
+                        palindromChange(palindrom, [operationObject('replace', '/author/first', 'tomalec')]);
 
                         // check and wait for async dom-bind's stamping
                         var retriesLeft = 100;

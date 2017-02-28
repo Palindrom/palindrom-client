@@ -25,22 +25,22 @@
         return domBind;
     };
     var currentVersion;
-    window.initPuppet = function(puppet, model) {
+    window.initPalindrom = function(palindrom, model) {
         currentVersion = 1;
         setMockServerModel(model);
         disableMockServerReplies();
-        puppetChange(puppet, [operationObject('replace', '', model)]);
+        palindromChange(palindrom, [operationObject('replace', '', model)]);
     };
-    window.puppetChange = function(puppet, sequence) {
-        puppet.handleRemoteChange(JSON.stringify(preparePatchFromMockServer(sequence)), '', '');
+    window.palindromChange = function(palindrom, sequence) {
+        palindrom.handleRemoteChange(JSON.stringify(preparePatchFromMockServer(sequence)), '', '');
     };
-    window.triggerPuppetSend = function() {
+    window.triggerPalindromSend = function() {
         var clickEvent = document.createEvent('MouseEvents');
         clickEvent.initEvent("mouseup", true, true);
         window.dispatchEvent(clickEvent);
     };
 
-    window.puppetChaiPlugin = function(chai, utils) {
+    window.palindromChaiPlugin = function(chai, utils) {
         chai.Assertion.addMethod('calledWithPatch', function (op) {
             this.assert(this._obj.called
                     // first arg is event, first two operations are OT-related
