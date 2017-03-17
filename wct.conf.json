@@ -12,9 +12,9 @@
         "platform": "Linux",
         "version": ""
       }, {
-        "browserName": "microsoftedge",
+        "browserName": "MicrosoftEdge",
         "platform": "Windows 10",
-        "version": "14"
+        "version": "14.14393"
       }, {
         "browserName": "safari",
         "platform": "OS X 10.11",
