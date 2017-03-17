@@ -263,7 +263,7 @@ All the changes from server are also received and propagated to your HTML.
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
 
-            this.palindrom = this.puppet /* backward compatibility */ = new PalindromDOM({
+            this.palindrom = new PalindromDOM({
                 remoteUrl: this.remoteUrl,
                 pingIntervalS: pingIntervalS,
                 listenTo: listenTo,
@@ -289,6 +289,8 @@ All the changes from server are also received and propagated to your HTML.
                     }
                 }.bind(this)
             });
+            /* backward compatibility */ 
+            this.puppet =  this.palindrom; 
             this.palindrom.addEventListener('patch-applied', this.onPatchApplied.bind(this));
 
             this.network = this.palindrom.network;
@@ -535,13 +537,15 @@ All the changes from server are also received and propagated to your HTML.
         var n = ~~Number(str);
         return String(n) === str && n >= 0;
     }
+    /* IE and Safari, polyfill Object.assign */
+    var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-    var palindromClient = Object.assign({}, component);
+    var palindromClient = _extends({}, component);
     palindromClient.is = "palindrom-client";
     Polymer(palindromClient);
 
     /* backward compatibility */
-    var puppetClient = Object.assign({}, component);
+    var puppetClient = _extends({}, component);
     puppetClient.is = "puppet-client";
     var originalAttached = puppetClient.attached;
     puppetClient.attached = function() {
