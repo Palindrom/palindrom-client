@@ -14,7 +14,7 @@
       }, {
         "browserName": "microsoftedge",
         "platform": "Windows 10",
-        "version": "14.14393"
+        "version": "14"
       }, {
         "browserName": "safari",
         "platform": "OS X 10.11",
