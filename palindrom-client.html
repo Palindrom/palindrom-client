@@ -201,7 +201,7 @@ All the changes from server are also received and propagated to your HTML.
             },
 
             /**
-             * Creates an instance of Palindrom according to given params, attaches it to .pupet property
+             * assigns an instance of Palindrom according to given params, attaches it to .pupet property
              *
              */
             attached: function () {
@@ -494,7 +494,6 @@ All the changes from server are also received and propagated to your HTML.
 
         return component;
     }());
-    
 </script>
 <dom-module id="palindrom-client">
     <template>
@@ -559,7 +558,7 @@ All the changes from server are also received and propagated to your HTML.
         </div>
     </template>
     <script>
-        var palindromClient = Object.create({}, component);
+        var palindromClient = Object.assign({}, component);
         palindromClient.is = "palindrom-client";
         Polymer(palindromClient);
     </script>
@@ -623,7 +622,7 @@ All the changes from server are also received and propagated to your HTML.
     </template>
     <script>
         /* backward compatibility */
-        var puppetClient = Object.create({}, component);
+        var puppetClient = Object.assign({}, component);
         puppetClient.is = "puppet-client";
         var originalAttached = puppetClient.attached;
         puppetClient.attached = function () {
