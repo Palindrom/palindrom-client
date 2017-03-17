@@ -82,7 +82,7 @@ All the changes from server are also received and propagated to your HTML.
     'use strict';
 
 
-    Polymer({
+    var component = {
 
         is: 'palindrom-client',
 
@@ -263,7 +263,7 @@ All the changes from server are also received and propagated to your HTML.
                 listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
             }
 
-            this.palindrom = new PalindromDOM({
+            this.palindrom = this.puppet /* backward compatibility */ = new PalindromDOM({
                 remoteUrl: this.remoteUrl,
                 pingIntervalS: pingIntervalS,
                 listenTo: listenTo,
@@ -523,7 +523,7 @@ All the changes from server are also received and propagated to your HTML.
 			}
 		}
 
-    });
+    };
 
     function noop() {}
 
@@ -535,6 +535,21 @@ All the changes from server are also received and propagated to your HTML.
         var n = ~~Number(str);
         return String(n) === str && n >= 0;
     }
+
+    var palindromClient = Object.assign({}, component);
+    palindromClient.is = "palindrom-client";
+    Polymer(palindromClient);
+
+    /* backward compatibility */
+    var puppetClient = Object.assign({}, component);
+    puppetClient.is = "puppet-client";
+    var originalAttached = puppetClient.attached;
+    puppetClient.attached = function() {
+        console.warn('`puppet-client` has been renamed to `palindrom-client`, please update your markup, `puppet-client` will be removed soon');
+        originalAttached.call(this);
+    }
+    Polymer(puppetClient);
+
 }());
 </script>
 </dom-module>

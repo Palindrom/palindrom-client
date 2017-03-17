@@ -12,6 +12,7 @@
     "json-patch",
     "palindrom",
     "binding",
+    "puppetjs",
     "template",
     "web-socket",
     "http",
