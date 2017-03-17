@@ -494,8 +494,7 @@ All the changes from server are also received and propagated to your HTML.
 
         return component;
     }());
-    /* IE and Safari, polyfill Object.assign */
-    var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+    
 </script>
 <dom-module id="palindrom-client">
     <template>
@@ -560,7 +559,7 @@ All the changes from server are also received and propagated to your HTML.
         </div>
     </template>
     <script>
-        var palindromClient = _extends({}, component);
+        var palindromClient = Object.create({}, component);
         palindromClient.is = "palindrom-client";
         Polymer(palindromClient);
     </script>
@@ -624,7 +623,7 @@ All the changes from server are also received and propagated to your HTML.
     </template>
     <script>
         /* backward compatibility */
-        var puppetClient = _extends({}, component);
+        var puppetClient = Object.create({}, component);
         puppetClient.is = "puppet-client";
         var originalAttached = puppetClient.attached;
         puppetClient.attached = function () {
