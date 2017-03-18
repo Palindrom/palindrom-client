@@ -11,11 +11,8 @@
         "browserName": "firefox",
         "platform": "Linux",
         "version": ""
-      }, {
-        "browserName": "MicrosoftEdge",
-        "platform": "Windows 10",
-        "version": "14.14393"
-      }, {
+      },
+      {
         "browserName": "safari",
         "platform": "OS X 10.11",
         "version": "9"
