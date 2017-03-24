@@ -4,12 +4,7 @@
 <!-- <link rel="import" href="iron-request.html"> -->
 
 <!-- include Palindrom with dependencies -->
-<script src="../fast-json-patch/dist/json-patch-duplex.min.js"></script>
-<script src="../json-patch-queue/src/json-patch-queue.js"></script>
-<script src="../json-patch-ot-agent/src/json-patch-ot-agent.js"></script>
-<script src="../json-patch-ot/src/json-patch-ot.js"></script>
-<script src="../Palindrom/src/palindrom.js"></script>
-<script src="../Palindrom/src/palindrom-dom.js"></script>
+<script src="../Palindrom/dist/palindrom-dom.js"></script>
 
 <!--
 The Polymer version of `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
@@ -139,7 +134,7 @@ All the changes from server are also received and propagated to your HTML.
                  * Object that will be synced
                  */
                 obj: {
-                    type: Object,
+                    type: Proxy,
                     notify: true,
                     value: function () {
                         return {};
@@ -234,7 +229,8 @@ All the changes from server are also received and propagated to your HTML.
                     remoteVersionPath: this.remoteVersionPath,
                     ot: this.ot,
                     purity: this.purity,
-                    callback: function () {
+                    callback: function (obj) {
+                        this.obj = obj;
                         if (whereToBind) {
                             this.bindTo(whereToBind);
                         }
