@@ -34,7 +34,7 @@
     "Gruntfile.js"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.3.0",
+    "polymer": "Polymer/polymer#^1.8.1",
     "Palindrom": "Palindrom/Palindrom#master"
   },
   "devDependencies": {
