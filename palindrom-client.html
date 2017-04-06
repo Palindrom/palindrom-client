@@ -220,6 +220,7 @@ All the changes from server are also received and propagated to your HTML.
                     onLocalChange: this.onLocalChange.bind(this),
                     onPatchReceived: this.onPatchReceived.bind(this),
                     onPatchSent: this.onPatchSent.bind(this),
+                    onRemoteChange: this.onPatchApplied.bind(this),
                     onSocketStateChanged: this.onSocketStateChanged.bind(this),
                     onConnectionError: this.onConnectionError.bind(this),
                     onReconnectionCountdown: this.onReconnectionCountdown.bind(this),
@@ -230,7 +231,7 @@ All the changes from server are also received and propagated to your HTML.
                     ot: this.ot,
                     purity: this.purity,
                     callback: function (obj) {
-                        this.obj = obj;
+                        this.set('obj', obj);
                         if (whereToBind) {
                             this.bindTo(whereToBind);
                         }
@@ -238,8 +239,6 @@ All the changes from server are also received and propagated to your HTML.
                 });
                 /* backward compatibility */
                 this.puppet = this.palindrom;
-                this.palindrom.addEventListener('patch-applied', this.onPatchApplied.bind(this));
-
                 this.network = this.palindrom.network;
                 this.morphUrl = this.palindrom.morphUrl.bind(this.palindrom);
             },
@@ -351,7 +350,7 @@ All the changes from server are also received and propagated to your HTML.
                     this._setShowReconnectingIn(false);
                 }
             },
-            onPatchApplied: function (ev) {
+            onPatchApplied: function (patches, results) {
                 if (!this.bound) {
                     var whereToBind = this.getAttribute("ref");
                     if (whereToBind) {
@@ -359,12 +358,11 @@ All the changes from server are also received and propagated to your HTML.
                     }
                 }
 
-                this.propagateDomBind(ev.detail);
-                // FIXME tomalec: DRY, palindrom does the same
+                this.propagateDomBind({patches, results});
                 this.dispatchEvent(new CustomEvent("patch-applied", {
                     bubbles: true,
                     cancelable: true,
-                    detail: ev.detail.patches
+                    detail: patches
                 }));
             },
             notifyTemplateDomBind: function (tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
