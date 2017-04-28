@@ -157,14 +157,14 @@
                     initPalindrom(palindrom, model);
                     // Polymer werido(m)bind attaches to dom asynchronously
                     setTimeout(done, 100);
-                }, 100);
+                }, 200);
 
             });
             afterEach(function (done) {
                 // Polymer werido(m)bind detaches from dom asynchronously
                 setTimeout(function () {
                     done();
-                }, 100);
+                }, 200);
             });
 
             console.info('EVENTUALLY <= Polymer updates array related content of `dom-bind` asynchronously!');
@@ -180,7 +180,7 @@
                             expect(patchAppliedEventCallback).to.have.been.called;
                             expect(document.querySelector("ul.primitive_people>li>span").innerHTML).to.equal("Homo erectus");
                             done();
-                        }, 100);
+                        }, 200);
                     });
                     it('for arrays of primitives, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patchsent', patchSentEventCallback);
@@ -189,9 +189,10 @@
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
                             expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/primitive_people/0', 'Homo erectus'));
+                            var span = document.querySelector("ul.primitive_people>li>span");
                             expect(document.querySelector("ul.primitive_people>li>span").innerHTML).to.equal("Homo erectus");
                             done();
-                        }, 100);
+                        }, 200);
 
                     });
                     it('in arrays of objects, after a remote change fire a change event, and EVENTUALLY update dom-bind', function (done) {
@@ -205,7 +206,7 @@
                             expect(patchAppliedEventCallback).to.have.been.called;
                             expect(document.querySelector("ul.people>li:nth-child(2)>span").innerHTML).to.equal(newItem.first);
                             done();
-                        }, 100);
+                        }, 200);
 
                     });
                     it('in arrays of objects, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
@@ -218,7 +219,7 @@
                             expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/people/1/first', newItem.first));
                             expect(document.querySelector("ul.people>li:nth-child(2)>span").innerHTML).to.equal(newItem.first);
                             done();
-                        }, 100);
+                        }, 200);
                     });
                 });
                 describe('properties of array items,', function () {
@@ -232,7 +233,7 @@
                             expect(patchAppliedEventCallback).to.have.been.called;
                             expect(document.querySelector("ul>li>span").innerHTML).to.equal("tomalec");
                             done();
-                        }, 100);
+                        }, 200);
                     });
                 });
                 describe('array properties, fire a change event, and EVENTUALLY update dom-bind:', function () {
@@ -247,7 +248,7 @@
                             expect(patchAppliedEventCallback).to.have.been.called;
                             expect(document.querySelector("ul.people_properties>li.length").innerHTML).to.equal("1");
                             done();
-                        }, 100);
+                        }, 200);
                     });
                     it('when updating custom property', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
@@ -258,7 +259,7 @@
                             expect(patchAppliedEventCallback).to.have.been.called;
                             expect(document.querySelector("ul.people_properties>li.update").innerHTML).to.equal("changed");
                             done();
-                        }, 100);
+                        }, 200);
                     });
                     it('when adding custom property', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
@@ -270,7 +271,7 @@
                             expect(patchAppliedEventCallback).to.have.been.called;
                             expect(document.querySelector("ul.people_properties>li.add")).to.be.not.null;
                             done();
-                        }, 100);
+                        }, 200);
                     });
                     it('when deleting custom property (dom-if restamps asynchronously)', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
@@ -282,7 +283,7 @@
                             expect(patchAppliedEventCallback).to.have.been.called;
                             expect(document.querySelector("ul.people_properties>li.delete")).to.be.null;
                             done();
-                        }, 100);
+                        }, 200);
                     });
                 });
                 describe('array push,', function () {
@@ -300,7 +301,7 @@
                             expect(document.querySelector("ul.push>li:nth-child(2)>span")).to.be.not.null;
                             expect(document.querySelector("ul.push>li:nth-child(2)>span").innerHTML).to.equal("Alice");
                             done();
-                        }, 100);
+                        }, 200);
                     });
 
                     it('should start observing changes to objects added to array, then once these get changed, EVENTUALLY update dom-bind', function (done) {
@@ -317,8 +318,8 @@
                                 // nth-child is 1-indexed
                                 expect(document.querySelector("ul.push>li:nth-child(" + (newIndex+1) + ")>span").innerHTML).to.equal("Wizard from Oz");
                                 done();
-                            }, 100);
-                        }, 100);
+                            }, 200);
+                        }, 200);
                         // change model
                         palindromChange(palindrom, [operationObject('add', '/people_push/-', {
                             first: "Wizard"
@@ -333,7 +334,7 @@
                         setTimeout(function listener() {
                             expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('add', '/people_push/1', {first: 'Abraham'}));
                             done();
-                        }, 100);
+                        }, 200);
                     });
                 });
 
@@ -350,7 +351,7 @@
                             expect(document.querySelector("ul.pop>li>span").innerHTML).to.equal("Alice");
                             expect(document.querySelectorAll("ul.pop>li")).to.have.property("length").equal(1);
                             done();
-                        }, 100);
+                        }, 200);
                     });
                     it('should stop observing changes to removed objects, and do NOT fire a change event - REDEFINE with dom-bind and DOM changes', function (done) {
                         var last = model.people_pop.length - 1,
@@ -372,7 +373,7 @@
                                 ppclient.removeEventListener('patch-applied', listener);
                                 expect(numberOfCallsForChangeEvent).to.equal(0);
                                 done();
-                            }, 100);
+                            }, 200);
                         }, 20);
                     });
                 });
@@ -388,12 +389,13 @@
                         // check and wait for async dom-bind's stamping
                         setTimeout(function listener() {
                             expect(patchAppliedEventCallback).to.have.been.called;
+                            var span = document.querySelector("ul.splice>li>span");
                             expect(document.querySelector("ul.splice>li>span").innerHTML).to.equal("Alice");
                             expect(document.querySelector("ul.splice>li:nth-child(2)>span")).to.have.property("innerHTML").equal("Tomek");
                             expect(document.querySelector("ul.splice>li:nth-child(3)>span").innerHTML).to.equal("Celine");
                             expect(document.querySelectorAll("ul.splice>li")).to.have.property("length").equal(3);
                             done();
-                        }, 100);
+                        }, 200);
                     });
                 });
                 describe('inserted (add in the middle) array items, should EVENTUALLY update correct dom-repeat rows', function () {
@@ -415,8 +417,8 @@
                                 expect(document.querySelector("ul.splice_n_change>li:nth-child(2)").innerHTML).to.equal("Konstantin");
                                 expect(document.querySelector("ul.splice_n_change>li:nth-child(3)").innerHTML).to.equal("Bob");
                                 done();
-                            }, 100);
-                        }, 100);
+                            }, 200);
+                        }, 200);
 
                     });
                     it('for primitive values', function (done) {
@@ -437,8 +439,8 @@
                                 expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(2)").innerHTML).to.equal("K");
                                 expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(3)").innerHTML).to.equal("B");
                                 done();
-                            }, 100);
-                        }, 100);
+                            }, 200);
+                        }, 200);
                     });
                 });
                 describe('nested array items,', function () {
@@ -452,7 +454,7 @@
                             expect(patchAppliedEventCallback).to.have.been.called;
                             expect(document.querySelector("ul.people_nested>li:nth-child(1)>span").innerHTML).to.equal("John");
                             done();
-                        }, 100);
+                        }, 200);
                     });
                 });
             });

@@ -62,14 +62,14 @@ describe('palindrom-client, when stamped from `dom-bind` with deep attribute and
             initPalindrom(palindrom, model);
             domBind = container.querySelector('template[is="dom-bind"]');
             // Polymer werido(m)bind attaches to dom asynchronously
-            setTimeout(done, 100);
-        }, 100);
+            setTimeout(done, 200);
+        }, 200);
     });
     afterEach(function (done) {
         // Polymer werido(m)bind detaches from dom asynchronously
         setTimeout(function () {
             done();
-        }, 100);
+        }, 200);
     });
 
     describe('should notify Polymer binding so that changing nested array element will me replaced after each model replace', function () {
@@ -93,9 +93,9 @@ describe('palindrom-client, when stamped from `dom-bind` with deep attribute and
                     expect(patchAppliedEventCallback2).to.have.been.called;
                     expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("secondChange");
                     done();
-                }, 100);
+                }, 200);
 
-            }, 100);
+            }, 200);
         });
     });
 });

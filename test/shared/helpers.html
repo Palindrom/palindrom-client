@@ -1,4 +1,5 @@
 <!-- mock server responses -->
+<link rel="import" href="../../polymer/polymer.html">
 <script src="../../../fast-json-patch/dist/json-patch.min.js"></script>
 <script src="../../../sinonjs/sinon.js"></script>
 <script src="../../demo/mockServer.js"></script>
@@ -33,7 +34,7 @@
         palindromChange(palindrom, [operationObject('replace', '', model)]);
     };
     window.palindromChange = function(palindrom, sequence) {
-        palindrom.handleRemoteChange(JSON.stringify(preparePatchFromMockServer(sequence)), '', '');
+        palindrom.handleRemoteChange(preparePatchFromMockServer(sequence), '', '');
     };
     window.triggerPalindromSend = function() {
         var clickEvent = document.createEvent('MouseEvents');
