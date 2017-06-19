@@ -2,7 +2,7 @@
 <script src="../../../sinonjs/sinon.js"></script>
 <script src="../../demo/mockServer.js"></script>
 <script>
-    window.operationObject = function(op, path, value) {
+    window.operationObject = function (op, path, value) {
         var o = {
             op: op,
             path: path
@@ -12,12 +12,12 @@
         }
         return o;
     };
-    window.domBindFixture = function(id, done, where){
+    window.domBindFixture = function (id, done, where) {
         var fixture = document.getElementById(id).content;
         var templ = document.importNode(fixture, true);
         var domBind = templ.querySelector('[is="dom-bind"]');
-        domBind.addEventListener('dom-change', function() {
-            setTimeout(function(){
+        domBind.addEventListener('dom-change', function () {
+            setTimeout(function () {
                 done();
             });
         });
@@ -25,29 +25,27 @@
         return domBind;
     };
     var currentVersion;
-    window.initPalindrom = function(palindrom, model) {
+    window.initPalindrom = function (palindrom, model) {
         currentVersion = 1;
         setMockServerModel(model);
         disableMockServerReplies();
         palindromChange(palindrom, [operationObject('replace', '', model)]);
     };
-    window.palindromChange = function(palindrom, sequence) {
-        palindrom.handleRemoteChange(JSON.stringify(preparePatchFromMockServer(sequence)), '', '');
-    };
-    window.triggerPalindromSend = function() {
-        var clickEvent = document.createEvent('MouseEvents');
-        clickEvent.initEvent("mouseup", true, true);
-        window.dispatchEvent(clickEvent);
+    window.palindromChange = function (palindrom, sequence) {
+        palindrom.handleRemoteChange(preparePatchFromMockServer(sequence), '', '');
     };
 
-    window.palindromChaiPlugin = function(chai, utils) {
+    window.palindromChaiPlugin = function (chai, utils) {
         chai.Assertion.addMethod('calledWithPatch', function (op) {
+
+            // first arg is event, first two operations are OT-related
+            const data = JSON.parse(this._obj.firstCall.args[0].detail.data)[2];
+
             this.assert(this._obj.called
-                    // first arg is event, first two operations are OT-related
-                    && utils.eql(JSON.parse(this._obj.firstCall.args[0].detail.data)[2], op),
-                    "expected a spy to have been called with patch #{exp}, but it was not",
-                    "expected a spy to not have been called with patch #{exp}, but it has been",
-                    op);
+                && utils.eql(data, op),
+                "expected a spy to have been called with patch #{exp}, but it was not",
+                "expected a spy to not have been called with patch #{exp}, but it has been",
+                op);
         });
 
         chai.Assertion.addProperty('visible', function () {
@@ -56,4 +54,5 @@
                 "expected element #{this} to be hidden, but it's visible");
         })
     };
+
 </script>

@@ -4,12 +4,7 @@
 <!-- <link rel="import" href="iron-request.html"> -->
 
 <!-- include Palindrom with dependencies -->
-<script src="../fast-json-patch/dist/json-patch-duplex.min.js"></script>
-<script src="../json-patch-queue/src/json-patch-queue.js"></script>
-<script src="../json-patch-ot-agent/src/json-patch-ot-agent.js"></script>
-<script src="../json-patch-ot/src/json-patch-ot.js"></script>
-<script src="../Palindrom/src/palindrom.js"></script>
-<script src="../Palindrom/src/palindrom-dom.js"></script>
+<script src="../Palindrom/dist/palindrom-dom.js"></script>
 
 <!--
 The Polymer version of `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
@@ -213,43 +208,42 @@ All the changes from server are also received and propagated to your HTML.
                 if (listenTo) {
                     listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
                 }
-
                 this.palindrom = new PalindromDOM({
                     remoteUrl: this.remoteUrl,
                     pingIntervalS: pingIntervalS,
                     listenTo: listenTo,
-                    obj: this.obj,
                     useWebSocket: this.useWebSocket,
                     ignoreAdd: this.ignoreAdd,
                     debug: this.debug,
                     onLocalChange: this.onLocalChange.bind(this),
+                    onRemoteChange: this.onPatchApplied.bind(this),
                     onPatchReceived: this.onPatchReceived.bind(this),
                     onPatchSent: this.onPatchSent.bind(this),
                     onSocketStateChanged: this.onSocketStateChanged.bind(this),
                     onConnectionError: this.onConnectionError.bind(this),
                     onReconnectionCountdown: this.onReconnectionCountdown.bind(this),
                     onReconnectionEnd: this.onReconnectionEnd.bind(this),
-
                     localVersionPath: this.localVersionPath,
                     remoteVersionPath: this.remoteVersionPath,
                     ot: this.ot,
                     purity: this.purity,
-                    callback: function () {
+                    onStateReset: obj => {
+                        this.set('obj', obj);
                         if (whereToBind) {
                             this.bindTo(whereToBind);
                         }
-                    }.bind(this)
+                        this.onPatchApplied([{ op: 'replace', path: '', value: obj }], [{ removed: this.obj }])
+                    }
                 });
                 /* backward compatibility */
                 this.puppet = this.palindrom;
-                this.palindrom.addEventListener('patch-applied', this.onPatchApplied.bind(this));
-
                 this.network = this.palindrom.network;
                 this.morphUrl = this.palindrom.morphUrl.bind(this.palindrom);
             },
             bindTo: function (element) {
                 // use node id or node itself;
                 element = typeof element == "string" ? document.getElementById(element) : element;
+
                 element.model = this.obj;
                 this.bound = element;
             },
@@ -295,7 +289,6 @@ All the changes from server are also received and propagated to your HTML.
                     method: method,
                     handled: false
                 };
-
                 this.fire("connectionerror", eventDetail);
 
                 if (!eventDetail.handled) {
@@ -347,7 +340,6 @@ All the changes from server are also received and propagated to your HTML.
                 var eventDetail = {
                     handled: false
                 };
-
                 this.fire("reconnection-end", eventDetail);
 
                 if (!eventDetail.handled) {
@@ -355,20 +347,12 @@ All the changes from server are also received and propagated to your HTML.
                     this._setShowReconnectingIn(false);
                 }
             },
-            onPatchApplied: function (ev) {
-                if (!this.bound) {
-                    var whereToBind = this.getAttribute("ref");
-                    if (whereToBind) {
-                        this.bindTo(whereToBind);
-                    }
-                }
-
-                this.propagateDomBind(ev.detail);
-                // FIXME tomalec: DRY, palindrom does the same
+            onPatchApplied: function (patches, results) {
+                this.propagateDomBind({ patches, results });
                 this.dispatchEvent(new CustomEvent("patch-applied", {
                     bubbles: true,
                     cancelable: true,
-                    detail: ev.detail.patches
+                    detail: patches
                 }));
             },
             notifyTemplateDomBind: function (tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
@@ -376,7 +360,6 @@ All the changes from server are also received and propagated to your HTML.
                 for (var operationNo = 0, len = patchesAndResults.patches.length; operationNo < len; operationNo++) {
                     operation = patchesAndResults.patches[operationNo];
                     var result = patchesAndResults.results[operationNo];
-
                     if (operation.path == "") {
                         //in case of root path, Polymer replaces the original obj, which detaches it from Palindrom
                         var newSequence = { patches: [], results: [] };
@@ -411,7 +394,7 @@ All the changes from server are also received and propagated to your HTML.
                                 case 'add':
                                     // JSONPatch push
                                     if (name === '-') {
-                                        name = result;
+                                        name = result.index;
                                     }
                                     templateDomBind.notifySplices(parentsPolymerPath,
                                         [{
@@ -427,7 +410,7 @@ All the changes from server are also received and propagated to your HTML.
                                     templateDomBind.notifySplices(parentsPolymerPath,
                                         [{
                                             index: parseInt(name, 10),
-                                            removed: [result],
+                                            removed: [result && result.removed],
                                             addedCount: 1,
                                             object: parent,
                                             type: 'splice'
@@ -438,7 +421,7 @@ All the changes from server are also received and propagated to your HTML.
                                     templateDomBind.notifySplices(parentsPolymerPath,
                                         [{
                                             index: parseInt(name, 10),
-                                            removed: [result],
+                                            removed: [result && result.removed],
                                             addedCount: 0,
                                             object: parent,
                                             type: 'splice'
@@ -448,9 +431,14 @@ All the changes from server are also received and propagated to your HTML.
                             }
                         } else {
                             switch (operation.op) {
+
                                 case 'add':
                                 case 'replace':
-                                    templateDomBind.notifyPath(polymerPath, operation.value, false);
+                                    if (typeof operation.value === 'object') {
+                                        templateDomBind.notifyPath(polymerPath);
+                                    } else {
+                                        templateDomBind.notifyPath(polymerPath, operation.value, false);
+                                    }
                                     break;
                                 case 'remove':
                                     //console.warn('Polymer does not support unsetting properties https://github.com/Polymer/polymer/issues/2565');
@@ -494,6 +482,7 @@ All the changes from server are also received and propagated to your HTML.
 
         return component;
     }());
+
 </script>
 <dom-module id="palindrom-client">
     <template>
@@ -507,11 +496,11 @@ All the changes from server are also received and propagated to your HTML.
                 justify-content: center;
                 z-index: 1000;
             }
-            
+
             .box-container[hidden] {
                 display: none;
             }
-            
+
             .box {
                 width: 50%;
                 border-radius: 0 0 10px 10px;
@@ -520,29 +509,29 @@ All the changes from server are also received and propagated to your HTML.
                 text-align: center;
                 padding: 5px 0;
             }
-            
+
             @media only screen and (max-width: 640px) {
                 .box {
                     width: 100%;
                 }
             }
-            
+
             .notice {
                 background-color: #fff4cc;
                 border-color: #ffe070;
                 color: #000;
             }
-            
+
             .error {
                 background-color: #DB0F13;
                 border-color: #A11517;
                 color: #FFFFFF;
             }
-            
+
             .tappable {
                 cursor: pointer;
             }
-            
+
             .tappable span {
                 text-decoration: underline;
             }
@@ -575,11 +564,12 @@ All the changes from server are also received and propagated to your HTML.
                 display: flex;
                 justify-content: center;
                 z-index: 1000;
-            }            
+            }
+
             .box-container[hidden] {
                 display: none;
             }
-            
+
             .box {
                 width: 50%;
                 border-radius: 0 0 10px 10px;
@@ -587,25 +577,30 @@ All the changes from server are also received and propagated to your HTML.
                 border-top: none;
                 text-align: center;
                 padding: 5px 0;
-            }            
+            }
+
             @media only screen and (max-width: 640px) {
                 .box {
                     width: 100%;
                 }
-            }            
+            }
+
             .notice {
                 background-color: #fff4cc;
                 border-color: #ffe070;
                 color: #000;
-            }            
+            }
+
             .error {
                 background-color: #DB0F13;
                 border-color: #A11517;
                 color: #FFFFFF;
-            }            
+            }
+
             .tappable {
                 cursor: pointer;
-            }            
+            }
+
             .tappable span {
                 text-decoration: underline;
             }

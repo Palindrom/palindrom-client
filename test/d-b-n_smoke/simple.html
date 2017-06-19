@@ -33,49 +33,46 @@
     </script>
 
     <script>
-        describe('palindrom-client, when stamped from `dom-bind` bound to shallow palindrom object', function() {
+        describe('palindrom-client, when stamped from `dom-bind` bound to shallow palindrom object', function () {
             var ppclient, palindrom;
             before(function waitForHTMLImportsAndDomBindChange(done) {
-                setTimeout(function() {
+                setTimeout(function () {
                     chai.use(palindromChaiPlugin);
                     ppclient = document.querySelector('palindrom-client');
                     palindrom = ppclient.palindrom;
                     initPalindrom(palindrom, model);
                     done();
-                });
+                }, 10);
             });
 
-            describe('should observe changes to it,', function() {
-                it('fire a patch-applied event, and update dom-bind', function(done) {
+            describe('should observe changes to it,', function () {
+                it('fire a patch-applied event, and update dom-bind', function (done) {
                     // check and wait for the event dispatching
                     ppclient.addEventListener("patch-applied", function listener(event) {
                         ppclient.removeEventListener("patch-applied", listener);
-                        expect(event.type).to.equal("patch-applied"); // It's kinda stupid, isn't it?
                         expect(document.querySelector("h4>span").innerHTML).to.equal("Polymer");
                         done();
                     });
                     // change model
-                    palindromChange(palindrom, [operationObject('replace','/name', 'Polymer')]);
+                    palindromChange(palindrom, [operationObject('replace', '/name', 'Polymer')]);
                 });
-                it('when element is removed, should notify any listeners', function(done) {
+                it('when element is removed, should notify any listeners', function (done) {
                     // change model
-                    palindromChange(palindrom, [operationObject('remove','/name')]);
+                    palindromChange(palindrom, [operationObject('remove', '/name')]);
                     setTimeout(function () {
                         // dom-if is an example of a listener
                         expect(document.querySelector("#conditional")).to.not.be.visible;
                         done();
                     })
                 });
-                it('and send back changes applied to model as a reaction to changes from server', function(done) {
+                it('and send back changes applied to model as a reaction to changes from server', function (done) {
                     var patchSentListener = sinon.spy();
                     ppclient.addEventListener('patchsent', patchSentListener);
-                    ppclient.addEventListener('patch-applied', function() {
+                    ppclient.addEventListener('patch-applied', function () {
                         domBind.set("model.name", "change #2");
-                        triggerPalindromSend();
                     });
                     palindromChange(palindrom, [operationObject('replace', '/name', "change #1")]);
-                    triggerPalindromSend();
-                    setTimeout(function() {
+                    setTimeout(function () {
                         expect(patchSentListener).to.have.been.calledWithPatch(operationObject("replace", "/name", "change #2"));
                         done();
                     }, 100);

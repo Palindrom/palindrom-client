@@ -17,15 +17,17 @@
 </head>
 
 <body>
-    <test-fixture id="my-fixture"><template>
-        <!-- workaround for test-fixture bug -->
-        <div>
-            <palindrom-client remote-url="/palindrom" ref="bind" ping-interval-s="0"></palindrom-client>
-            <template is="dom-bind" id="bind">
-                <span id="name">{{model.name}}</span>
-            </template>
-        </div>
-    </template></test-fixture>
+    <test-fixture id="my-fixture">
+        <template>
+            <!-- workaround for test-fixture bug -->
+            <div>
+                <palindrom-client remote-url="/palindrom" ref="bind" ping-interval-s="0"></palindrom-client>
+                <template is="dom-bind" id="bind">
+                    <span id="name">{{model.name}}</span>
+                </template>
+            </div>
+        </template>
+    </test-fixture>
     <script>
         var model;
         // Do not take `console.error` as a reason to fail the test.
@@ -42,7 +44,7 @@
                 patchSentEventCallback = sinon.spy();
                 consoleErrorSpy = sinon.spy(console, 'error');
 
-                model = {"name": "oldname"};
+                model = { "name": "oldname" };
 
                 container = fixture('my-fixture');
                 setTimeout(function () {
@@ -65,24 +67,24 @@
             });
 
             it('when connection is broken with a reason should display an error box', function () {
-                var closeEvent = {reason: 'thereason', code:1};
+                var closeEvent = { reason: 'thereason', code: 1 };
                 var boxErrorMsg = 'Connection error. See console for details.';
                 palindrom.network._ws.close(closeEvent);
                 expect(container.querySelector("div.box.error.tappable").innerText).to.contain(boxErrorMsg);
             });
 
-            it('and log error reason to the console', function() {
-                var closeEvent = {reason: 'thereason', code: 1};
+            it('and log error reason to the console', function () {
+                var closeEvent = { reason: 'thereason', code: 1 };
                 palindrom.network._ws.close(closeEvent);
                 expect(consoleErrorSpy.getCall(0).args[0]).to.contain(closeEvent.reason);
             });
 
-            describe('when connection is broken without a reason should display a notice box', function() {
-                it('and reconnect after a second and use model from server', function(done) {
-                    var closeEvent = {reason: undefined, code:1};
+            describe('when connection is broken without a reason should display a notice box', function () {
+                it('and reconnect after a second and use model from server', function (done) {
+                    var closeEvent = { reason: undefined, code: 1 };
                     palindrom.network._ws.close(closeEvent);
                     var newName = 'newname';
-                    setMockServerModel({name: newName});
+                    setMockServerModel({ name: newName });
                     expect(container.querySelector("div.box.notice").innerText).to.contain("Connecting in 1s...");
                     ppclient.addEventListener('reconnection-end', function () {
                         setTimeout(function () {
@@ -92,16 +94,16 @@
                     });
                 });
 
-                it('and send pending patches when reconnecting', function(done) {
-                    var closeEvent = {reason: undefined, code:1};
+                it('and send pending patches when reconnecting', function (done) {
+                    var closeEvent = { reason: undefined, code: 1 };
                     var newName = "new-name";
                     palindrom.network._ws.close(closeEvent);
                     domBind.set("model.name", newName);
-                    triggerPalindromSend();
+
                     ppclient.addEventListener('reconnection-end', function () {
                         expect(JSON.parse(lastRequestContent)[0][2]).to.deep.equal(
-                                //            first patch ----^  ^---- first two operations are versions
-                                operationObject('replace', '/name', newName));
+                            //            first patch ----^  ^---- first two operations are versions
+                            operationObject('replace', '/name', newName));
                         done();
                     });
                 });

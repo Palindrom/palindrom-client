@@ -34,8 +34,8 @@
     "Gruntfile.js"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.3.0",
-    "Palindrom": "Palindrom/Palindrom#master"
+    "polymer": "Polymer/polymer#^1.9.1",
+    "Palindrom": "Palindrom/Palindrom#3.0.0-rc.0"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#^1.0.0",

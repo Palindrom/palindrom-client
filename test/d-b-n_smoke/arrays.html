@@ -17,84 +17,87 @@
 </head>
 
 <body>
-    <test-fixture id="my-fixture"><template>
-        <!-- workaround for test-fixture bug -->
-        <div>
-            <palindrom-client remote-url="/palindrom" ref="arrays" ping-interval-s="0"></palindrom-client>
-            <template is="dom-bind" id="arrays">
-                <h4>
-                    <span>{{model.name}}</span> people:</h4>
-                <ul class="people">
-                    <template is="dom-repeat" items="{{model.people}}">
-                        <li>
-                            <span>{{item.first}}</span>
-                        </li>
-                    </template>
-                </ul>
-                <ul class="primitive_people">
-                    <template is="dom-repeat" items="{{model.primitive_people}}">
-                        <li>
-                            <span>{{item}}</span>
-                        </li>
-                    </template>
-                </ul>
-                <ul class="people_properties">
-                    <li class="arr">Elements:
-                        <template is="dom-repeat" items="{{model.people_properties}}">
-                                <span>{{item}}</span>,
-                        </template></li>
-                    <li class="length">{{model.people_properties.length}}</li>
-                    <li class="update">{{model.people_properties.prop}}</li>
-                    <template is="dom-if" if="{{model.people_properties.newProp}}" restamp>
-                        <li class="add">Add</li>
-                    </template>
-                    <template is="dom-if" if="{{model.people_properties.deletedProp}}" restamp>
-                        <li class="delete">Deleted? - <span>{{model.people_properties.deletedProp}}</span></li>
-                    </template>
-                </ul>
-                <ul class="push">
-                    <template is="dom-repeat" items="{{model.people_push}}">
-                        <li>
-                            <span>{{item.first}}</span>
-                        </li>
-                    </template>
-                </ul>
-                <ul class="pop">
-                    <template is="dom-repeat" items="{{model.people_pop}}">
-                        <li>
-                            <span>{{item.first}}</span>
-                        </li>
-                    </template>
-                </ul>
-                <ul class="splice">
-                    <template is="dom-repeat" items="{{model.people_splice}}">
-                        <li>
-                            <span>{{item.first}}</span>
-                        </li>
-                    </template>
-                </ul>
-                <ul class="splice_n_change">
-                    <template is="dom-repeat" items="{{model.people_splice_n_change}}">
-                        <li>{{item.first}}</li>
-                    </template>
-                </ul>
-                <ul class="primitive_splice_n_change">
-                    <template is="dom-repeat" items="{{model.primitive_splice_n_change}}">
-                        <li>{{item}}</li>
-                    </template>
-                </ul>
-                <ul class="people_nested">
-                    <template is="dom-repeat" items="{{model.people_nested}}">
-                        <li>
-                            <template is="dom-repeat" items="{{item}}">
+    <test-fixture id="my-fixture">
+        <template>
+            <!-- workaround for test-fixture bug -->
+            <div>
+                <palindrom-client remote-url="/palindrom" ref="arrays" ping-interval-s="0"></palindrom-client>
+                <template is="dom-bind" id="arrays">
+                    <h4>
+                        <span>{{model.name}}</span> people:</h4>
+                    <ul class="people">
+                        <template is="dom-repeat" items="{{model.people}}">
+                            <li>
+                                <span>{{item.first}}</span>
+                            </li>
+                        </template>
+                    </ul>
+                    <ul class="primitive_people">
+                        <template is="dom-repeat" items="{{model.primitive_people}}">
+                            <li>
                                 <span>{{item}}</span>
+                            </li>
+                        </template>
+                    </ul>
+                    <ul class="people_properties">
+                        <li class="arr">Elements:
+                            <template is="dom-repeat" items="{{model.people_properties}}">
+                                <span>{{item}}</span>,
                             </template>
                         </li>
-                    </template>
-                </ul>
-            </template>
-        </div>
-    </template></test-fixture>
+                        <li class="length">{{model.people_properties.length}}</li>
+                        <li class="update">{{model.people_properties.prop}}</li>
+                        <template is="dom-if" if="{{model.people_properties.newProp}}" restamp>
+                            <li class="add">Add</li>
+                        </template>
+                        <template is="dom-if" if="{{model.people_properties.deletedProp}}" restamp>
+                            <li class="delete">Deleted? - <span>{{model.people_properties.deletedProp}}</span></li>
+                        </template>
+                    </ul>
+                    <ul class="push">
+                        <template is="dom-repeat" items="{{model.people_push}}">
+                            <li>
+                                <span>{{item.first}}</span>
+                            </li>
+                        </template>
+                    </ul>
+                    <ul class="pop">
+                        <template is="dom-repeat" items="{{model.people_pop}}">
+                            <li>
+                                <span>{{item.first}}</span>
+                            </li>
+                        </template>
+                    </ul>
+                    <ul class="splice">
+                        <template is="dom-repeat" items="{{model.people_splice}}">
+                            <li>
+                                <span>{{item.first}}</span>
+                            </li>
+                        </template>
+                    </ul>
+                    <ul class="splice_n_change">
+                        <template is="dom-repeat" items="{{model.people_splice_n_change}}">
+                            <li>{{item.first}}</li>
+                        </template>
+                    </ul>
+                    <ul class="primitive_splice_n_change">
+                        <template is="dom-repeat" items="{{model.primitive_splice_n_change}}">
+                            <li>{{item}}</li>
+                        </template>
+                    </ul>
+                    <ul class="people_nested">
+                        <template is="dom-repeat" items="{{model.people_nested}}">
+                            <li>
+                                <template is="dom-repeat" items="{{item}}">
+                                    <span>{{item}}</span>
+                                </template>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+            </div>
+        </template>
+    </test-fixture>
     <script>
         var model;
         describe('palindrom-client, when stamped from `dom-bind` and bound to palindrom object w/ array', function () {
@@ -111,7 +114,7 @@
                     name: "Juicy",
                     people: [{
                         first: "Tomek"
-                    },{
+                    }, {
                         first: "Romek"
                     }],
                     primitive_people: [
@@ -185,7 +188,7 @@
                     it('for arrays of primitives, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         ppclient.addEventListener('patchsent', patchSentEventCallback);
                         domBind.splice('model.primitive_people', 0, 1, 'Homo erectus');
-                        triggerPalindromSend();
+
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
                             expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/primitive_people/0', 'Homo erectus'));
@@ -195,9 +198,10 @@
 
                     });
                     it('in arrays of objects, after a remote change fire a change event, and EVENTUALLY update dom-bind', function (done) {
-                        var newItem = {first: 'Atomek'};
+                        var newItem = { first: 'Atomek' };
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
+
                         palindromChange(palindrom, [operationObject('replace', '/people/1', newItem)]);
 
                         // check and wait for the event dispatching
@@ -209,13 +213,18 @@
 
                     });
                     it('in arrays of objects, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
-                        var newItem = {first: 'Atomek'};
+                        var newItem = { first: 'Atomek' };
+
                         ppclient.addEventListener('patchsent', patchSentEventCallback);
+
+                        /* we are replacing the whole object, not only the first name */
                         domBind.splice('model.people', 1, 1, newItem);
-                        triggerPalindromSend();
+
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
-                            expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/people/1/first', newItem.first));
+                            expect(patchSentEventCallback).to.have.been.called;
+                            var call = patchSentEventCallback.getCall(0);
+                            expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('replace', '/people/1', newItem));
                             expect(document.querySelector("ul.people>li:nth-child(2)>span").innerHTML).to.equal(newItem.first);
                             done();
                         }, 100);
@@ -252,10 +261,8 @@
                     it('when updating custom property', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         palindromChange(palindrom, [operationObject('replace', '/people_properties/prop', 'changed')]);
-
-                        // check and wait for the event dispatching
-                        setTimeout(function listener() {
-                            expect(patchAppliedEventCallback).to.have.been.called;
+                        expect(patchAppliedEventCallback).to.have.been.called;
+                        setTimeout(() => {
                             expect(document.querySelector("ul.people_properties>li.update").innerHTML).to.equal("changed");
                             done();
                         }, 100);
@@ -315,7 +322,7 @@
                             setTimeout(function listener() {
                                 expect(patchAppliedEventCallback).to.have.been.called;
                                 // nth-child is 1-indexed
-                                expect(document.querySelector("ul.push>li:nth-child(" + (newIndex+1) + ")>span").innerHTML).to.equal("Wizard from Oz");
+                                expect(document.querySelector("ul.push>li:nth-child(" + (newIndex + 1) + ")>span").innerHTML).to.equal("Wizard from Oz");
                                 done();
                             }, 100);
                         }, 100);
@@ -328,16 +335,16 @@
                     it('when adding element to array patch should be sent', function (done) {
                         ppclient.addEventListener('patchsent', patchSentEventCallback);
                         palindrom.ignoreAdd = false;
-                        domBind.splice('model.people_push', 1, 0, {first: 'Abraham'});
-                        triggerPalindromSend();
+                        domBind.splice('model.people_push', 1, 0, { first: 'Abraham' });
+
                         setTimeout(function listener() {
-                            expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('add', '/people_push/1', {first: 'Abraham'}));
+                            expect(patchSentEventCallback).to.have.been.calledWithPatch(operationObject('add', '/people_push/1', { first: 'Abraham' }));
                             done();
                         }, 100);
                     });
                 });
 
-                describe('array remove (last),', function () {
+                describe('array remove - last,', function () {
                     it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         var last = model.people_pop.length - 1;
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
@@ -353,10 +360,12 @@
                         }, 100);
                     });
                     it('should stop observing changes to removed objects, and do NOT fire a change event - REDEFINE with dom-bind and DOM changes', function (done) {
-                        var last = model.people_pop.length - 1,
-                            remocedObj = model.people_pop[last];
+                        var last = palindrom.obj.people_pop.length - 1,
+                            removedObj = palindrom.obj.people_pop[last];
+                        ;
                         // change model
                         palindromChange(palindrom, [operationObject('remove', '/people_pop/' + last)]);
+
                         // make it async, to make sure it will come as separated change
                         setTimeout(function () {
                             var numberOfCallsForChangeEvent = 0;
@@ -366,7 +375,7 @@
                                 numberOfCallsForChangeEvent++;
                             }
                             ppclient.addEventListener('patch-applied', listener);
-                            remocedObj.first = "removed Alice";
+                            removedObj.first = "removed Alice";
                             // wait for any event to be called
                             setTimeout(function () {
                                 ppclient.removeEventListener('patch-applied', listener);
@@ -424,14 +433,12 @@
                         palindromChange(palindrom, [operationObject('add', '/primitive_splice_n_change/1', 'T')]);
                         // wait to apply it in another sequence
                         setTimeout(function () {
-                            console.log(palindrom, domBind);
                             ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                             // change model
                             palindromChange(palindrom, [operationObject('replace', '/primitive_splice_n_change/1', 'K')]);
 
                             // check and wait for async dom-bind's stamping
                             setTimeout(function listener() {
-                                console.log(palindrom, domBind);
                                 expect(patchAppliedEventCallback).to.have.been.called;
                                 expect(document.querySelector("ul.primitive_splice_n_change>li").innerHTML).to.equal("A");
                                 expect(document.querySelector("ul.primitive_splice_n_change>li:nth-child(2)").innerHTML).to.equal("K");

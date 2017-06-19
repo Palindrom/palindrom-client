@@ -15,8 +15,8 @@
 
 <body>
 
-    <puppet-client remote-url="/palindrom" ref="simple" ping-interval-s="0"></puppet-client>
-    <template is="dom-bind" id="simple">
+    <puppet-client remote-url="/palindrom" ref="backward-comp" ping-interval-s="0"></puppet-client>
+    <template is="dom-bind" id="backward-comp">
 
         <h4>Welcome to
             <span>{{model.name}}</span>!</h4>
@@ -28,54 +28,52 @@
         var model = {
             name: "Juicy"
         };
-        var domBind = document.getElementById("simple");
+        var domBind = document.getElementById("backward-comp");
         domBind.model = model;
     </script>
 
     <script>
-        describe('Test backward compability, puppet-client, when stamped from `dom-bind` bound to shallow puppet object', function() {
+        describe('Test backward compability, puppet-client, when stamped from `dom-bind` bound to shallow puppet object', function () {
             var ppclient, puppet;
             before(function waitForHTMLImportsAndDomBindChange(done) {
-                setTimeout(function() {
+                setTimeout(function () {
                     chai.use(palindromChaiPlugin);
                     ppclient = document.querySelector('puppet-client');
                     puppet = ppclient.puppet;
                     initPalindrom(puppet, model);
                     done();
-                });
+                }, 10);
             });
 
-            describe('should observe changes to it,', function() {
-                it('fire a patch-applied event, and update dom-bind', function(done) {
+            describe('should observe changes to it,', function () {
+                it('fire a patch-applied event, and update dom-bind', function (done) {
                     // check and wait for the event dispatching
                     ppclient.addEventListener("patch-applied", function listener(event) {
                         ppclient.removeEventListener("patch-applied", listener);
-                        expect(event.type).to.equal("patch-applied"); // It's kinda stupid, isn't it?
                         expect(document.querySelector("h4>span").innerHTML).to.equal("Polymer");
                         done();
                     });
                     // change model
-                    palindromChange(puppet, [operationObject('replace','/name', 'Polymer')]);
+                    palindromChange(puppet, [operationObject('replace', '/name', 'Polymer')]);
                 });
-                it('when element is removed, should notify any listeners', function(done) {
+                it('when element is removed, should notify any listeners', function (done) {
                     // change model
-                    palindromChange(puppet, [operationObject('remove','/name')]);
+                    palindromChange(puppet, [operationObject('remove', '/name')]);
                     setTimeout(function () {
                         // dom-if is an example of a listener
                         expect(document.querySelector("#conditional")).to.not.be.visible;
                         done();
-                    })
+                    }, 10)
                 });
-                it('and send back changes applied to model as a reaction to changes from server', function(done) {
+                it('and send back changes applied to model as a reaction to changes from server', function (done) {
                     var patchSentListener = sinon.spy();
                     ppclient.addEventListener('patchsent', patchSentListener);
-                    ppclient.addEventListener('patch-applied', function() {
+                    ppclient.addEventListener('patch-applied', function () {
                         domBind.set("model.name", "change #2");
-                        triggerPalindromSend();
                     });
                     palindromChange(puppet, [operationObject('replace', '/name', "change #1")]);
-                    triggerPalindromSend();
-                    setTimeout(function() {
+                    setTimeout(function () {
+                        var a = ppclient.puppet;
                         expect(patchSentListener).to.have.been.calledWithPatch(operationObject("replace", "/name", "change #2"));
                         done();
                     }, 100);

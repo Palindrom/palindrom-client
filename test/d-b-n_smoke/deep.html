@@ -39,11 +39,10 @@
                 domBind.model = model;
                 ppclient = document.querySelector("palindrom-client");
                 palindrom = ppclient.palindrom;
-                initPalindrom(palindrom, model);
-
-                setTimeout(function () {
+                setTimeout(() => {
+                    initPalindrom(palindrom, model);
                     done();
-                });
+                }, 100)
             });
             describe('should observe changes to it,', function () {
                 if (navigator.vendor && navigator.vendor.indexOf('Apple') > -1) {
@@ -52,25 +51,25 @@
                     it('fire a change event, and update dom-bind', function (done) {
                         var patchAppliedEventCallback = sinon.spy();
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
+                        
                         // change model
                         palindromChange(palindrom, [operationObject('replace', '/author/first', 'tomalec')]);
 
                         // check and wait for async dom-bind's stamping
-                        var retriesLeft = 100;
                         // temporary construct. See #23
                         function tryAssertion() {
-                            if (retriesLeft == 0) {
-                                fail("Exceeded timeout waiting for condition");
-                            } else if (patchAppliedEventCallback.called
-                                    && document.getElementById("author").innerHTML == "tomalec") {
+                            if (patchAppliedEventCallback.called
+                                && document.getElementById("author").innerHTML == "tomalec") {
                                 done();
-                            } else {
-                                retriesLeft--;
-                                setTimeout(tryAssertion, 100)
+                            }
+                            else {
+                                console.info('Assertion didn\'t pass');
+                                console.info('patchAppliedEventCallback.called: ', patchAppliedEventCallback.called);
+                                console.info('document.getElementById("author").innerHTML: ', document.getElementById("author").innerHTML);
                             }
                         }
+                        setInterval(tryAssertion, 100); // Mocha timeouts after 10 seconds
 
-                        tryAssertion();
                     });
                 }
             });

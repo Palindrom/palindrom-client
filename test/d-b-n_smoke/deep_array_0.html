@@ -1,6 +1,6 @@
-
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
@@ -15,25 +15,28 @@
     <!-- Step 1: import the element to test -->
     <link rel="import" href="../../palindrom-client.html">
 </head>
+
 <body>
 
-    <test-fixture id="my-fixture"><template>
-        <!-- workaround for test-fixture bug -->
-        <div>
-            <palindrom-client remote-url="/palindrom" ref="deep_array" ping-interval-s="0"></palindrom-client>
-            <template is="dom-bind" id="deep_array">
-                <div id="arrayDiv">
-                    <template is="dom-repeat" items="{{model.path_to.array}}">
-                        <div id="nestedArrayDiv">
-                          <template is="dom-repeat" items="{{item.nested_array}}">
-                              <span>{{item.prop}}</span>
-                          </template>
-                        </div>
-                    </template>
-                </div>
-            </template>
-        </div>
-    </template></test-fixture>
+    <test-fixture id="my-fixture">
+        <template>
+            <!-- workaround for test-fixture bug -->
+            <div>
+                <palindrom-client remote-url="/palindrom" ref="deep_array" ping-interval-s="0"></palindrom-client>
+                <template is="dom-bind" id="deep_array">
+                    <div id="arrayDiv">
+                        <template is="dom-repeat" items="{{model.path_to.array}}">
+                            <div id="nestedArrayDiv">
+                                <template is="dom-repeat" items="{{item.nested_array}}">
+                                    <span>{{item.prop}}</span>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </test-fixture>
     <script>
         var model = {
             path_to: {
@@ -49,57 +52,58 @@
             }
         };
 
-describe('palindrom-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function () {
-    var container, domBind, ppclient, palindrom, patchAppliedEventCallback;
+        describe('palindrom-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function () {
+            var container, domBind, ppclient, palindrom, patchAppliedEventCallback;
 
-    beforeEach(function (done) {
-        patchAppliedEventCallback = sinon.spy();
+            beforeEach(function (done) {
+                patchAppliedEventCallback = sinon.spy();
 
-        container = fixture('my-fixture');
-        setTimeout(function () {
-            ppclient = container.querySelector("palindrom-client");
-            palindrom = ppclient.palindrom;
-            initPalindrom(palindrom, model);
-            domBind = container.querySelector('template[is="dom-bind"]');
-            // Polymer werido(m)bind attaches to dom asynchronously
-            setTimeout(done, 100);
-        }, 100);
-    });
-    afterEach(function (done) {
-        // Polymer werido(m)bind detaches from dom asynchronously
-        setTimeout(function () {
-            done();
-        }, 100);
-    });
-
-    describe('should notify Polymer binding so that changing nested array element will me replaced after each model replace', function () {
-        it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
-            ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
-            // change model
-            palindromChange(palindrom, [operationObject('replace', '/path_to/array/0/nested_array/0', {prop: "firstChange"})]);
-
-            // check and wait for async dom-bind's stamping
-            setTimeout(function listener() {
-                expect(patchAppliedEventCallback).to.have.been.called;
-                expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("firstChange");
-
-                var patchAppliedEventCallback2 = sinon.spy();
-                ppclient.addEventListener('patch-applied', patchAppliedEventCallback2);
-                // change model
-                palindromChange(palindrom, [operationObject('replace', '/path_to/array/0/nested_array/0', {prop: "secondChange"})]);
-
-                // check and wait for async dom-bind's stamping
-                setTimeout(function listener2() {
-                    expect(patchAppliedEventCallback2).to.have.been.called;
-                    expect( document.querySelector("#nestedArrayDiv>span:first-child").innerHTML ).to.equal("secondChange");
+                container = fixture('my-fixture');
+                setTimeout(function () {
+                    ppclient = container.querySelector("palindrom-client");
+                    palindrom = ppclient.palindrom;
+                    initPalindrom(palindrom, model);
+                    domBind = container.querySelector('template[is="dom-bind"]');
+                    // Polymer werido(m)bind attaches to dom asynchronously
+                    setTimeout(done, 100);
+                }, 100);
+            });
+            afterEach(function (done) {
+                // Polymer werido(m)bind detaches from dom asynchronously
+                setTimeout(function () {
                     done();
                 }, 100);
+            });
 
-            }, 100);
+            describe('should notify Polymer binding so that changing nested array element will me replaced after each model replace', function () {
+                it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
+                    ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
+                    // change model
+                    palindromChange(palindrom, [operationObject('replace', '/path_to/array/0/nested_array/0', { prop: "firstChange" })]);
+
+                    // check and wait for async dom-bind's stamping
+                    setTimeout(function listener() {
+                        expect(patchAppliedEventCallback).to.have.been.called;
+                        expect(document.querySelector("#nestedArrayDiv>span:first-child").innerHTML).to.equal("firstChange");
+
+                        var patchAppliedEventCallback2 = sinon.spy();
+                        ppclient.addEventListener('patch-applied', patchAppliedEventCallback2);
+                        // change model
+                        palindromChange(palindrom, [operationObject('replace', '/path_to/array/0/nested_array/0', { prop: "secondChange" })]);
+
+                        // check and wait for async dom-bind's stamping
+                        setTimeout(function listener2() {
+                            expect(patchAppliedEventCallback2).to.have.been.called;
+                            expect(document.querySelector("#nestedArrayDiv>span:first-child").innerHTML).to.equal("secondChange");
+                            done();
+                        }, 100);
+
+                    }, 100);
+                });
+            });
         });
-    });
-});
     </script>
 
-  </body>
+</body>
+
 </html>
