@@ -65,16 +65,6 @@ All the changes from server are also received and propagated to your HTML.
                     type: String
                 },
                 /**
-                 * Regular expression with local properties to ignore
-                 * @see [Palindrom.ignoreAdd](https://github.com/Palindrom/Palindrom#ignoring-local-changes-ignoreadd).
-                 * Should be given in string format, like `"_.+"`.
-                 */
-                ignoreAdd: {
-                    type: RegExp,
-                    value: /.*/,
-                    observer: '_ignoreAddChanged'
-                },
-                /**
                  * Set to `false` to disable WebSocket (use HTTP)
                  */
                 useWebSocket: {
@@ -213,7 +203,6 @@ All the changes from server are also received and propagated to your HTML.
                     pingIntervalS: pingIntervalS,
                     listenTo: listenTo,
                     useWebSocket: this.useWebSocket,
-                    ignoreAdd: this.ignoreAdd,
                     debug: this.debug,
                     onLocalChange: this.onLocalChange.bind(this),
                     onRemoteChange: this.onPatchApplied.bind(this),
@@ -460,13 +449,7 @@ All the changes from server are also received and propagated to your HTML.
             unobserveJSONPatch: function () {
                 // FIXME this is dummy as hell
                 this.palindromObserver = noop;
-            },
-            _ignoreAddChanged: function (newVal, oldVal) {
-                if (typeof this.ignoreAdd === "string") {
-                    this.ignoreAdd = new RegExp(this.ignoreAdd);
-                }
             }
-
         };
 
         function noop() { }

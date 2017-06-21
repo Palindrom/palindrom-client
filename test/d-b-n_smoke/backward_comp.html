@@ -73,7 +73,6 @@
                     });
                     palindromChange(puppet, [operationObject('replace', '/name', "change #1")]);
                     setTimeout(function () {
-                        var a = ppclient.puppet;
                         expect(patchSentListener).to.have.been.calledWithPatch(operationObject("replace", "/name", "change #2"));
                         done();
                     }, 100);
