@@ -62,7 +62,6 @@ Attribute                       | Options   | Default | Description
 ---                             | ---       | ---     | ---
 ref   | `String` or `HTMLElement` | element itself | To which element (polymer element/`template is="dom-bind"`) we should bind to.
 debug | `Boolean` | `false` | Set to `true` to enable debugging mode
-ignoreAdd | `RegExp` | `/.*/` | Regular expression with local properties to ignore
 listenTo | `String` | `document.body` | DOM node to listen to (see PalindromDOM listenTo attribute)
 localVersionPath | `JSONPointer` | `/_ver#c$` | local version path, set to falsy do disable Versioned JSON Patch communication
 obj | `Object` | `{}` | **notifies** Object that will be synced
