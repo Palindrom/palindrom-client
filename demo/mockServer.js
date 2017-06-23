@@ -94,7 +94,7 @@
       outPatches.push({op: 'replace', path: '_ver#s', value: serverVersionNumber});
       outPatches.push({op: 'test', path: '_ver#c$', value: clientVersionNumber});
 
-      jsonpatch.apply(full, inPatches);
+      jsonpatch.applyPatch(full, inPatches);
 
 
       inPatches.forEach(function (patch) {

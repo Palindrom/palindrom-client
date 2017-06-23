@@ -334,7 +334,6 @@
                     });
                     it('when adding element to array patch should be sent', function (done) {
                         ppclient.addEventListener('patchsent', patchSentEventCallback);
-                        palindrom.ignoreAdd = false;
                         domBind.splice('model.people_push', 1, 0, { first: 'Abraham' });
 
                         setTimeout(function listener() {
