@@ -399,7 +399,7 @@ All the changes from server are also received and propagated to your HTML.
                                     templateDomBind.notifySplices(parentsPolymerPath,
                                         [{
                                             index: parseInt(name, 10),
-                                            removed: [result && result.removed],
+                                            removed: (result && [result.removed]) || [],
                                             addedCount: 1,
                                             object: parent,
                                             type: 'splice'
@@ -410,7 +410,7 @@ All the changes from server are also received and propagated to your HTML.
                                     templateDomBind.notifySplices(parentsPolymerPath,
                                         [{
                                             index: parseInt(name, 10),
-                                            removed: [result && result.removed],
+                                            removed: (result && [result.removed]) || [],
                                             addedCount: 0,
                                             object: parent,
                                             type: 'splice'
