@@ -1,4 +1,3 @@
-
 # &lt;palindrom-polymer-client&gt; [![Build Status](https://travis-ci.org/Palindrom/palindrom-polymer-client.svg?branch=gh-pages)](https://travis-ci.org/Palindrom/palindrom-polymer-client)
 ---
 > Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.

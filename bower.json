@@ -1,6 +1,6 @@
 {
   "name": "palindrom-polymer-client",
-  "version": "3.3.0",
+  "version": "4.0.0",
   "description": "Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.",
   "private": true,
   "authors": [
@@ -35,7 +35,7 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.9.1",
-    "Palindrom": "Palindrom/Palindrom#v3.0.0-rc.2"
+    "Palindrom": "Palindrom/Palindrom#^v3.0.0"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#^1.0.0",
