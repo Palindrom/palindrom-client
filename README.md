@@ -1,23 +1,21 @@
-# &lt;palindrom-polymer-client&gt; [![Build Status](https://travis-ci.org/Palindrom/palindrom-polymer-client.svg?branch=gh-pages)](https://travis-ci.org/Palindrom/palindrom-polymer-client)
+# &lt;palindrom-polymer&gt; [![Build Status](https://travis-ci.org/Palindrom/palindrom-polymer.svg?branch=gh-pages)](https://travis-ci.org/Palindrom/palindrom-polymer)
 ---
-> Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.
+> Data binding with [&lt;palindrom-connection&gt;](https://github.com/Palindrom/palindrom-connection) via DOM events.
 
-Custom Element that binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
+Custom Element that binds [&lt;palindrom-connection&gt;](https://github.com/Palindrom/palindrom-connection) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
 That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
 data-model using Palindrom & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
 
 You get three-way data binding server - JS - HTML, kept in flawless sync.
-
-    <palindrom-polymer
-        obj="{{model}}"></palindrom-polymer>
-
-
-
+```html
+<palindrom-connection remote-url='/palindom'></palindrom-connection>
+<palindrom-polymer obj="{{model}}"></palindrom-polymer>
+```
 
 ## Demo
 
-- [Check it live!](http://Palindrom.github.io/palindrom-polymer-client/demo)
-- [test suite](http://Palindrom.github.io/palindrom-polymer-client/test)
+- [Check it live!](http://Palindrom.github.io/palindrom-polymer/demo)
+- [test suite](http://Palindrom.github.io/palindrom-polymer/test)
 
 
 ## Install
@@ -25,10 +23,10 @@ You get three-way data binding server - JS - HTML, kept in flawless sync.
 Install the component using [Bower](http://bower.io/):
 
 ```sh
-$ bower install palindrom-polymer-client --save
+$ bower install palindrom-polymer --save
 ```
 
-Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archive/master.zip).
+Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer/archive/master.zip).
 
 ## Usage
 
@@ -41,18 +39,18 @@ Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archi
 2. Import Custom Element:
 
     ```html
-    <link rel="import" href="bower_components/palindrom-polymer-client/palindrom-polymer.html">
+    <link rel="import" href="bower_components/palindrom-polymer/palindrom-polymer.html">
     ```
 
 3. Start using it!
 
     ```html
+    <palindrom-connection remote-url='/palindom'></palindrom-connection>
     <palindrom-polymer obj="{{model}}"></palindrom-polymer>
     ```
-    It establishes the Palindrom connection when attached. All the changes made
-    in browser are sent to the server via WebSocket or HTTP, as
+    It handles `palindrom-connection` events and channels them to the bound Polymer element(s). Also, all the changes made inside those bound Polymer elements are sent to the server via WebSocket or HTTP, as
     [JSON Patch](https://tools.ietf.org/html/rfc6902)es.
-    All the changes from server are also received and propagated to your HTML.
+    All the changes from server are also received and propagated to your HTML via events from `palindrom-connection`.
 
 ## Attributes & Properties
 
@@ -60,36 +58,8 @@ Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archi
 Attribute                       | Options   | Default | Description
 ---                             | ---       | ---     | ---
 ref   | `String` or `HTMLElement` | element itself | To which element (polymer element/`template is="dom-bind"`) we should bind to.
-debug | `Boolean` | `false` | Set to `true` to enable debugging mode
-listenTo | `String` | `document.body` | DOM node to listen to (see PalindromDOM listenTo attribute)
-localVersionPath | `JSONPointer` | `/_ver#c$` | local version path, set to falsy do disable Versioned JSON Patch communication
-obj | `Object` | `{}` | **notifies** Object that will be synced
-ot | `Boolean` | `true` | `false` to disable OT
-path | `String` | `/` | Path to given obj
-pingIntervalS | `Number` | `5` | Interval in seconds between heartbeat patches, `0` - disable heartbeat
-purity | `Boolean` | `false` | `true` to enable purist mode of OT
-remote-url / remoteUrl | `String` | `window.location` | The remote's URL
-remoteVersionPath | `JSONPointer` | `/_ver#s` | remote version path, set it to falsy to disable Double Versioned JSON Patch communication
-useWebSocket | `Boolean` | `true` | Set to false to disable WebSocket (use HTTP)
-
-## Events
-
-Name                       | Description
----                             | ---     
-patch-applied | Fired when patch gets applied
-patchreceived | Fired when patch gets received
-patch-sent | Fired when patch gets send
-socketstatechanged | Fired when web socket state changes
-connectionerror | Fired when unrecoverable connection error happens
-reconnection-countdown | Fired when reconnecting. has `milliseconds` property in details, denoting number of milliseconds to scheduled reconnection
-reconnection-end | Fired after successful reconnection
-
-:warning: Please note, that Polymer applies changes (especially array ones) asynchronously, so those could happen after `patch-applied` event was triggered.
-
-## Reconnection and heartbeats
-
-See [Palindrom docs](https://github.com/Palindrom/Palindrom#heartbeat-and-reconnection).
-`pingIntervalS` is directly forwarded to Palindrom, `reconnection-countdown` and `reconnection-end` events are directly based on respective callbacks.
+target   | `CSS Selector String` | `palindrom-connection` | The CSS selector of the `palindrom-connection` element.
+obj | `Object` | `{}` | Object that will be synced
 
 ## Template binding issues
 
@@ -108,16 +78,16 @@ Polymer template binding is [known to have problems with arrays](https://github.
 In order to develop it locally we suggest to use [polyserve](https://npmjs.com/polyserve) tool to handle bower paths gently.
 
 1. Install the global NPM modules [bower](http://bower.io/) & [polyserve](https://npmjs.com/polyserve): `npm install -g bower polyserve`
-2. Make a local clone of this repo: `git clone git@github.com:Palindrom/palindrom-polymer-client.git`
-3. Go to the directory: `cd palindrom-polymer-client`
+2. Make a local clone of this repo: `git clone git@github.com:Palindrom/palindrom-polymer.git`
+3. Go to the directory: `cd palindrom-polymer`
 4. Install the local dependencies: `bower install`
 5. Start the development server: `polyserve -p 8000`
-6. Open the demo: [http://localhost:8000/components/palindrom-polymer-client/](http://localhost:8000/components/palindrom-polymer-client/)
-7. Open the test suite: [http://localhost:8000/components/palindrom-polymer-client/test/](http://localhost:8000/components/palindrom-polymer-client/test/)
+6. Open the demo: [http://localhost:8000/components/palindrom-polymer/](http://localhost:8000/components/palindrom-polymer/)
+7. Open the test suite: [http://localhost:8000/components/palindrom-polymer/test/](http://localhost:8000/components/palindrom-polymer/test/)
 
 ## History
 
-For detailed changelog, check [Releases](https://github.com/Palindrom/palindrom-polymer-client/releases).
+For detailed changelog, check [Releases](https://github.com/Palindrom/palindrom-polymer/releases).
 
 ## License
 
