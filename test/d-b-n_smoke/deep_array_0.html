@@ -13,7 +13,9 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../palindrom-client.html">
+    <link rel="import" href="../../palindrom-polymer.html">
+    <link rel="import" href="../../../palindrom-connection/palindrom-connection.html">
+
 </head>
 
 <body>
@@ -22,7 +24,8 @@
         <template>
             <!-- workaround for test-fixture bug -->
             <div>
-                <palindrom-client remote-url="/palindrom" ref="deep_array" ping-interval-s="0"></palindrom-client>
+                <palindrom-connection remote-url="/palindrom" ping-interval-s="0"></palindrom-connection>
+                <palindrom-polymer ref="deep_array"></palindrom-polymer>
                 <template is="dom-bind" id="deep_array">
                     <div id="arrayDiv">
                         <template is="dom-repeat" items="{{model.path_to.array}}">
@@ -52,7 +55,7 @@
             }
         };
 
-        describe('palindrom-client, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function () {
+        describe('palindrom-polymer, when stamped from `dom-bind` with deep attribute and bound to object w/ nested arrays', function () {
             var container, domBind, ppclient, palindrom, patchAppliedEventCallback;
 
             beforeEach(function (done) {
@@ -60,7 +63,7 @@
 
                 container = fixture('my-fixture');
                 setTimeout(function () {
-                    ppclient = container.querySelector("palindrom-client");
+                    ppclient = document.querySelector('palindrom-connection');
                     palindrom = ppclient.palindrom;
                     initPalindrom(palindrom, model);
                     domBind = container.querySelector('template[is="dom-bind"]');

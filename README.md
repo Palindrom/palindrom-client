@@ -8,8 +8,8 @@ data-model using Palindrom & [JSON Patch](https://tools.ietf.org/html/rfc6902) f
 
 You get three-way data binding server - JS - HTML, kept in flawless sync.
 
-    <palindrom-client
-        obj="{{model}}"></palindrom-client>
+    <palindrom-polymer
+        obj="{{model}}"></palindrom-polymer>
 
 
 
@@ -41,13 +41,13 @@ Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archi
 2. Import Custom Element:
 
     ```html
-    <link rel="import" href="bower_components/palindrom-polymer-client/palindrom-client.html">
+    <link rel="import" href="bower_components/palindrom-polymer-client/palindrom-polymer.html">
     ```
 
 3. Start using it!
 
     ```html
-    <palindrom-client obj="{{model}}"></palindrom-client>
+    <palindrom-polymer obj="{{model}}"></palindrom-polymer>
     ```
     It establishes the Palindrom connection when attached. All the changes made
     in browser are sent to the server via WebSocket or HTTP, as
@@ -78,7 +78,7 @@ Name                       | Description
 ---                             | ---     
 patch-applied | Fired when patch gets applied
 patchreceived | Fired when patch gets received
-patchsent | Fired when patch gets send
+patch-sent | Fired when patch gets send
 socketstatechanged | Fired when web socket state changes
 connectionerror | Fired when unrecoverable connection error happens
 reconnection-countdown | Fired when reconnecting. has `milliseconds` property in details, denoting number of milliseconds to scheduled reconnection

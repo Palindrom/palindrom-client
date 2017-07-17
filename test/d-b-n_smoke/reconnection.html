@@ -13,7 +13,9 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../palindrom-client.html">
+    <link rel="import" href="../../palindrom-polymer.html">
+    <link rel="import" href="../../../palindrom-connection/palindrom-connection.html">
+
 </head>
 
 <body>
@@ -21,7 +23,8 @@
         <template>
             <!-- workaround for test-fixture bug -->
             <div>
-                <palindrom-client remote-url="/palindrom" ref="bind" ping-interval-s="0"></palindrom-client>
+                <palindrom-connection remote-url="/palindrom" ping-interval-s="0"></palindrom-connection>
+                <palindrom-polymer ref="bind"></palindrom-polymer>
                 <template is="dom-bind" id="bind">
                     <span id="name">{{model.name}}</span>
                 </template>
@@ -32,7 +35,7 @@
         var model;
         // Do not take `console.error` as a reason to fail the test.
         WCT._config.trackConsoleError = false;
-        describe('palindrom-client', function () {
+        describe('palindrom-polymer', function () {
             before(function initChai(done) {
                 chai.use(palindromChaiPlugin);
                 done();
@@ -48,7 +51,7 @@
 
                 container = fixture('my-fixture');
                 setTimeout(function () {
-                    ppclient = container.querySelector("palindrom-client");
+                    ppclient = document.querySelector('palindrom-connection');
                     palindrom = ppclient.palindrom;
                     domBind = container.querySelector('template[is="dom-bind"]');
                     nameSpan = container.querySelector('#name');
@@ -70,7 +73,9 @@
                 var closeEvent = { reason: 'thereason', code: 1 };
                 var boxErrorMsg = 'Connection error. See console for details.';
                 palindrom.network._ws.close(closeEvent);
-                expect(container.querySelector("div.box.error.tappable").innerText).to.contain(boxErrorMsg);
+                const SR = ppclient.shadowRoot;
+
+                expect(SR.querySelector("div.box-container").innerText).to.contain(boxErrorMsg);
             });
 
             it('and log error reason to the console', function () {
@@ -85,7 +90,8 @@
                     palindrom.network._ws.close(closeEvent);
                     var newName = 'newname';
                     setMockServerModel({ name: newName });
-                    expect(container.querySelector("div.box.notice").innerText).to.contain("Connecting in 1s...");
+                    const SR = ppclient.shadowRoot;
+                    expect(SR.querySelector("div.box-container").innerText).to.contain("Connecting in 1");
                     ppclient.addEventListener('reconnection-end', function () {
                         setTimeout(function () {
                             expect(nameSpan.innerText).to.equal(newName);

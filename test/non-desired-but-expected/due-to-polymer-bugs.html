@@ -13,7 +13,9 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../palindrom-client.html">
+    <link rel="import" href="../../palindrom-polymer.html">
+    <link rel="import" href="../../../palindrom-connection/palindrom-connection.html">
+
 </head>
 
 <body>
@@ -21,7 +23,8 @@
         <template>
             <!-- workaround for test-fixture bug -->
             <div>
-                <palindrom-client remote-url="/palindrom" ref="domBind"></palindrom-client>
+                <palindrom-connection remote-url="/palindrom" ping-interval-s="0"></palindrom-connection>
+                <palindrom-polymer ref="domBind"></palindrom-polymer>
                 <template is="dom-bind" id="domBind">
                     <ul>
                         <template is="dom-repeat" items="{{model.array}}">
@@ -58,14 +61,15 @@
                         model = { array: [0, 1] };
 
                         container = fixture('palindrom-polymer-array');
-                        ppclient = container.querySelector("palindrom-client");
+                        ppclient = document.querySelector('palindrom-connection');
                         palindrom = ppclient.palindrom;
+                        debugger
                         initPalindrom(palindrom, model);
                         setTimeout(() => {
-                        domBind = container.querySelector('template[is="dom-bind"]');
-                        // Polymer werido(m)bind attaches to dom asynchronously
-                        setTimeout(done, 10)
-                        }, 10);
+                            domBind = container.querySelector('template[is="dom-bind"]');
+                            // Polymer werido(m)bind attaches to dom asynchronously
+                            setTimeout(done, 10)
+                        }, 100);
                     });
                     afterEach(function (done) {
                         // Polymer werido(m)bind detaches from dom asynchronously

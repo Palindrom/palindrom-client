@@ -13,7 +13,8 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../palindrom-client.html">
+    <link rel="import" href="../../palindrom-polymer.html">
+    <link rel="import" href="../../../palindrom-connection/palindrom-connection.html">
 </head>
 
 <body>
@@ -21,7 +22,8 @@
         <template>
             <!-- workaround for test-fixture bug -->
             <div>
-                <palindrom-client remote-url="/palindrom" ref="arrays" ping-interval-s="0"></palindrom-client>
+                <palindrom-connection remote-url="/palindrom" ping-interval-s="0"></palindrom-connection>
+                <palindrom-polymer ref="arrays"></palindrom-polymer>
                 <template is="dom-bind" id="arrays">
                     <h4>
                         <span>{{model.name}}</span> people:</h4>
@@ -100,7 +102,7 @@
     </test-fixture>
     <script>
         var model;
-        describe('palindrom-client, when stamped from `dom-bind` and bound to palindrom object w/ array', function () {
+        describe('palindrom-polymer, when stamped from `dom-bind` and bound to palindrom object w/ array', function () {
             before(function initChai(done) {
                 chai.use(palindromChaiPlugin);
                 done();
@@ -154,7 +156,7 @@
 
                 container = fixture('my-fixture');
                 setTimeout(function () {
-                    ppclient = container.querySelector("palindrom-client");
+                    ppclient = document.querySelector('palindrom-connection');
                     palindrom = ppclient.palindrom;
                     domBind = container.querySelector('template[is="dom-bind"]');
                     initPalindrom(palindrom, model);
@@ -186,7 +188,7 @@
                         }, 100);
                     });
                     it('for arrays of primitives, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
-                        ppclient.addEventListener('patchsent', patchSentEventCallback);
+                        ppclient.addEventListener('patch-sent', patchSentEventCallback);
                         domBind.splice('model.primitive_people', 0, 1, 'Homo erectus');
 
                         // check and wait for the event dispatching
@@ -215,7 +217,7 @@
                     it('in arrays of objects, trigger a local change, fire a change event, and EVENTUALLY update dom-bind', function (done) {
                         var newItem = { first: 'Atomek' };
 
-                        ppclient.addEventListener('patchsent', patchSentEventCallback);
+                        ppclient.addEventListener('patch-sent', patchSentEventCallback);
 
                         /* we are replacing the whole object, not only the first name */
                         domBind.splice('model.people', 1, 1, newItem);
@@ -333,7 +335,7 @@
 
                     });
                     it('when adding element to array patch should be sent', function (done) {
-                        ppclient.addEventListener('patchsent', patchSentEventCallback);
+                        ppclient.addEventListener('patch-sent', patchSentEventCallback);
                         domBind.splice('model.people_push', 1, 0, { first: 'Abraham' });
 
                         setTimeout(function listener() {

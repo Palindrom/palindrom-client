@@ -1,0 +1,219 @@
+<!-- palindrom-polymer-client version: 4.0.0 | MIT License -->
+
+<link rel="import" href="../polymer/polymer.html">
+<!-- <link rel="import" href="iron-request.html"> -->
+
+<!-- include Palindrom with dependencies -->
+<script src="../Palindrom/dist/palindrom-dom.min.js"></script>
+
+<!--
+The Polymer version of `palindrom-polymer` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
+That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
+data-model using Palindrom & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
+
+You get three-way data binding server - JS - HTML, kept in flawless sync.
+
+    <palindrom-polymer
+        obj="{{model}}"></palindrom-polymer>
+
+
+It establishes the Palindrom connection when attached. All the changes made
+in browser are sent to the server via WebSocket or HTTP, as
+[JSON Patch](https://tools.ietf.org/html/rfc6902)es.
+All the changes from server are also received and propagated to your HTML.
+
+@demo demo/index.html
+-->
+<script>
+    var component = (function () {
+        'use strict';
+
+        var component = {
+
+            is: 'palindrom-polymer',
+
+            properties: {
+                obj: {
+                    type: Object,
+                    notify: true,
+                    value: function () {
+                        return {};
+                    }
+                },
+                target: {
+                    type: String,
+                    notify: true,
+                    value: 'palindrom-connection'
+                }
+            },
+            attached: function () {
+                const palindromConnection = document.querySelector(this.target);
+                if (!palindromConnection) {
+                    throw new Error('You need to have a palindrom-connection element in your page before using palindrom-polymer');
+                }
+                this.whereToBind = this.getAttribute("ref");                
+
+                palindromConnection.addEventListener('local-change', this.onLocalChange.bind(this));
+                palindromConnection.addEventListener('patch-applied', this.onPatchApplied.bind(this));
+                palindromConnection.addEventListener('state-reset', this.onStateReset.bind(this));
+
+            },
+            bindTo: function (element) {
+                // use node id or node itself;
+                element = typeof element == "string" ? document.getElementById(element) : element;
+                element.model = this.obj;
+                this.bound = element;
+            },
+            onStateReset: function (ev) {
+                const obj = ev.detail;
+                this.set('obj', obj);
+                this.whereToBind && this.bindTo(this.whereToBind);
+                this.onPatchApplied({detail: {patch: [{ op: 'replace', path: '', value: obj }], results: [{ removed: this.obj }]}});
+            },
+            propagateDomBind: function (sequence) {
+                if (this.bound) {
+                    this.notifyTemplateDomBind(this.bound.model, sequence, this.bound, "model");
+                }
+                else {
+                    this.notifyTemplateDomBind(this.obj, sequence, this, "obj");
+                }
+            },
+            onLocalChange: function (ev) {
+                const patch = ev.detail;
+                this.propagateDomBind({ patch, results: patch.map(function () { }) });
+            },
+            onPatchApplied: function (ev) {
+                const patch = ev.detail.patch;
+                const results = ev.detail.results;
+                this.propagateDomBind({ patch, results });
+            },
+            notifyTemplateDomBind: function (tree, patchAndResults, templateDomBind, polymerPathPrefix) {
+                var operation, polymerPath;
+                for (var operationNo = 0, len = patchAndResults.patch.length; operationNo < len; operationNo++) {
+                    operation = patchAndResults.patch[operationNo];
+                    var result = patchAndResults.results[operationNo];
+                    if (operation.path == "") {
+                        //in case of root path, Polymer replaces the original obj, which detaches it from Palindrom
+                        var newSequence = { patch: [], results: [] };
+                        for (var prop in operation.value) {
+                            if (operation.value.hasOwnProperty(prop)) {
+                                newSequence.patch.push({
+                                    op: "add",
+                                    path: "/" + prop,
+                                    value: operation.value[prop]
+                                });
+                            }
+                        }
+                        this.notifyTemplateDomBind(tree, newSequence, templateDomBind, polymerPathPrefix);
+                        continue;
+                    }
+
+                    polymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path);
+
+                    if (operation.op === 'test') {
+                        // we assume that jsonpatch covered it already
+                    } else if (operation.op === 'move' || operation.op === 'copy') {
+                        console.warn("move, and copy operations are not supported yet.")
+                    } else {
+                        // for add and remove we need to check whether it's an array or not
+                        var lastSeparator = operation.path.lastIndexOf('/');
+                        var name = operation.path.substr(lastSeparator + 1);
+                        var parentsPolymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path.substring(0, lastSeparator));
+
+                        var parent = templateDomBind.get(parentsPolymerPath);
+                        if (Array.isArray(parent) && (name === '-' || isNormalInteger(name))) {
+                            switch (operation.op) {
+                                case 'add':
+                                    // JSONPatch push
+                                    if (name === '-') {
+                                        name = result.index;
+                                    }
+                                    templateDomBind.notifySplices(parentsPolymerPath,
+                                        [{
+                                            index: parseInt(name, 10),
+                                            removed: [],
+                                            addedCount: 1,
+                                            object: parent,
+                                            type: 'splice'
+                                        }]
+                                    );
+                                    break;
+                                case 'replace':
+                                    templateDomBind.notifySplices(parentsPolymerPath,
+                                        [{
+                                            index: parseInt(name, 10),
+                                            removed: (result && [result.removed]) || [],
+                                            addedCount: 1,
+                                            object: parent,
+                                            type: 'splice'
+                                        }]
+                                    );
+                                    break;
+                                case 'remove':
+                                    templateDomBind.notifySplices(parentsPolymerPath,
+                                        [{
+                                            index: parseInt(name, 10),
+                                            removed: (result && [result.removed]) || [],
+                                            addedCount: 0,
+                                            object: parent,
+                                            type: 'splice'
+                                        }]
+                                    );
+                                    break;
+                            }
+                        } else {
+                            switch (operation.op) {
+
+                                case 'add':
+                                case 'replace':
+                                    if (typeof operation.value === 'object') {
+                                        templateDomBind.notifyPath(polymerPath);
+                                    } else {
+                                        templateDomBind.notifyPath(polymerPath, operation.value, false);
+                                    }
+                                    break;
+                                case 'remove':
+                                    //console.warn('Polymer does not support unsetting properties https://github.com/Polymer/polymer/issues/2565');
+                                    //console.warn('remove is translated to JSON incompatible set to `undefined`, as there is no remove method in Polymer.')
+                                    templateDomBind.notifyPath(polymerPath, undefined, false);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            },
+            validateJSONPatch: function () {
+                console.info('inherit validateJSONPatch from fast-json-patch');
+            },
+            observeJSONPatch: function (obj, callback) {
+                this.palindromObserver = callback;
+                return callback;
+            },
+            unobserveJSONPatch: function () {
+                // FIXME this is dummy as hell
+                this.palindromObserver = noop;
+            }
+        };
+
+        function noop() { }
+
+        function translateJSONPointerToPolymerPath(pointer) {
+            return pointer.replace(/\//g, '.');
+        }
+
+        function isNormalInteger(str) {
+            var n = ~~Number(str);
+            return String(n) === str && n >= 0;
+        }
+
+        return component;
+    }());
+
+</script>
+<dom-module id="palindrom-polymer">
+    <script>
+        var palindromClient = Object.assign({}, component);
+        palindromClient.is = "palindrom-polymer";
+        Polymer(palindromClient);
+    </script>
+</dom-module>

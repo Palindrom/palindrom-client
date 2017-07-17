@@ -11,12 +11,14 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../palindrom-client.html">
+    <link rel="import" href="../../palindrom-polymer.html">
+    <link rel="import" href="../../../palindrom-connection/palindrom-connection.html">
+
 </head>
 
 <body>
-
-    <palindrom-client ref="deep" remote-url="/palindrom" ping-interval-s="0"></palindrom-client>
+    <palindrom-connection remote-url="/palindrom" ping-interval-s="0"></palindrom-connection>
+    <palindrom-polymer ref="deep"></palindrom-polymer>
     <template is="dom-bind" id="deep">
 
         <h3>{{model.name}}</h3>
@@ -25,11 +27,11 @@
 
     </template>
     <script>
-        describe('palindrom-client, when stamped from `dom-bind` with deep attribute and bound to object', function () {
+        describe('palindrom-polymer, when stamped from `dom-bind` with deep attribute and bound to object', function () {
             var model, domBind, ppclient, palindrom;
             beforeEach(function waitForHTMLImportsAndDomBindChange(done) {
                 model = {
-                    name: "<palindrom-client>",
+                    name: "<palindrom-polymer>",
                     author: {
                         first: "Tomek",
                         last: "Wytrębowicz"
@@ -37,7 +39,7 @@
                 };
                 domBind = document.getElementById("deep");
                 domBind.model = model;
-                ppclient = document.querySelector("palindrom-client");
+                ppclient = document.querySelector('palindrom-connection');
                 palindrom = ppclient.palindrom;
                 setTimeout(() => {
                     initPalindrom(palindrom, model);
@@ -51,7 +53,7 @@
                     it('fire a change event, and update dom-bind', function (done) {
                         var patchAppliedEventCallback = sinon.spy();
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
-                        
+
                         // change model
                         palindromChange(palindrom, [operationObject('replace', '/author/first', 'tomalec')]);
 

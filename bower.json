@@ -18,7 +18,7 @@
     "http",
     "json"
   ],
-  "main": "palindrom-client.html",
+  "main": "palindrom-polymer.html",
   "repository": {
     "type": "git",
     "url": "git://github.com/Palindrom/palindrom-polymer-client.git"
@@ -35,7 +35,8 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.9.1",
-    "Palindrom": "Palindrom/Palindrom#^v3.0.0"
+    "Palindrom": "Palindrom/Palindrom#^v3.0.0",
+    "palindrom-connection": "*"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#^1.0.0",

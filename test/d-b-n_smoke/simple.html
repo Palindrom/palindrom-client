@@ -10,14 +10,14 @@
     <script src="../../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../../palindrom-client.html">
+    <link rel="import" href="../../palindrom-polymer.html">
+    <link rel="import" href="../../../palindrom-connection/palindrom-connection.html">
 </head>
 
 <body>
-
-    <palindrom-client remote-url="/palindrom" ref="simple" ping-interval-s="0"></palindrom-client>
+    <palindrom-connection remote-url="/palindrom" ping-interval-s="0"></palindrom-connection>
+    <palindrom-polymer ref="simple"></palindrom-polymer>
     <template is="dom-bind" id="simple">
-
         <h4>Welcome to
             <span>{{model.name}}</span>!</h4>
         <template is="dom-if" if="{{model.name}}">
@@ -33,16 +33,16 @@
     </script>
 
     <script>
-        describe('palindrom-client, when stamped from `dom-bind` bound to shallow palindrom object', function () {
+        describe('palindrom-polymer, when stamped from `dom-bind` bound to shallow palindrom object', function () {
             var ppclient, palindrom;
             before(function waitForHTMLImportsAndDomBindChange(done) {
                 setTimeout(function () {
                     chai.use(palindromChaiPlugin);
-                    ppclient = document.querySelector('palindrom-client');
+                    ppclient = document.querySelector('palindrom-connection');
                     palindrom = ppclient.palindrom;
                     initPalindrom(palindrom, model);
                     done();
-                }, 10);
+                }, 100);
             });
 
             describe('should observe changes to it,', function () {
@@ -67,12 +67,15 @@
                 });
                 it('and send back changes applied to model as a reaction to changes from server', function (done) {
                     var patchSentListener = sinon.spy();
-                    ppclient.addEventListener('patchsent', patchSentListener);
+                    ppclient.addEventListener('patch-sent', patchSentListener);
                     ppclient.addEventListener('patch-applied', function () {
                         domBind.set("model.name", "change #2");
                     });
                     palindromChange(palindrom, [operationObject('replace', '/name', "change #1")]);
                     setTimeout(function () {
+
+                        const a = palindrom;
+                        const b = ppclient
                         expect(patchSentListener).to.have.been.calledWithPatch(operationObject("replace", "/name", "change #2"));
                         done();
                     }, 100);

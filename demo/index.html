@@ -6,7 +6,7 @@
     <title>palindrom-polymer-client</title>
 
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="../palindrom-client.html">
+    <link rel="import" href="../palindrom-polymer.html">
     <script src="../../fast-json-patch/dist/fast-json-patch.min.js"></script>
 
     <link rel="import" href="../../paper-styles/demo-pages.html">
@@ -19,7 +19,7 @@
     <h1>Palindrom + Polymer</h1>
     <div class="horizontal-section-container">
         <template is="dom-bind" id="app">
-            <palindrom-client auto obj="{{model}}" remote-url="/palindrom"></palindrom-client>
+            <palindrom-polymer auto obj="{{model}}" remote-url="/palindrom"></palindrom-polymer>
             <template is="dom-if" if="{{!model}}" restamp>
                 <div>User data was not yet fetched from data</div>
             </template>
