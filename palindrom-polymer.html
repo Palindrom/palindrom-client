@@ -24,11 +24,9 @@ All the changes from server are also received and propagated to your HTML.
 
 @demo demo/index.html
 -->
-<script>
-    var component = (function () {
-        'use strict';
-
-        var component = {
+<dom-module id="palindrom-polymer">
+    <script>
+        Polymer({
 
             is: 'palindrom-polymer',
 
@@ -47,11 +45,11 @@ All the changes from server are also received and propagated to your HTML.
                 }
             },
             attached: function () {
-                const palindromConnection = document.querySelector(this.target);
+                const palindromConnection = this.getRootNode().querySelector(this.target);
                 if (!palindromConnection) {
                     throw new Error('You need to have a palindrom-connection element in your page before using palindrom-polymer');
                 }
-                this.whereToBind = this.getAttribute("ref");                
+                this.whereToBind = this.getAttribute("ref");
 
                 palindromConnection.addEventListener('local-change', this.onLocalChange.bind(this));
                 palindromConnection.addEventListener('patch-applied', this.onPatchApplied.bind(this));
@@ -68,7 +66,7 @@ All the changes from server are also received and propagated to your HTML.
                 const obj = ev.detail;
                 this.set('obj', obj);
                 this.whereToBind && this.bindTo(this.whereToBind);
-                this.onPatchApplied({detail: {patch: [{ op: 'replace', path: '', value: obj }], results: [{ removed: this.obj }]}});
+                this.onPatchApplied({ detail: { patch: [{ op: 'replace', path: '', value: obj }], results: [{ removed: this.obj }] } });
             },
             propagateDomBind: function (sequence) {
                 if (this.bound) {
@@ -181,19 +179,8 @@ All the changes from server are also received and propagated to your HTML.
                         }
                     }
                 }
-            },
-            validateJSONPatch: function () {
-                console.info('inherit validateJSONPatch from fast-json-patch');
-            },
-            observeJSONPatch: function (obj, callback) {
-                this.palindromObserver = callback;
-                return callback;
-            },
-            unobserveJSONPatch: function () {
-                // FIXME this is dummy as hell
-                this.palindromObserver = noop;
             }
-        };
+        });
 
         function noop() { }
 
@@ -205,15 +192,5 @@ All the changes from server are also received and propagated to your HTML.
             var n = ~~Number(str);
             return String(n) === str && n >= 0;
         }
-
-        return component;
-    }());
-
-</script>
-<dom-module id="palindrom-polymer">
-    <script>
-        var palindromClient = Object.assign({}, component);
-        palindromClient.is = "palindrom-polymer";
-        Polymer(palindromClient);
     </script>
 </dom-module>
