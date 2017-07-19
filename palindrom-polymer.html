@@ -26,6 +26,24 @@ All the changes from server are also received and propagated to your HTML.
 -->
 <dom-module id="palindrom-polymer">
     <script>
+        function getRootNodePonyfill(node) {
+            var root = getRoot(node);
+
+            if (isShadowRoot(root)) {
+                return getShadowIncludingRoot(root.host);
+            }
+            return root;
+        }
+        function getRoot(node) {
+            if (node.parentNode != null) {
+                return getRoot(node.parentNode);
+            }
+
+            return node;
+        }
+        function isShadowRoot(node) {
+            return typeof ShadowRoot === 'function' && node instanceof ShadowRoot;
+        }
         Polymer({
 
             is: 'palindrom-polymer',
@@ -45,7 +63,7 @@ All the changes from server are also received and propagated to your HTML.
                 }
             },
             attached: function () {
-                const palindromConnection = this.getRootNode().querySelector(this.target);
+                const palindromConnection = (this.getRootNode && this.getRootNode() || getRootNodePonyfill(this)).querySelector(this.target);
                 if (!palindromConnection) {
                     throw new Error('You need to have a palindrom-connection element in your page before using palindrom-polymer');
                 }
