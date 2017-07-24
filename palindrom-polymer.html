@@ -31,7 +31,7 @@ All the changes from server are also received and propagated to your HTML.
                 var root = getRoot(node);
 
                 if (isShadowRoot(root)) {
-                    return getShadowIncludingRoot(root.host);
+                    return getRootNodePonyfill(root.host);
                 }
                 return root;
             }
