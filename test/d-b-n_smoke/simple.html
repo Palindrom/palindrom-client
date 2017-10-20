@@ -12,21 +12,26 @@
     <!-- Step 1: import the element to test -->
     <link rel="import" href="../../palindrom-client.html">
 </head>
-
 <body>
-
     <palindrom-client remote-url="/palindrom" ref="simple" ping-interval-s="0"></palindrom-client>
     <template is="dom-bind" id="simple">
-
         <h4>Welcome to
             <span>{{model.name}}</span>!</h4>
         <template is="dom-if" if="{{model.name}}">
             <span id="conditional"></span>
         </template>
+        <template is="dom-if" if="{{model.subObj}}">
+            <template is="dom-bind" model={{model.subObj}}>
+                <template is="dom-if" if="{{model.subName}}">
+                    <span id="conditional-object">{{model.subName}}</span>                        
+                </template>
+            </template>
+        </template>
     </template>
     <script>
         var model = {
-            name: "Juicy"
+            name: "Juicy",
+            subObj: {subName: 'Omar'}
         };
         var domBind = document.getElementById("simple");
         domBind.model = model;
@@ -62,6 +67,15 @@
                     setTimeout(function () {
                         // dom-if is an example of a listener
                         expect(document.querySelector("#conditional")).to.not.be.visible;
+                        done();
+                    })
+                });
+                it('when nested object is removed, should notify any listeners', function (done) {
+                    // change model      
+                    palindromChange(palindrom, [operationObject('remove', '/subObj')]);
+                    setTimeout(function () {
+                        // dom-if is an example of a listener
+                        expect(document.querySelector("#conditional-object")).to.not.be.visible;
                         done();
                     })
                 });
