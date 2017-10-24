@@ -432,6 +432,7 @@ All the changes from server are also received and propagated to your HTML.
                                 case 'remove':
                                     //console.warn('Polymer does not support unsetting properties https://github.com/Polymer/polymer/issues/2565');
                                     //console.warn('remove is translated to JSON incompatible set to `undefined`, as there is no remove method in Polymer.')
+                                    templateDomBind.notifyPath(polymerPath, null, false);
                                     templateDomBind.notifyPath(polymerPath, undefined, false);
                                     break;
                             }
