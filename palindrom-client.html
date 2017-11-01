@@ -126,7 +126,7 @@ All the changes from server are also received and propagated to your HTML.
                 obj: {
                     type: Object,
                     notify: true,
-                    value: function () {
+                    value() {
                         return {};
                     }
                 },
@@ -176,12 +176,20 @@ All the changes from server are also received and propagated to your HTML.
                     value: false,
                     readOnly: true,
                     notify: false
+                },
+                /**
+                 * error to show in bright red box
+                 */
+                showGenericError: {
+                    type: Boolean,
+                    value: false,
+                    notify: false
                 }
             },
-            reconnectNow: function () {
+            reconnectNow() {
                 this.palindrom.reconnectNow();
             },
-            reload: function () {
+            reload() {
                 window.location.reload();
             },
 
@@ -189,7 +197,7 @@ All the changes from server are also received and propagated to your HTML.
              * assigns an instance of Palindrom according to given params, attaches it to .pupet property
              *
              */
-            attached: function () {
+            attached() {
 
                 var whereToBind = this.getAttribute("ref");
                 var listenTo = this.listenTo;
@@ -207,6 +215,8 @@ All the changes from server are also received and propagated to your HTML.
                     onLocalChange: this.onLocalChange.bind(this),
                     onRemoteChange: this.onPatchApplied.bind(this),
                     onPatchReceived: this.onPatchReceived.bind(this),
+                    onIncomingPatchValidationError: this.onGenericError.bind(this),
+                    onOutgoingPatchValidationError: this.onGenericError.bind(this),
                     onPatchSent: this.onPatchSent.bind(this),
                     onSocketStateChanged: this.onSocketStateChanged.bind(this),
                     onConnectionError: this.onConnectionError.bind(this),
@@ -229,14 +239,14 @@ All the changes from server are also received and propagated to your HTML.
                 this.network = this.palindrom.network;
                 this.morphUrl = this.palindrom.morphUrl.bind(this.palindrom);
             },
-            bindTo: function (element) {
+            bindTo(element) {
                 // use node id or node itself;
                 element = typeof element == "string" ? document.getElementById(element) : element;
 
                 element.model = this.obj;
                 this.bound = element;
             },
-            propagateDomBind: function (sequence) {
+            propagateDomBind(sequence) {
                 if (this.bound) {
                     this.notifyTemplateDomBind(this.bound.model, sequence, this.bound, "model");
                 }
@@ -244,25 +254,25 @@ All the changes from server are also received and propagated to your HTML.
                     this.notifyTemplateDomBind(this.obj, sequence, this, "obj");
                 }
             },
-            onLocalChange: function (patches) {
+            onLocalChange(patches) {
                 // todo #26
                 this.propagateDomBind({ patches: patches, results: patches.map(function () { }) });
             },
-            onPatchReceived: function (data, url, method) {
+            onPatchReceived(data, url, method) {
                 this.fire("patchreceived", {
                     data: data,
                     url: url,
                     method: method
                 });
             },
-            onPatchSent: function (data, url, method) {
+            onPatchSent(data, url, method) {
                 this.fire("patchsent", {
                     data: data,
                     url: url,
                     method: method
                 });
             },
-            onSocketStateChanged: function (state, url, data, code, reason) {
+            onSocketStateChanged(state, url, data, code, reason) {
                 this.fire("socketstatechanged", {
                     state: state,
                     url: url,
@@ -271,7 +281,7 @@ All the changes from server are also received and propagated to your HTML.
                     reason: reason
                 });
             },
-            onConnectionError: function (data, url, method) {
+            onConnectionError(data, url, method) {
                 var eventDetail = {
                     data: data,
                     url: url,
@@ -281,37 +291,38 @@ All the changes from server are also received and propagated to your HTML.
                 this.fire("connectionerror", eventDetail);
 
                 if (!eventDetail.handled) {
-                    if (window.console && window.console.error) {
-                        var str = "Connection error: ";
+                    var str = "Connection error: ";
 
-                        if (eventDetail.data.statusText) {
-                            str += eventDetail.data.statusText + " ";
-                        }
-
-                        if (eventDetail.data.statusCode) {
-                            str += "(" + eventDetail.data.statusCode + ") ";
-                        }
-
-                        str += "\n\n";
-
-                        if (eventDetail.method) {
-                            str += eventDetail.method + " ";
-                        }
-
-                        if (eventDetail.url) {
-                            str += eventDetail.url;
-                        }
-
-                        if (eventDetail.data.reason) {
-                            str += "\n\n" + eventDetail.data.reason;
-                        }
-
-                        console.error(str);
+                    if (eventDetail.data.statusText) {
+                        str += eventDetail.data.statusText + " ";
                     }
+
+                    if (eventDetail.data.statusCode) {
+                        str += "(" + eventDetail.data.statusCode + ") ";
+                    }
+
+                    str += "\n\n";
+
+                    if (eventDetail.method) {
+                        str += eventDetail.method + " ";
+                    }
+
+                    if (eventDetail.url) {
+                        str += eventDetail.url;
+                    }
+
+                    if (eventDetail.data.reason) {
+                        str += "\n\n" + eventDetail.data.reason;
+                    }
+                    console.error(str);
                     this._setShowConnectionError(true);
                 }
             },
-            onReconnectionCountdown: function (milliseconds) {
+            onGenericError(error) {
+                this.set('showGenericError', true);
+                console.error(error);
+            },
+            onReconnectionCountdown(milliseconds) {
                 var eventDetail = {
                     milliseconds: milliseconds,
                     handled: false
@@ -325,7 +336,7 @@ All the changes from server are also received and propagated to your HTML.
                     this._setReconnectionSeconds(milliseconds / 1000);
                 }
             },
-            onReconnectionEnd: function () {
+            onReconnectionEnd() {
                 var eventDetail = {
                     handled: false
                 };
@@ -336,7 +347,7 @@ All the changes from server are also received and propagated to your HTML.
                     this._setShowReconnectingIn(false);
                 }
             },
-            onPatchApplied: function (patches, results) {
+            onPatchApplied(patches, results) {
                 this.propagateDomBind({ patches, results });
                 this.dispatchEvent(new CustomEvent("patch-applied", {
                     bubbles: true,
@@ -344,7 +355,7 @@ All the changes from server are also received and propagated to your HTML.
                     detail: patches
                 }));
             },
-            notifyTemplateDomBind: function (tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
+            notifyTemplateDomBind(tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
                 var operation, polymerPath;
                 for (var operationNo = 0, len = patchesAndResults.patches.length; operationNo < len; operationNo++) {
                     operation = patchesAndResults.patches[operationNo];
@@ -440,14 +451,14 @@ All the changes from server are also received and propagated to your HTML.
                     }
                 }
             },
-            validateJSONPatch: function () {
+            validateJSONPatch() {
                 console.info('inherit validateJSONPatch from fast-json-patch');
             },
-            observeJSONPatch: function (obj, callback) {
+            observeJSONPatch(obj, callback) {
                 this.palindromObserver = callback;
                 return callback;
             },
-            unobserveJSONPatch: function () {
+            unobserveJSONPatch() {
                 // FIXME this is dummy as hell
                 this.palindromObserver = noop;
             }
@@ -476,8 +487,6 @@ All the changes from server are also received and propagated to your HTML.
                 top: 0;
                 left: 0;
                 width: 100%;
-                display: flex;
-                justify-content: center;
                 z-index: 1000;
             }
 
@@ -486,18 +495,7 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             .box {
-                width: 50%;
-                border-radius: 0 0 10px 10px;
-                border: thin solid;
-                border-top: none;
-                text-align: center;
-                padding: 5px 0;
-            }
-
-            @media only screen and (max-width: 640px) {
-                .box {
-                    width: 100%;
-                }
+                padding: 5px 5px;
             }
 
             .notice {
@@ -507,9 +505,23 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             .error {
-                background-color: #DB0F13;
-                border-color: #A11517;
-                color: #FFFFFF;
+                background-color: #fdd;
+                border: 1px solid #f9c1c1;
+                border-top: none;
+                color: #444;
+            }
+
+            .hourglass {
+                animation: rotateHG 2s cubic-bezier(.03, 1, 1, 0) infinite;
+                transform-origin: 50% 50%;
+                display: inline-block;
+                text-decoration: none!important;
+            }
+
+            @keyframes rotateHG {
+                100% {
+                    transform: rotate(360deg)
+                }
             }
 
             .tappable {
@@ -521,13 +533,27 @@ All the changes from server are also received and propagated to your HTML.
             }
         </style>
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
-            <div class="box notice tappable" on-tap="reconnectNow"><strong>Not connected.</strong> Connecting in {{reconnectionSeconds}}s... <span>Retry now</span></div>
+            <div class="box notice tappable" on-tap="reconnectNow">
+                <strong><span class="hourglass">⏳</span> Not connected.</strong> Connecting in {{reconnectionSeconds}}s...
+                <span>Retry now</span>
+            </div>
         </div>
         <div class="box-container" hidden$="{{!showReconnectingNow}}">
-            <div class="box notice"><strong>Connecting now...</strong></div>
+            <div class="box notice">
+                <strong><span class="hourglass">⏳</span> Connecting now...</strong>
+            </div>
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
-            <div class="box error tappable" on-tap="reload"><strong>Connection error.</strong> See console for details. <span>Click here to reload</span></div>
+            <div class="box error tappable" on-tap="reload">
+                <strong>⚠️ Connection error.</strong> See console for details.
+                <span>Click here to reload</span>
+            </div>
+        </div>
+        <div class="box-container" hidden$="{{!showGenericError}}">
+            <div class="box error tappable" on-tap="reload">
+                <strong>⚠️ An error has occurred.</strong> See console for details.
+                <span>Click here to reload</span>
+            </div>
         </div>
     </template>
     <script>
@@ -545,8 +571,6 @@ All the changes from server are also received and propagated to your HTML.
                 top: 0;
                 left: 0;
                 width: 100%;
-                display: flex;
-                justify-content: center;
                 z-index: 1000;
             }
 
@@ -555,18 +579,7 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             .box {
-                width: 50%;
-                border-radius: 0 0 10px 10px;
-                border: thin solid;
-                border-top: none;
-                text-align: center;
-                padding: 5px 0;
-            }
-
-            @media only screen and (max-width: 640px) {
-                .box {
-                    width: 100%;
-                }
+                padding: 5px 5px;
             }
 
             .notice {
@@ -576,9 +589,23 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             .error {
-                background-color: #DB0F13;
-                border-color: #A11517;
-                color: #FFFFFF;
+                background-color: #fdd;
+                border: 1px solid #f9c1c1;
+                border-top: none;
+                color: #444;
+            }
+
+            .hourglass {
+                animation: rotateHG 2s cubic-bezier(.03, 1, 1, 0) infinite;
+                transform-origin: 50% 50%;
+                display: inline-block;
+                text-decoration: none!important;
+            }
+
+            @keyframes rotateHG {
+                100% {
+                    transform: rotate(360deg)
+                }
             }
 
             .tappable {
@@ -590,13 +617,27 @@ All the changes from server are also received and propagated to your HTML.
             }
         </style>
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
-            <div class="box notice tappable" on-tap="reconnectNow"><strong>Not connected.</strong> Connecting in {{reconnectionSeconds}}s... <span>Retry now</span></div>
+            <div class="box notice tappable" on-tap="reconnectNow">
+                <strong><span class="hourglass">⏳</span> Not connected.</strong> Connecting in {{reconnectionSeconds}}s...
+                <span>Retry now</span>
+            </div>
         </div>
         <div class="box-container" hidden$="{{!showReconnectingNow}}">
-            <div class="box notice"><strong>Connecting now...</strong></div>
+            <div class="box notice">
+                <strong><span class="hourglass">⏳</span> Connecting now...</strong>
+            </div>
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
-            <div class="box error tappable" on-tap="reload"><strong>Connection error.</strong> See console for details. <span>Click here to reload</span></div>
+            <div class="box error tappable" on-tap="reload">
+                <strong>⚠️ Connection error.</strong> See console for details.
+                <span>Click here to reload</span>
+            </div>
+        </div>
+        <div class="box-container" hidden$="{{!showGenericError}}">
+            <div class="box error tappable" on-tap="reload">
+                <strong>⚠️ An error has occurred.</strong> See console for details.
+                <span>Click here to reload</span>
+            </div>
         </div>
     </template>
     <script>
