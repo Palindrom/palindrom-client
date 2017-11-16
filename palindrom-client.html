@@ -646,7 +646,8 @@ All the changes from server are also received and propagated to your HTML.
         puppetClient.is = "puppet-client";
         var originalAttached = puppetClient.attached;
         puppetClient.attached = function () {
-            console.warn('`puppet-client` has been renamed to `palindrom-client`, please update your markup, `puppet-client` will be removed soon');
+            // no need to warn before 2.4
+            // console.warn('`puppet-client` has been renamed to `palindrom-client`, please update your markup, `puppet-client` will be removed soon');
             originalAttached.call(this);
         }
         Polymer(puppetClient);
