@@ -540,14 +540,17 @@ All the changes from server are also received and propagated to your HTML.
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
             <div class="box notice tappable" on-tap="reconnectNow">
                 <strong>
-                    <span class="hourglass">⏳</span> Not connected.</strong> Connecting in {{reconnectionSeconds}}s...
+                    <span class="hourglass">⏳</span> Not connected.                    
+                </strong> 
+                Connecting in {{reconnectionSeconds}}s...
                 <span>Retry now</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showReconnectingNow}}">
             <div class="box notice">
                 <strong>
-                    <span class="hourglass">⏳</span> Connecting now...</strong>
+                    <span class="hourglass">⏳</span> Connecting now...
+                </strong>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
@@ -626,7 +629,9 @@ All the changes from server are also received and propagated to your HTML.
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
             <div class="box notice tappable" on-tap="reconnectNow">
                 <strong>
-                    <span class="hourglass">⏳</span> Not connected.</strong> Connecting in {{reconnectionSeconds}}s...
+                    <span class="hourglass">⏳</span> Not connected.
+                </strong> 
+                Connecting in {{reconnectionSeconds}}s...
                 <span>Retry now</span>
             </div>
         </div>
