@@ -217,6 +217,7 @@ All the changes from server are also received and propagated to your HTML.
                     onPatchReceived: this.onPatchReceived.bind(this),
                     onIncomingPatchValidationError: this.onGenericError.bind(this),
                     onOutgoingPatchValidationError: this.onGenericError.bind(this),
+                    onError: this.onGenericError.bind(this),
                     onPatchSent: this.onPatchSent.bind(this),
                     onSocketStateChanged: this.onSocketStateChanged.bind(this),
                     onConnectionError: this.onConnectionError.bind(this),
@@ -281,45 +282,15 @@ All the changes from server are also received and propagated to your HTML.
                     reason: reason
                 });
             },
-            onConnectionError(data, url, method) {
+            onConnectionError(palindromConnectionError) {
                 var eventDetail = {
-                    data,
-                    url,
-                    method,
+                    palindromConnectionError,
                     handled: false
                 };
                 this.fire("connectionerror", eventDetail);
 
                 if (!eventDetail.handled) {
-                    if (typeof data === 'string') {
-                        // if data is provided as a string, log it as is
-                        console.error(data);
-                    } else {
-                        var str = "Connection error: ";
-
-                        if (eventDetail.data.statusText) {
-                            str += eventDetail.data.statusText + " ";
-                        }
-
-                        if (eventDetail.data.statusCode) {
-                            str += "(" + eventDetail.data.statusCode + ") ";
-                        }
-
-                        str += "\n\n";
-
-                        if (eventDetail.method) {
-                            str += eventDetail.method + " ";
-                        }
-
-                        if (eventDetail.url) {
-                            str += eventDetail.url;
-                        }
-
-                        if (eventDetail.data.reason) {
-                            str += "\n\n" + eventDetail.data.reason;
-                        }
-                        console.error(str);
-                    }
+                    console.error(palindromConnectionError);
                     this._setShowConnectionError(true);
                 }
             },
