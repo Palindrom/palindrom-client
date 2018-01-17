@@ -9,8 +9,7 @@
       "disabled": false,
       "browsers": [{
         "browserName": "firefox",
-        "platform": "Linux",
-        "version": ""
+        "platform": "Windows 10"
       },
       {
         "browserName": "safari",

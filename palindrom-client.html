@@ -217,6 +217,7 @@ All the changes from server are also received and propagated to your HTML.
                     onPatchReceived: this.onPatchReceived.bind(this),
                     onIncomingPatchValidationError: this.onGenericError.bind(this),
                     onOutgoingPatchValidationError: this.onGenericError.bind(this),
+                    onError: this.onGenericError.bind(this),
                     onPatchSent: this.onPatchSent.bind(this),
                     onSocketStateChanged: this.onSocketStateChanged.bind(this),
                     onConnectionError: this.onConnectionError.bind(this),
@@ -281,40 +282,15 @@ All the changes from server are also received and propagated to your HTML.
                     reason: reason
                 });
             },
-            onConnectionError(data, url, method) {
+            onConnectionError(palindromConnectionError) {
                 var eventDetail = {
-                    data: data,
-                    url: url,
-                    method: method,
+                    palindromConnectionError,
                     handled: false
                 };
                 this.fire("connectionerror", eventDetail);
 
                 if (!eventDetail.handled) {
-                    var str = "Connection error: ";
-
-                    if (eventDetail.data.statusText) {
-                        str += eventDetail.data.statusText + " ";
-                    }
-
-                    if (eventDetail.data.statusCode) {
-                        str += "(" + eventDetail.data.statusCode + ") ";
-                    }
-
-                    str += "\n\n";
-
-                    if (eventDetail.method) {
-                        str += eventDetail.method + " ";
-                    }
-
-                    if (eventDetail.url) {
-                        str += eventDetail.url;
-                    }
-
-                    if (eventDetail.data.reason) {
-                        str += "\n\n" + eventDetail.data.reason;
-                    }
-                    console.error(str);
+                    console.error(palindromConnectionError);
                     this._setShowConnectionError(true);
                 }
             },
@@ -534,13 +510,18 @@ All the changes from server are also received and propagated to your HTML.
         </style>
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
             <div class="box notice tappable" on-tap="reconnectNow">
-                <strong><span class="hourglass">⏳</span> Not connected.</strong> Connecting in {{reconnectionSeconds}}s...
+                <strong>
+                    <span class="hourglass">⏳</span> Not connected.                    
+                </strong> 
+                Connecting in {{reconnectionSeconds}}s...
                 <span>Retry now</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showReconnectingNow}}">
             <div class="box notice">
-                <strong><span class="hourglass">⏳</span> Connecting now...</strong>
+                <strong>
+                    <span class="hourglass">⏳</span> Connecting now...
+                </strong>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
@@ -618,13 +599,17 @@ All the changes from server are also received and propagated to your HTML.
         </style>
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
             <div class="box notice tappable" on-tap="reconnectNow">
-                <strong><span class="hourglass">⏳</span> Not connected.</strong> Connecting in {{reconnectionSeconds}}s...
+                <strong>
+                    <span class="hourglass">⏳</span> Not connected.
+                </strong> 
+                Connecting in {{reconnectionSeconds}}s...
                 <span>Retry now</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showReconnectingNow}}">
             <div class="box notice">
-                <strong><span class="hourglass">⏳</span> Connecting now...</strong>
+                <strong>
+                    <span class="hourglass">⏳</span> Connecting now...</strong>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
