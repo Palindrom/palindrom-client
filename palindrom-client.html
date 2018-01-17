@@ -119,7 +119,13 @@ All the changes from server are also received and propagated to your HTML.
                     type: Number,
                     value: '60'
                 },
-
+                /**
+                * Interval in seconds until the page refreshes upon connection errors
+                */
+                pageReloadDelay: {
+                    type: Number,
+                    value: 5
+                },
                 /**
                  * Object that will be synced
                  */
@@ -191,6 +197,9 @@ All the changes from server are also received and propagated to your HTML.
             },
             reload() {
                 window.location.reload();
+            },
+            cancelReloading() {
+                clearInterval(this.reloadingInterval);
             },
 
             /**
@@ -292,6 +301,16 @@ All the changes from server are also received and propagated to your HTML.
                 if (!eventDetail.handled) {
                     console.error(palindromConnectionError);
                     this._setShowConnectionError(true);
+                    let timeout = (this.pageReloadDelay * 1000)
+                    this._setReconnectionSeconds(timeout / 1000);
+
+                    this.reloadingInterval = setInterval(() => {
+                        this._setReconnectionSeconds(timeout / 1000);
+                        timeout -= 1000;
+                        if(timeout <= 0) {
+                            this.reload();
+                        }
+                    }, 1000);
                 }
             },
             onGenericError(error) {
@@ -525,9 +544,11 @@ All the changes from server are also received and propagated to your HTML.
             </div>
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
-            <div class="box error tappable" on-tap="reload">
-                <strong>⚠️ Connection error.</strong> See console for details.
-                <span>Click here to reload</span>
+            <div class="box error tappable">
+                <span class="hourglass">⏳</span> Connection error.</strong> See console for details.
+                Reloading page in {{reconnectionSeconds}}s...
+                <span on-tap="reload">Reload now</span> •
+                <span on-tap="cancelReloading">Cancel reloading</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showGenericError}}">
@@ -600,7 +621,7 @@ All the changes from server are also received and propagated to your HTML.
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
             <div class="box notice tappable" on-tap="reconnectNow">
                 <strong>
-                    <span class="hourglass">⏳</span> Not connected.
+                    <span class="hourglass">⏳</span> Not connected.                    
                 </strong> 
                 Connecting in {{reconnectionSeconds}}s...
                 <span>Retry now</span>
@@ -609,13 +630,16 @@ All the changes from server are also received and propagated to your HTML.
         <div class="box-container" hidden$="{{!showReconnectingNow}}">
             <div class="box notice">
                 <strong>
-                    <span class="hourglass">⏳</span> Connecting now...</strong>
+                    <span class="hourglass">⏳</span> Connecting now...
+                </strong>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
-            <div class="box error tappable" on-tap="reload">
-                <strong>⚠️ Connection error.</strong> See console for details.
-                <span>Click here to reload</span>
+            <div class="box error tappable">
+                <span class="hourglass">⏳</span> Connection error.</strong> See console for details.
+                Reloading page in {{reconnectionSeconds}}s...
+                <span on-tap="reload">Reload now</span> •
+                <span on-tap="cancelReloading">Cancel reloading</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showGenericError}}">
