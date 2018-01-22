@@ -122,7 +122,7 @@ All the changes from server are also received and propagated to your HTML.
                 /**
                 * Interval in seconds until the page refreshes upon connection errors
                 */
-                pageReloadDelay: {
+                fatalErrorReloadAfterS: {
                     type: Number,
                     value: 5
                 },
@@ -301,7 +301,7 @@ All the changes from server are also received and propagated to your HTML.
                 if (!eventDetail.handled) {
                     console.error(palindromConnectionError);
                     this._setShowConnectionError(true);
-                    let timeout = (this.pageReloadDelay * 1000)
+                    let timeout = (this.fatalErrorReloadAfterS * 1000)
                     this._setReconnectionSeconds(timeout / 1000);
 
                     this.reloadingInterval = setInterval(() => {
