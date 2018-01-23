@@ -151,7 +151,6 @@ All the changes from server are also received and propagated to your HTML.
                 showReconnectingIn: {
                     type: Boolean,
                     value: false,
-                    readOnly: true,
                     notify: false
                 },
 
@@ -161,7 +160,6 @@ All the changes from server are also received and propagated to your HTML.
                 showReconnectingNow: {
                     type: Boolean,
                     value: false,
-                    readOnly: true,
                     notify: false
                 },
 
@@ -170,7 +168,6 @@ All the changes from server are also received and propagated to your HTML.
                  */
                 reconnectionSeconds: {
                     type: Number,
-                    readOnly: true,
                     notify: false
                 },
 
@@ -180,7 +177,7 @@ All the changes from server are also received and propagated to your HTML.
                 showConnectionError: {
                     type: Boolean,
                     value: false,
-                    readOnly: true,
+
                     notify: false
                 },
                 /**
@@ -300,14 +297,15 @@ All the changes from server are also received and propagated to your HTML.
 
                 if (!eventDetail.handled) {
                     console.error(palindromConnectionError);
-                    this._setShowConnectionError(true);
-                    let timeout = (this.fatalErrorReloadAfterS * 1000)
-                    this._setReconnectionSeconds(timeout / 1000);
+                    this.set('showConnectionError', true);
+                    this.set('reconnectionSeconds', this.fatalErrorReloadAfterS);
 
+                    let timeout = this.fatalErrorReloadAfterS;
                     this.reloadingInterval = setInterval(() => {
-                        this._setReconnectionSeconds(timeout / 1000);
-                        timeout -= 1000;
-                        if(timeout <= 0) {
+                        this.set('reconnectionSeconds', timeout);
+                        timeout--;
+                        if (timeout <= 0) {
+                            clearTimeout(this.reloadingInterval);
                             this.reload();
                         }
                     }, 1000);
@@ -326,9 +324,9 @@ All the changes from server are also received and propagated to your HTML.
                 this.fire("reconnection-countdown", eventDetail);
 
                 if (!eventDetail.handled) {
-                    this._setShowReconnectingNow(milliseconds == 0);
-                    this._setShowReconnectingIn(milliseconds != 0);
-                    this._setReconnectionSeconds(milliseconds / 1000);
+                    this.set('showReconnectingNow', milliseconds == 0);
+                    this.set('showReconnectingIn', milliseconds != 0);
+                    this.set('reconnectionSeconds', milliseconds / 1000);
                 }
             },
             onReconnectionEnd() {
@@ -338,8 +336,8 @@ All the changes from server are also received and propagated to your HTML.
                 this.fire("reconnection-end", eventDetail);
 
                 if (!eventDetail.handled) {
-                    this._setShowReconnectingNow(false);
-                    this._setShowReconnectingIn(false);
+                    this.set('showReconnectingNow', false);
+                    this.set('showReconnectingIn', false);
                 }
             },
             onPatchApplied(patches, results) {
@@ -530,8 +528,8 @@ All the changes from server are also received and propagated to your HTML.
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
             <div class="box notice tappable" on-tap="reconnectNow">
                 <strong>
-                    <span class="hourglass">⏳</span> Not connected.                    
-                </strong> 
+                    <span class="hourglass">⏳</span> Not connected.
+                </strong>
                 Connecting in {{reconnectionSeconds}}s...
                 <span>Retry now</span>
             </div>
@@ -545,10 +543,9 @@ All the changes from server are also received and propagated to your HTML.
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
             <div class="box error tappable">
-                <span class="hourglass">⏳</span> Connection error.</strong> See console for details.
-                Reloading page in {{reconnectionSeconds}}s...
+                <span class="hourglass">⏳</span> Connection error.</strong> See console for details. Reloading page in {{reconnectionSeconds}}s...
                 <span on-tap="reload">Reload now</span> •
-                <span on-tap="cancelReloading">Cancel reloading</span>
+                <span on-tap="cancelReloading">Do not reload</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showGenericError}}">
@@ -621,8 +618,8 @@ All the changes from server are also received and propagated to your HTML.
         <div class="box-container" hidden$="{{!showReconnectingIn}}">
             <div class="box notice tappable" on-tap="reconnectNow">
                 <strong>
-                    <span class="hourglass">⏳</span> Not connected.                    
-                </strong> 
+                    <span class="hourglass">⏳</span> Not connected.
+                </strong>
                 Connecting in {{reconnectionSeconds}}s...
                 <span>Retry now</span>
             </div>
@@ -636,10 +633,9 @@ All the changes from server are also received and propagated to your HTML.
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
             <div class="box error tappable">
-                <span class="hourglass">⏳</span> Connection error.</strong> See console for details.
-                Reloading page in {{reconnectionSeconds}}s...
+                <span class="hourglass">⏳</span> Connection error.</strong> See console for details. Reloading page in {{reconnectionSeconds}}s...
                 <span on-tap="reload">Reload now</span> •
-                <span on-tap="cancelReloading">Cancel reloading</span>
+                <span on-tap="cancelReloading">Do not reload</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showGenericError}}">
