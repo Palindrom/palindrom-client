@@ -305,7 +305,7 @@ All the changes from server are also received and propagated to your HTML.
                         this.set('reconnectionSeconds', timeout);
                         timeout--;
                         if (timeout <= 0) {
-                            clearTimeout(this.reloadingInterval);
+                            clearInterval(this.reloadingInterval);
                             this.reload();
                         }
                     }, 1000);
