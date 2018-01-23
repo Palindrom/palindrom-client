@@ -5,7 +5,7 @@
 
 <!-- include Palindrom with dependencies -->
 <script src="../Palindrom/dist/palindrom-dom.min.js"></script>
-
+<script src="./devtools-detect.js"></script>
 <!--
 The Polymer version of `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
 That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
@@ -187,6 +187,10 @@ All the changes from server are also received and propagated to your HTML.
                     type: Boolean,
                     value: false,
                     notify: false
+                },
+                devToolsOpen: {
+                    type: Boolean,
+                    value: false
                 }
             },
             reconnectNow() {
@@ -204,7 +208,10 @@ All the changes from server are also received and propagated to your HTML.
              *
              */
             attached() {
-
+                /**
+                 * An object that has `open` property that you can use to tell whether Chrome, FF, Safari's or Starcounter DevTools is open 
+                 */
+                this.devTools = getDevTools();
                 var whereToBind = this.getAttribute("ref");
                 var listenTo = this.listenTo;
                 var pingIntervalS = this.pingIntervalS / 1;
@@ -298,17 +305,22 @@ All the changes from server are also received and propagated to your HTML.
                 if (!eventDetail.handled) {
                     console.error(palindromConnectionError);
                     this.showConnectionError = true;
-                    this.reconnectionSeconds = this.fatalErrorReloadAfterS;
+                    if (this.devTools.open) {
+                        this.devToolsOpen = true;
+                    } else {
+                        this.devToolsOpen = false;
+                        this.reconnectionSeconds = this.fatalErrorReloadAfterS;
 
-                    let timeout = this.fatalErrorReloadAfterS;
-                    this.reloadingInterval = setInterval(() => {
-                        this.reconnectionSeconds = timeout;
-                        timeout--;
-                        if (timeout <= 0) {
-                            clearInterval(this.reloadingInterval);
-                            this.reload();
-                        }
-                    }, 1000);
+                        let timeout = this.fatalErrorReloadAfterS;
+                        this.reloadingInterval = setInterval(() => {
+                            this.reconnectionSeconds = timeout;
+                            timeout--;
+                            if (timeout <= 0) {
+                                clearInterval(this.reloadingInterval);
+                                this.reload();
+                            }
+                        }, 1000);
+                    }
                 }
             },
             onGenericError(error) {
@@ -543,9 +555,23 @@ All the changes from server are also received and propagated to your HTML.
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
             <div class="box error tappable">
-                <span class="hourglass">⏳</span> Connection error.</strong> See console for details. Reloading page in {{reconnectionSeconds}}s...
-                <span on-tap="reload">Reload now</span> •
-                <span on-tap="cancelReloading">Do not reload</span>
+                <span class="hourglass">⏳</span> Connection error.</strong> See console for details.
+                <dom-if if="{{!devToolsOpen}}">
+                    <template>
+                        <a>
+                            Reloading page in {{reconnectionSeconds}}s...
+                            <span on-tap="cancelReloading">Do not reload</span> •
+                        </a>
+                    </template>
+                </dom-if>
+                <dom-if if="{{devToolsOpen}}">
+                    <template>
+                        <em>
+                            Will not reload because DevTools is open. 
+                        </em>
+                    </template>
+                </dom-if>
+                <span on-tap="reload">Reload now</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showGenericError}}">
@@ -633,9 +659,23 @@ All the changes from server are also received and propagated to your HTML.
         </div>
         <div class="box-container" hidden$="{{!showConnectionError}}">
             <div class="box error tappable">
-                <span class="hourglass">⏳</span> Connection error.</strong> See console for details. Reloading page in {{reconnectionSeconds}}s...
-                <span on-tap="reload">Reload now</span> •
-                <span on-tap="cancelReloading">Do not reload</span>
+                <span class="hourglass">⏳</span> Connection error.</strong> See console for details.
+                <dom-if if="{{!devToolsOpen}}">
+                    <template>
+                        <a>
+                            Reloading page in {{reconnectionSeconds}}s...
+                            <span on-tap="cancelReloading">Do not reload</span> •
+                        </a>
+                    </template>
+                </dom-if>
+                <dom-if if="{{devToolsOpen}}">
+                    <template>
+                        <em>
+                            Will not reload because DevTools is open. 
+                        </em>
+                    </template>
+                </dom-if>
+                <span on-tap="reload">Reload now</span>
             </div>
         </div>
         <div class="box-container" hidden$="{{!showGenericError}}">
