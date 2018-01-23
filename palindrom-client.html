@@ -234,7 +234,7 @@ All the changes from server are also received and propagated to your HTML.
                     ot: this.ot,
                     purity: this.purity,
                     onStateReset: obj => {
-                        this.set('obj', obj);
+                        this.obj = obj;
                         if (whereToBind) {
                             this.bindTo(whereToBind);
                         }
@@ -297,12 +297,12 @@ All the changes from server are also received and propagated to your HTML.
 
                 if (!eventDetail.handled) {
                     console.error(palindromConnectionError);
-                    this.set('showConnectionError', true);
-                    this.set('reconnectionSeconds', this.fatalErrorReloadAfterS);
+                    this.showConnectionError = true;
+                    this.reconnectionSeconds = this.fatalErrorReloadAfterS;
 
                     let timeout = this.fatalErrorReloadAfterS;
                     this.reloadingInterval = setInterval(() => {
-                        this.set('reconnectionSeconds', timeout);
+                        this.reconnectionSeconds = timeout;
                         timeout--;
                         if (timeout <= 0) {
                             clearInterval(this.reloadingInterval);
@@ -312,7 +312,7 @@ All the changes from server are also received and propagated to your HTML.
                 }
             },
             onGenericError(error) {
-                this.set('showGenericError', true);
+                this.showGenericError = true;
                 console.error(error);
             },
             onReconnectionCountdown(milliseconds) {
@@ -324,9 +324,9 @@ All the changes from server are also received and propagated to your HTML.
                 this.fire("reconnection-countdown", eventDetail);
 
                 if (!eventDetail.handled) {
-                    this.set('showReconnectingNow', milliseconds == 0);
-                    this.set('showReconnectingIn', milliseconds != 0);
-                    this.set('reconnectionSeconds', milliseconds / 1000);
+                    this.showReconnectingNow = milliseconds == 0;
+                    this.showReconnectingIn = milliseconds != 0;
+                    this.reconnectionSeconds = milliseconds / 1000;
                 }
             },
             onReconnectionEnd() {
@@ -336,8 +336,8 @@ All the changes from server are also received and propagated to your HTML.
                 this.fire("reconnection-end", eventDetail);
 
                 if (!eventDetail.handled) {
-                    this.set('showReconnectingNow', false);
-                    this.set('showReconnectingIn', false);
+                    this.showReconnectingNow = false;
+                    this.showReconnectingIn = false;
                 }
             },
             onPatchApplied(patches, results) {
