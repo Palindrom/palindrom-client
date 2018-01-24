@@ -71,7 +71,7 @@ purity | `Boolean` | `false` | `true` to enable purist mode of OT
 remote-url / remoteUrl | `String` | `window.location` | The remote's URL
 remoteVersionPath | `JSONPointer` | `/_ver#s` | remote version path, set it to falsy to disable Double Versioned JSON Patch communication
 useWebSocket | `Boolean` | `true` | Set to false to disable WebSocket (use HTTP)
-
+fatalErrorReloadAfterS | `Number` | 5      | Timeout in seconds until the page refreshes upon connection errors
 ## Events
 
 Name                       | Description
