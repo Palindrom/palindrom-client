@@ -5,7 +5,6 @@
 
 <!-- include Palindrom with dependencies -->
 <script src="../Palindrom/dist/palindrom-dom.min.js"></script>
-<script src="./devtools-detect.js"></script>
 <!--
 The Polymer version of `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
 That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
@@ -25,6 +24,41 @@ All the changes from server are also received and propagated to your HTML.
 @demo demo/index.html
 -->
 <script>
+    /*!
+	devtools-detect
+	Detect if DevTools is open
+	https://github.com/sindresorhus/devtools-detect
+	by Sindre Sorhus
+	MIT License
+    */
+    function isDevToolsOpen() {
+        var threshold = 160;
+        // Starcounter DevTools
+        if (
+            typeof starcounterDebugAidListener !== 'undefined' &&
+            starcounterDebugAidListener.updateListeners &&
+            starcounterDebugAidListener.updateListeners.length > 0
+        ) {
+            return true;
+        }
+        // Browser DevTools
+        var widthThreshold = window.outerWidth - window.innerWidth > threshold;
+        var heightThreshold = window.outerHeight - window.innerHeight > threshold;
+
+        if (
+            !(heightThreshold && widthThreshold) &&
+            ((window.Firebug &&
+                window.Firebug.chrome &&
+                window.Firebug.chrome.isInitialized) ||
+                widthThreshold ||
+                heightThreshold)
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     var component = (function () {
         'use strict';
 
@@ -208,10 +242,6 @@ All the changes from server are also received and propagated to your HTML.
              *
              */
             attached() {
-                /**
-                 * An object that has `open` property that you can use to tell whether Chrome, FF, Safari's or Starcounter DevTools is open 
-                 */
-                this.devTools = getDevTools();
                 var whereToBind = this.getAttribute("ref");
                 var listenTo = this.listenTo;
                 var pingIntervalS = this.pingIntervalS / 1;
@@ -305,7 +335,7 @@ All the changes from server are also received and propagated to your HTML.
                 if (!eventDetail.handled) {
                     console.error(palindromConnectionError);
                     this.showConnectionError = true;
-                    if (this.devTools.open) {
+                    if (isDevToolsOpen()) {
                         this.devToolsOpen = true;
                     } else {
                         this.devToolsOpen = false;
@@ -567,7 +597,7 @@ All the changes from server are also received and propagated to your HTML.
                 <dom-if if="{{devToolsOpen}}">
                     <template>
                         <em>
-                            Will not reload because DevTools is open. 
+                            Will not reload because DevTools is open.
                         </em>
                     </template>
                 </dom-if>
@@ -671,7 +701,7 @@ All the changes from server are also received and propagated to your HTML.
                 <dom-if if="{{devToolsOpen}}">
                     <template>
                         <em>
-                            Will not reload because DevTools is open. 
+                            Will not reload because DevTools is open.
                         </em>
                     </template>
                 </dom-if>
