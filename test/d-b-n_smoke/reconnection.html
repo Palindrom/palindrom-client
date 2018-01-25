@@ -76,7 +76,7 @@
             it('and log error reason to the console', function () {
                 var closeEvent = { reason: 'thereason', code: 1 };
                 palindrom.network._ws.close(closeEvent);
-                expect(consoleErrorSpy.getCall(0).args[0].reason).to.contain(closeEvent.reason);
+                expect(consoleErrorSpy.getCall(0).args[0].message).to.contain(closeEvent.reason);
             });
 
             describe('when connection is broken without a reason should display a notice box', function () {
