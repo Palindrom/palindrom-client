@@ -72,7 +72,7 @@
                 var closeEvent = { reason: 'thereason', code: 1 };
                 var boxErrorMsg = 'Connection error. See console for details.';
                 palindrom.network._ws.close(closeEvent);
-                expect(container.querySelector("div.box.error.tappable").innerText).to.contain(boxErrorMsg);
+                expect(ppclient.shadowRoot.querySelector("div.box.error.tappable").innerText).to.contain(boxErrorMsg);
             });
 
             it('and log error reason to the console', function () {
@@ -87,7 +87,7 @@
                     palindrom.network._ws.close(closeEvent);
                     var newName = 'newname';
                     setMockServerModel({ name: newName });
-                    expect(container.querySelector("div.box.notice").innerText).to.contain("Connecting in 1s...");
+                    expect(ppclient.shadowRoot.querySelector("div.box.notice").innerText).to.contain("Connecting in 1s...");
                     ppclient.addEventListener('reconnection-end', function () {
                         setTimeout(function () {
                             expect(nameSpan.innerText).to.equal(newName);
