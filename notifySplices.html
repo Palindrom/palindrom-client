@@ -2,21 +2,22 @@
 <html>
 
 <head>
-    <script src="../webcomponentsjs/webcomponents.js"></script>
+    <script src="../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../polymer/polymer.html">
 </head>
 
 <body>
-
-    <template is="dom-bind" id="arrays">
-        <ul class="people">
-            <template is="dom-repeat" items="{{organization.people}}">
-                <li>
-                    <span>{{item}}</span>
-                </li>
-            </template>
-        </ul>
-    </template>
+    <dom-bind id="arrays">
+        <template>
+            <ul class="people">
+                <template is="dom-repeat" items="{{organization.people}}">
+                    <li>
+                        <span>{{item}}</span>
+                    </li>
+                </template>
+            </ul>
+        </template>
+    </dom-bind>
     <script>
         var model = {
             name: "Juicy",

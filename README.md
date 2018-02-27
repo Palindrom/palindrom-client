@@ -3,7 +3,7 @@
 > Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.
 
 Custom Element that binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/1.0/docs/devguide/templates.html).
-That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
+That keeps your Polymer app, or just `<dom-bind>` in sync with any server-side
 data-model using Palindrom & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
 
 You get three-way data binding server - JS - HTML, kept in flawless sync.
@@ -35,7 +35,7 @@ Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archi
 1. Import Web Components' polyfill, if needed:
 
     ```html
-    <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
     ```
 
 2. Import Custom Element:
@@ -59,7 +59,7 @@ Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archi
 
 Attribute                       | Options   | Default | Description
 ---                             | ---       | ---     | ---
-ref   | `String` or `HTMLElement` | element itself | To which element (polymer element/`template is="dom-bind"`) we should bind to.
+ref   | `String` or `HTMLElement` | element itself | To which element (polymer element/`<dom-bind>`) we should bind to.
 debug | `Boolean` | `false` | Set to `true` to enable debugging mode
 listenTo | `String` | `document.body` | DOM node to listen to (see PalindromDOM listenTo attribute)
 localVersionPath | `JSONPointer` | `/_ver#c$` | local version path, set to falsy do disable Versioned JSON Patch communication

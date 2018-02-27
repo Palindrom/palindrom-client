@@ -45,6 +45,7 @@
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
     "jasmine-core": "jasmine#^2.4.1",
     "jasmine-ajax": "^3.2.0",
-    "starcounter-include": "Starcounter/starcounter-include#master"
+    "starcounter-include": "Starcounter/starcounter-include#master",
+    "fast-json-patch": "^2.0.6"
   }
 }

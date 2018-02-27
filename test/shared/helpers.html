@@ -17,7 +17,7 @@
     window.domBindFixture = function (id, done, where) {
         var fixture = document.getElementById(id).content;
         var templ = document.importNode(fixture, true);
-        var domBind = templ.querySelector('[is="dom-bind"]');
+        var domBind = templ.querySelector('dom-bind');
         domBind.addEventListener('dom-change', function () {
             setTimeout(function () {
                 done();

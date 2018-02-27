@@ -7,7 +7,7 @@
 
     <title>Test suite for reconnection</title>
     <!-- Importing Web Component's Polyfill -->
-    <script src="../../../webcomponentsjs/webcomponents.js"></script>
+    <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../shared/helpers.html">
 
     <script src="../../../web-component-tester/browser.js"></script>
@@ -22,9 +22,11 @@
             <!-- workaround for test-fixture bug -->
             <div>
                 <palindrom-client remote-url="/palindrom" ref="bind" ping-interval-s="0"></palindrom-client>
-                <template is="dom-bind" id="bind">
-                    <span id="name">{{model.name}}</span>
-                </template>
+                <dom-bind id="bind">
+                    <template>
+                        <span id="name">{{model.name}}</span>
+                    </template>
+                </dom-bind>
             </div>
         </template>
     </test-fixture>
@@ -50,7 +52,7 @@
                 setTimeout(function () {
                     ppclient = container.querySelector("palindrom-client");
                     palindrom = ppclient.palindrom;
-                    domBind = container.querySelector('template[is="dom-bind"]');
+                    domBind = container.querySelector('dom-bind');
                     nameSpan = container.querySelector('#name');
                     initPalindrom(palindrom, model);
                     // Polymer werido(m)bind attaches to dom asynchronously
