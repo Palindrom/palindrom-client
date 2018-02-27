@@ -41,6 +41,8 @@ Or [download as ZIP](https://github.com/Palindrom/palindrom-client/archive/maste
 2. Import Custom Element:
 
     ```html
+    <!-- include Palindrom with dependencies -->
+    <script src="bower_components/Palindrom/dist/palindrom-dom.min.js"></script>
     <link rel="import" href="bower_components/palindrom-client/palindrom-client.html">
     ```
 
