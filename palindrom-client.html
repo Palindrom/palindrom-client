@@ -218,7 +218,11 @@ All the changes from server are also received and propagated to your HTML.
                 this.network = this.palindrom.network;
                 this.morphUrl = this.palindrom.morphUrl.bind(this.palindrom);
             }
-
+            disconnectedCallback(){
+                this.palindrom.unlisten();
+                // hacky way to stop Palindrom connection
+                this.palindrom.useWebSocket = false;
+            }
             bindTo(element) {
                 // use node id or node itself;
                 element = typeof element == "string" ? document.getElementById(element) : element;
