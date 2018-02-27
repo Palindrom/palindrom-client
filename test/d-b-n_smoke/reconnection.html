@@ -12,6 +12,8 @@
 
     <script src="../../../web-component-tester/browser.js"></script>
 
+    <link rel="import" href="../../../polymer/polymer.html">
+
     <!-- Step 1: import the element to test -->
     <link rel="import" href="../../palindrom-client.html">
 </head>
@@ -87,7 +89,7 @@
                     palindrom.network._ws.close(closeEvent);
                     var newName = 'newname';
                     setMockServerModel({ name: newName });
-                    expect(ppclient.shadowRoot.querySelector("div.box.notice").innerText).to.contain("Connecting in 1s...");
+                    expect(ppclient.shadowRoot.querySelector("div.box.notice").innerText).to.contain("Connecting in 5s...");
                     ppclient.addEventListener('reconnection-end', function () {
                         setTimeout(function () {
                             expect(nameSpan.innerText).to.equal(newName);

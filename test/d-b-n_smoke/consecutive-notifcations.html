@@ -8,7 +8,11 @@
     <title>Test behavior expected due to Polymer bugs</title>
     <!-- Importing Web Component's Polyfill -->
     <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../../polymer/polymer.html">
+
     <link rel="import" href="../shared/helpers.html">
+
 
     <script src="../../../web-component-tester/browser.js"></script>
 
@@ -52,9 +56,8 @@
     </test-fixture>
     <script>
         var model;
-        describe('not desired but expected behavior, caused by Polymer bugs', function () {
             describe('when stamped with reference to `dom-bind` and bound to palindrom object w/ array of primitives', function () {
-                describe('once two consecutive changes are made and first one sets a value to one of existing ones - #14 (Polymer/polymer#3682)', function () {
+                describe('once two consecutive changes are made, both should take effect correctly', function () {
                     var container, domBind, ppclient, palindrom, patchAppliedEventCallback;
 
                     beforeEach(function (done) {
@@ -87,7 +90,7 @@
                             // check and wait for the event dispatching
                             setTimeout(function listener() {
                                 expect(patchAppliedEventCallback).to.have.been.called;
-                                expect(container.querySelector("ul>li:first-child").innerHTML).to.equal('');
+                                expect(container.querySelector("ul>li:first-child").innerHTML).to.equal('1');
                                 expect(container.querySelector("ul>li:nth-child(2)").innerHTML).to.equal('2');
                                 done();
                             }, 10);
@@ -96,7 +99,7 @@
                 });
             });
             describe('`dom-bind` when bound to an array of primitives', function () {
-                describe('once two consecutive `splice`s are made and first one sets a value to one of existing ones - Polymer/polymer#3682', function () {
+                describe('once two consecutive `splice`s are made, both should take effect correctly', function () {
                     var container, domBind;
 
                     beforeEach(function (done) {
@@ -122,14 +125,13 @@
 
                         // check and wait for the event dispatching
                         setTimeout(function listener() {
-                            expect(container.querySelector("ul>li:first-child").innerHTML).to.equal('');
+                            expect(container.querySelector("ul>li:first-child").innerHTML).to.equal('1');
                             expect(container.querySelector("ul>li:nth-child(2)").innerHTML).to.equal('2');
                             done();
                         }, 10);
                     });
                 });
             });
-        });
     </script>
 
 </body>
