@@ -7,8 +7,10 @@
 
     <title>Test suite for array operations</title>
     <!-- Importing Web Component's Polyfill -->
-    <script src="../../../webcomponentsjs/webcomponents.js"></script>
+    <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../shared/helpers.html">
+
+    <link rel="import" href="../../../polymer/polymer.html">
 
     <script src="../../../web-component-tester/browser.js"></script>
 
@@ -22,79 +24,81 @@
             <!-- workaround for test-fixture bug -->
             <div>
                 <palindrom-client remote-url="/palindrom" ref="arrays" ping-interval-s="0"></palindrom-client>
-                <template is="dom-bind" id="arrays">
-                    <h4>
-                        <span>{{model.name}}</span> people:</h4>
-                    <ul class="people">
-                        <template is="dom-repeat" items="{{model.people}}">
-                            <li>
-                                <span>{{item.first}}</span>
-                            </li>
-                        </template>
-                    </ul>
-                    <ul class="primitive_people">
-                        <template is="dom-repeat" items="{{model.primitive_people}}">
-                            <li>
-                                <span>{{item}}</span>
-                            </li>
-                        </template>
-                    </ul>
-                    <ul class="people_properties">
-                        <li class="arr">Elements:
-                            <template is="dom-repeat" items="{{model.people_properties}}">
-                                <span>{{item}}</span>,
+                <dom-bind id="arrays">
+                    <template>
+                        <h4>
+                            <span>{{model.name}}</span> people:</h4>
+                        <ul class="people">
+                            <template is="dom-repeat" items="{{model.people}}">
+                                <li>
+                                    <span>{{item.first}}</span>
+                                </li>
                             </template>
-                        </li>
-                        <li class="length">{{model.people_properties.length}}</li>
-                        <li class="update">{{model.people_properties.prop}}</li>
-                        <template is="dom-if" if="{{model.people_properties.newProp}}" restamp>
-                            <li class="add">Add</li>
-                        </template>
-                        <template is="dom-if" if="{{model.people_properties.deletedProp}}" restamp>
-                            <li class="delete">Deleted? - <span>{{model.people_properties.deletedProp}}</span></li>
-                        </template>
-                    </ul>
-                    <ul class="push">
-                        <template is="dom-repeat" items="{{model.people_push}}">
-                            <li>
-                                <span>{{item.first}}</span>
-                            </li>
-                        </template>
-                    </ul>
-                    <ul class="pop">
-                        <template is="dom-repeat" items="{{model.people_pop}}">
-                            <li>
-                                <span>{{item.first}}</span>
-                            </li>
-                        </template>
-                    </ul>
-                    <ul class="splice">
-                        <template is="dom-repeat" items="{{model.people_splice}}">
-                            <li>
-                                <span>{{item.first}}</span>
-                            </li>
-                        </template>
-                    </ul>
-                    <ul class="splice_n_change">
-                        <template is="dom-repeat" items="{{model.people_splice_n_change}}">
-                            <li>{{item.first}}</li>
-                        </template>
-                    </ul>
-                    <ul class="primitive_splice_n_change">
-                        <template is="dom-repeat" items="{{model.primitive_splice_n_change}}">
-                            <li>{{item}}</li>
-                        </template>
-                    </ul>
-                    <ul class="people_nested">
-                        <template is="dom-repeat" items="{{model.people_nested}}">
-                            <li>
-                                <template is="dom-repeat" items="{{item}}">
+                        </ul>
+                        <ul class="primitive_people">
+                            <template is="dom-repeat" items="{{model.primitive_people}}">
+                                <li>
                                     <span>{{item}}</span>
+                                </li>
+                            </template>
+                        </ul>
+                        <ul class="people_properties">
+                            <li class="arr">Elements:
+                                <template is="dom-repeat" items="{{model.people_properties}}">
+                                    <span>{{item}}</span>,
                                 </template>
                             </li>
-                        </template>
-                    </ul>
-                </template>
+                            <li class="length">{{model.people_properties.length}}</li>
+                            <li class="update">{{model.people_properties.prop}}</li>
+                            <template is="dom-if" if="{{model.people_properties.newProp}}" restamp>
+                                <li class="add">Add</li>
+                            </template>
+                            <template is="dom-if" if="{{model.people_properties.deletedProp}}" restamp>
+                                <li class="delete">Deleted? - <span>{{model.people_properties.deletedProp}}</span></li>
+                            </template>
+                        </ul>
+                        <ul class="push">
+                            <template is="dom-repeat" items="{{model.people_push}}">
+                                <li>
+                                    <span>{{item.first}}</span>
+                                </li>
+                            </template>
+                        </ul>
+                        <ul class="pop">
+                            <template is="dom-repeat" items="{{model.people_pop}}">
+                                <li>
+                                    <span>{{item.first}}</span>
+                                </li>
+                            </template>
+                        </ul>
+                        <ul class="splice">
+                            <template is="dom-repeat" items="{{model.people_splice}}">
+                                <li>
+                                    <span>{{item.first}}</span>
+                                </li>
+                            </template>
+                        </ul>
+                        <ul class="splice_n_change">
+                            <template is="dom-repeat" items="{{model.people_splice_n_change}}">
+                                <li>{{item.first}}</li>
+                            </template>
+                        </ul>
+                        <ul class="primitive_splice_n_change">
+                            <template is="dom-repeat" items="{{model.primitive_splice_n_change}}">
+                                <li>{{item}}</li>
+                            </template>
+                        </ul>
+                        <ul class="people_nested">
+                            <template is="dom-repeat" items="{{model.people_nested}}">
+                                <li>
+                                    <template is="dom-repeat" items="{{item}}">
+                                        <span>{{item}}</span>
+                                    </template>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                </dom-bind>
             </div>
         </template>
     </test-fixture>
@@ -156,7 +160,7 @@
                 setTimeout(function () {
                     ppclient = container.querySelector("palindrom-client");
                     palindrom = ppclient.palindrom;
-                    domBind = container.querySelector('template[is="dom-bind"]');
+                    domBind = container.querySelector('dom-bind');
                     initPalindrom(palindrom, model);
                     // Polymer werido(m)bind attaches to dom asynchronously
                     setTimeout(done, 100);
@@ -244,6 +248,27 @@
                         }, 100);
                     });
                 });
+
+                describe('Undesired but expected. Polymer does not reflect deleting props', function () {
+                    // see: https://github.com/Polymer/polymer/issues/2565
+                    console.info('Undesired but expected. Polymer does not reflect deleting props', 'see: https://github.com/Polymer/polymer/issues/2565');
+                    it('when deleting custom property (dom-if restamps asynchronously) the attached dom-if will not detect it', function (done) {
+                        ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
+                        // change model
+                        palindromChange(palindrom, [operationObject('remove', '/people_properties/deletedProp')]);
+
+                        // check and wait for the event dispatching
+                        setTimeout(function listener() {
+                            // out part is right
+                            expect(patchAppliedEventCallback).to.have.been.called;
+
+                            // but Polymer's isn't
+                            expect(document.querySelector("ul.people_properties>li.delete")).to.be.visible;
+                            done();
+                        }, 100);
+                    });
+                });
+
                 describe('array properties, fire a change event, and EVENTUALLY update dom-bind:', function () {
                     it('when adding something to array `length` property should be notified', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
@@ -278,19 +303,7 @@
                             expect(document.querySelector("ul.people_properties>li.add")).to.be.not.null;
                             done();
                         }, 100);
-                    });
-                    it('when deleting custom property (dom-if restamps asynchronously)', function (done) {
-                        ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
-                        // change model
-                        palindromChange(palindrom, [operationObject('remove', '/people_properties/deletedProp')]);
-
-                        // check and wait for the event dispatching
-                        setTimeout(function listener() {
-                            expect(patchAppliedEventCallback).to.have.been.called;
-                            expect(document.querySelector("ul.people_properties>li.delete")).to.be.null;
-                            done();
-                        }, 100);
-                    });
+                    });                    
                 });
                 describe('array push,', function () {
                     it('fire a change event, and EVENTUALLY update dom-bind', function (done) {

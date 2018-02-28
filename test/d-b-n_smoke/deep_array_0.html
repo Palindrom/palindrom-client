@@ -7,10 +7,12 @@
 
     <title>Test suite for deep array operations</title>
     <!-- Importing Web Component's Polyfill -->
-    <script src="../../../webcomponentsjs/webcomponents.js"></script>
+    <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../shared/helpers.html">
 
     <script src="../../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../../../polymer/polymer.html">
 
     <!-- Step 1: import the element to test -->
     <link rel="import" href="../../palindrom-client.html">
@@ -23,17 +25,19 @@
             <!-- workaround for test-fixture bug -->
             <div>
                 <palindrom-client remote-url="/palindrom" ref="deep_array" ping-interval-s="0"></palindrom-client>
-                <template is="dom-bind" id="deep_array">
-                    <div id="arrayDiv">
-                        <template is="dom-repeat" items="{{model.path_to.array}}">
-                            <div id="nestedArrayDiv">
-                                <template is="dom-repeat" items="{{item.nested_array}}">
-                                    <span>{{item.prop}}</span>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-                </template>
+                <dom-bind id="deep_array">
+                    <template>
+                        <div id="arrayDiv">
+                            <template is="dom-repeat" items="{{model.path_to.array}}">
+                                <div id="nestedArrayDiv">
+                                    <template is="dom-repeat" items="{{item.nested_array}}">
+                                        <span>{{item.prop}}</span>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </dom-bind>
             </div>
         </template>
     </test-fixture>
@@ -63,7 +67,7 @@
                     ppclient = container.querySelector("palindrom-client");
                     palindrom = ppclient.palindrom;
                     initPalindrom(palindrom, model);
-                    domBind = container.querySelector('template[is="dom-bind"]');
+                    domBind = container.querySelector('dom-bind');
                     // Polymer werido(m)bind attaches to dom asynchronously
                     setTimeout(done, 100);
                 }, 100);
