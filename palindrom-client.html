@@ -186,7 +186,13 @@ All the changes from server are also received and propagated to your HTML.
                     listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
                 }
                 let palindrom = PalindromDOM.instances && PalindromDOM.instances.get(this.remoteUrl);
-                if(!palindrom){
+                if(!palindrom) {
+                    /**
+                     * To tell whether we connected to an existing instance,
+                     * or created our own. This is useful for detachement, we don't want
+                     * to destroy Palindrom instances that we don't own 
+                     * */
+                    this.isUsingOwnInstanceOfPalindrom = true;
                     this.palindrom = palindrom = new PalindromDOM({
                         remoteUrl: this.remoteUrl,
                         pingIntervalS,
@@ -223,6 +229,7 @@ All the changes from server are also received and propagated to your HTML.
                     }
                     PalindromDOM.instances.set(this.remoteUrl, palindrom);
                 } else {
+                    this.isUsingOwnInstanceOfPalindrom = false;
                     // with already established connection we cannot change listenTo parameter
 
                     this.palindrom = palindrom;
@@ -253,11 +260,12 @@ All the changes from server are also received and propagated to your HTML.
                 this.morphUrl = palindrom.morphUrl.bind(palindrom)
             }
             disconnectedCallback(){
-                // TODO: add test for detaching, if we keep anything here after the refactoring
-                this.palindrom.unlisten();
-                // hacky way to stop Palindrom connection
-                this.palindrom.useWebSocket = false;
-                PalindromDOM.instances.delete(this.remoteUrl);
+                if(this.isUsingOwnInstanceOfPalindrom) {
+                    this.palindrom.unlisten();
+                    // hacky way to stop Palindrom connection
+                    this.palindrom.useWebSocket = false;
+                    PalindromDOM.instances.delete(this.remoteUrl);
+                }
             }
             bindTo(element) {
                 // use node id or node itself;

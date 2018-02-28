@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <title>Test suite for deep array operations</title>
+    <!-- Importing Web Component's Polyfill -->
+    <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <!-- mock server responses -->
+    <script src="../../../sinonjs/sinon.js"></script>
+    <script src="../../demo/mockServer.js"></script>
+    <script src="../../../fast-json-patch/dist/fast-json-patch.min.js"></script>
+
+    <link rel="import" href="../shared/helpers.html">
+
+    <script src="../../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../../../polymer/polymer.html">
+
+    <!-- Step 1: import the element to test -->
+    <script src="../../../Palindrom/dist/palindrom-dom.min.js"></script>
+
+    <link rel="import" href="../../palindrom-client.html">
+</head>
+
+<body>
+    <test-fixture id="my-fixture">
+        <template>
+            <div><palindrom-client remote-url="/palindrom" ref="deep_array" ping-interval-s="0"></palindrom-client></div>
+        </template>
+    </test-fixture>
+
+    <test-fixture id="my-fixture-existent-palindrom-dom">
+        <template>
+            <div><palindrom-client remote-url="/palindrom-exists" ref="deep_array" ping-interval-s="0"></palindrom-client></div>
+        </template>
+    </test-fixture>
+
+    <script>
+        describe('Attachment - non-existent PalindromDOM', function () {
+            var container;
+            it('Should create an instance of PalindromDOM once attached', function (done) {
+                expect(PalindromDOM.instances).to.equal(undefined);
+                container = fixture('my-fixture');
+                setTimeout(() => {
+                    expect(PalindromDOM.instances).to.not.equal(undefined);
+                    expect(PalindromDOM.instances.size).to.equal(1);
+                    done();
+                }, 10);
+            });
+
+            it('Should destroy the instance of PalindromDOM once deattached and remove it from the instances map', function (done) {
+                expect(PalindromDOM.instances.size).to.equal(0);
+                container = fixture('my-fixture');
+                setTimeout(() => {
+                    expect(PalindromDOM.instances).to.not.equal(undefined);
+                    expect(PalindromDOM.instances.size).to.equal(1);                   
+
+                    // now detach it
+                    container.querySelector('palindrom-client').remove();
+                    expect(PalindromDOM.instances.size).to.equal(0);
+                    done();
+                }, 10);
+            });
+        });
+
+        describe('Attachment - existent PalindromDOM', function () {  
+            var container, instance;
+
+            beforeEach(function() {
+                instance = new PalindromDOM({remoteUrl: '/palindrom-exists'});
+                PalindromDOM.instances.set('/palindrom-exists', instance);
+            });
+
+            after(function() {
+                delete PalindromDOM.instances;
+            });
+
+            it('Should use existing Palindrom instance', function (done) {
+                container = fixture('my-fixture-existent-palindrom-dom');
+                setTimeout(() => {
+                    const palindromClient = container.querySelector('palindrom-client');
+                    assert(palindromClient.palindrom === instance, "palindromClient should use the existing PalindromDOM instance");
+                    done();
+                }, 10);
+            });
+
+            it('Should NOT destroy the instance of PalindromDOM once deattached (because it does not own it)', function (done) {
+                // there is a ready PalindromDOM instance
+                expect(PalindromDOM.instances.size).to.equal(1);
+                // this must use that ready instance
+                container = fixture('my-fixture-existent-palindrom-dom');
+
+                // make sure it didn't create a new one
+                expect(PalindromDOM.instances.size).to.equal(1);
+
+                setTimeout(() => {     
+                    // now detach it
+                    container.querySelector('palindrom-client').remove();
+                    
+                    // instance should not be removed
+                    expect(PalindromDOM.instances.size).to.equal(1);
+                    done();
+                }, 10);
+            });
+        });
+    </script>
+
+</body>
+
+</html>
