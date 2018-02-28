@@ -3,7 +3,7 @@
       clientVersionNumber = 0,
       enableServerReplies = true;
 
-  WebSocket = function FakeWebSocket(){
+  WebSocket = function FakeWebSocket() {
     this.readyState = 1;
   };
   var full = {
