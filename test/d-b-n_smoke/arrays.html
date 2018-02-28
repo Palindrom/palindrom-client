@@ -251,6 +251,7 @@
 
                 describe('Undesired but expected. Polymer does not reflect deleting props', function () {
                     // see: https://github.com/Polymer/polymer/issues/2565
+                    console.info('Undesired but expected. Polymer does not reflect deleting props', 'see: https://github.com/Polymer/polymer/issues/2565');
                     it('when deleting custom property (dom-if restamps asynchronously) the attached dom-if will not detect it', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
                         // change model
