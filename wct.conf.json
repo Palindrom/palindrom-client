@@ -13,8 +13,7 @@
       },
       {
         "browserName": "safari",
-        "platform": "OS X 10.12",
-        "version": "10"
+        "platform": "macOS 10.13"
       }]
     }
   }
