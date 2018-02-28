@@ -1,4 +1,4 @@
-# &lt;palindrom-polymer-client&gt; [![Build Status](https://travis-ci.org/Palindrom/palindrom-polymer-client.svg?branch=gh-pages)](https://travis-ci.org/Palindrom/palindrom-polymer-client)
+# &lt;palindrom-client&gt; [![Build Status](https://travis-ci.org/Palindrom/palindrom-client.svg?branch=gh-pages)](https://travis-ci.org/Palindrom/palindrom-client)
 ---
 > Three-way data binding server - JS - HTML kept in flawless sync with JSON Patch, WebSockets/HTTP.
 
@@ -16,8 +16,8 @@ You get three-way data binding server - JS - HTML, kept in flawless sync.
 
 ## Demo
 
-- [Check it live!](http://Palindrom.github.io/palindrom-polymer-client/demo)
-- [test suite](http://Palindrom.github.io/palindrom-polymer-client/test)
+- [Check it live!](http://Palindrom.github.io/palindrom-client/demo)
+- [test suite](http://Palindrom.github.io/palindrom-client/test)
 
 
 ## Install
@@ -25,10 +25,10 @@ You get three-way data binding server - JS - HTML, kept in flawless sync.
 Install the component using [Bower](http://bower.io/):
 
 ```sh
-$ bower install palindrom-polymer-client --save
+$ bower install palindrom-client --save
 ```
 
-Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archive/master.zip).
+Or [download as ZIP](https://github.com/Palindrom/palindrom-client/archive/master.zip).
 
 ## Usage
 
@@ -41,7 +41,7 @@ Or [download as ZIP](https://github.com/Palindrom/palindrom-polymer-client/archi
 2. Import Custom Element:
 
     ```html
-    <link rel="import" href="bower_components/palindrom-polymer-client/palindrom-client.html">
+    <link rel="import" href="bower_components/palindrom-client/palindrom-client.html">
     ```
 
 3. Start using it!
@@ -108,16 +108,16 @@ Polymer template binding is [known to have problems with arrays](https://github.
 In order to develop it locally we suggest to use [polyserve](https://npmjs.com/polyserve) tool to handle bower paths gently.
 
 1. Install the global NPM modules [bower](http://bower.io/) & [polyserve](https://npmjs.com/polyserve): `npm install -g bower polyserve`
-2. Make a local clone of this repo: `git clone git@github.com:Palindrom/palindrom-polymer-client.git`
-3. Go to the directory: `cd palindrom-polymer-client`
+2. Make a local clone of this repo: `git clone git@github.com:Palindrom/palindrom-client.git`
+3. Go to the directory: `cd palindrom-client`
 4. Install the local dependencies: `bower install`
 5. Start the development server: `polyserve -p 8000`
-6. Open the demo: [http://localhost:8000/components/palindrom-polymer-client/](http://localhost:8000/components/palindrom-polymer-client/)
-7. Open the test suite: [http://localhost:8000/components/palindrom-polymer-client/test/](http://localhost:8000/components/palindrom-polymer-client/test/)
+6. Open the demo: [http://localhost:8000/components/palindrom-client/](http://localhost:8000/components/palindrom-client/)
+7. Open the test suite: [http://localhost:8000/components/palindrom-client/test/](http://localhost:8000/components/palindrom-client/test/)
 
 ## History
 
-For detailed changelog, check [Releases](https://github.com/Palindrom/palindrom-polymer-client/releases).
+For detailed changelog, check [Releases](https://github.com/Palindrom/palindrom-client/releases).
 
 ## License
 

@@ -2,8 +2,9 @@
 
 <!-- include Palindrom with dependencies -->
 <script src="../Palindrom/dist/palindrom-dom.js"></script>
+
 <!--
-The Polymer version of `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/2.0/docs/devguide/templates.html).
+`palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/2.0/docs/devguide/templates.html).
 That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
 data-model using Palindrom & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
 
@@ -20,6 +21,7 @@ All the changes from server are also received and propagated to your HTML.
 
 @demo demo/index.html
 -->
+
 <template id="palindrom-client">
     <style>
         .box-container {
@@ -112,7 +114,7 @@ All the changes from server are also received and propagated to your HTML.
 
         const template = document.currentScript.ownerDocument.querySelector('#palindrom-client');
 
-        const defaultValues = {
+        const defaultProps = {
             "useWebSocket": true,
             "debug": false,
             "localVersionPath": '/_ver#c$',
@@ -124,21 +126,15 @@ All the changes from server are also received and propagated to your HTML.
             "devToolsOpen": false,
             "fatalErrorReloadAfterS": 5
         }
+        const defaultAttributes = ['remote-url', 'use-web-socket', 'debug', 'local-version-path', 'remote-version-path', 'ot', 'purity', 'listen-to', 'ping-interval-s', 'purity', 'fatal-error-reload-after-s', 'path'];
 
         class PalindromClient extends HTMLElement {
-            static get observedAttributes() {
-                return ['remote-url', 'use-web-socket', 'debug', 'local-version-path', 'remote-version-path', 'ot', 'purity', 'listen-to', 'ping-interval-s', 'purity', 'fatal-error-reload-after-s', 'path'];
-            }
-
+            
             constructor() {
                 super();
-                Object.assign(this, defaultValues);
-                for (const attrib of this.attributes) {
-                    const prop = kebebCaseToCamelCase(attrib.name);
-                    if (PalindromClient.observedAttributes.includes(attrib.name)) {
-                        this[prop] = attrib.value;
-                    }
-                };
+                
+                // assign default properties
+                Object.assign(this, defaultProps);                
 
                 // Creates the shadow root
                 const shadowRoot = this.attachShadow({ mode: 'open' });                
@@ -176,6 +172,15 @@ All the changes from server are also received and propagated to your HTML.
              *
              */
             connectedCallback() {
+                
+                // assign default attributes
+                for (const attrib of this.attributes) {
+                    if (defaultAttributes.includes(attrib.name)) {
+                        const prop = kebebCaseToCamelCase(attrib.name);
+                        this[prop] = attrib.value;
+                    }
+                };
+
                 const whereToBind = this.getAttribute("ref");
                 let listenTo = this.listenTo;
                 const pingIntervalS = this.pingIntervalS / 1;

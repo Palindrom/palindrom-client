@@ -248,6 +248,26 @@
                         }, 100);
                     });
                 });
+
+                describe('Undesired but expected. Polymer does not reflect deleting props', function () {
+                    // see: https://github.com/Polymer/polymer/issues/2565
+                    it('when deleting custom property (dom-if restamps asynchronously) the attached dom-if will not detect it', function (done) {
+                        ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
+                        // change model
+                        palindromChange(palindrom, [operationObject('remove', '/people_properties/deletedProp')]);
+
+                        // check and wait for the event dispatching
+                        setTimeout(function listener() {
+                            // out part is right
+                            expect(patchAppliedEventCallback).to.have.been.called;
+
+                            // but Polymer's isn't
+                            expect(document.querySelector("ul.people_properties>li.delete")).to.be.visible;
+                            done();
+                        }, 100);
+                    });
+                });
+
                 describe('array properties, fire a change event, and EVENTUALLY update dom-bind:', function () {
                     it('when adding something to array `length` property should be notified', function (done) {
                         ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
@@ -282,20 +302,7 @@
                             expect(document.querySelector("ul.people_properties>li.add")).to.be.not.null;
                             done();
                         }, 100);
-                    });
-                    // see: https://github.com/Polymer/polymer/issues/2565
-                    xit('when deleting custom property (dom-if restamps asynchronously)', function (done) {
-                        ppclient.addEventListener('patch-applied', patchAppliedEventCallback);
-                        // change model
-                        palindromChange(palindrom, [operationObject('remove', '/people_properties/deletedProp')]);
-
-                        // check and wait for the event dispatching
-                        setTimeout(function listener() {
-                            expect(patchAppliedEventCallback).to.have.been.called;
-                            expect(document.querySelector("ul.people_properties>li.delete")).to.be.null;
-                            done();
-                        }, 100);
-                    });
+                    });                    
                 });
                 describe('array push,', function () {
                     it('fire a change event, and EVENTUALLY update dom-bind', function (done) {
