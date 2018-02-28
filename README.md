@@ -86,6 +86,8 @@ reconnection-end | Fired after successful reconnection
 
 :warning: Please note, that Polymer applies changes (especially array ones) asynchronously, so those could happen after `patch-applied` event was triggered.
 
+:warning: Both attributes and properties are not observed during runtime and are only collected within `connectedCallback`, updating them in runtime will go unnoticed.
+
 ## Reconnection and heartbeats
 
 See [Palindrom docs](https://github.com/Palindrom/Palindrom#heartbeat-and-reconnection).
