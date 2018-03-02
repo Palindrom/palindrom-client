@@ -74,6 +74,7 @@ remote-url / remoteUrl | `String` | `window.location` | The remote's URL
 remoteVersionPath | `JSONPointer` | `/_ver#s` | remote version path, set it to falsy to disable Double Versioned JSON Patch communication
 useWebSocket | `Boolean` | `true` | Set to false to disable WebSocket (use HTTP)
 fatalErrorReloadAfterS | `Number` | 5      | Timeout in seconds until the page refreshes upon connection errors
+isUsingOwnInstanceOfPalindrom | `Boolean` | `true` when `palindrom-client` has created and is using its own Palindrom instance, as opposed to connecting to an existing one.
 ## Events
 
 Name                       | Description
