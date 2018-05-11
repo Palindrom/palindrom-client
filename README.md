@@ -12,14 +12,6 @@ You get three-way data binding server - JS - HTML, kept in flawless sync.
         obj="{{model}}"></palindrom-client>
 
 
-
-
-## Demo
-
-- [Check it live!](http://Palindrom.github.io/palindrom-client/demo)
-- [test suite](http://Palindrom.github.io/palindrom-client/test)
-
-
 ## Install
 
 Install the component using [Bower](http://bower.io/):
