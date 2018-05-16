@@ -23,7 +23,7 @@ All the changes from server are also received and propagated to your HTML.
 <script>
 
 
-    (function() {
+    (function () {
         const defaultProps = {
             "useWebSocket": true,
             "debug": false,
@@ -82,7 +82,7 @@ All the changes from server are also received and propagated to your HTML.
                     listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
                 }
                 let palindrom = PalindromDOM.instances && PalindromDOM.instances.get(this.remoteUrl);
-                if(!palindrom) {
+                if (!palindrom) {
                     /**
                      * To tell whether we connected to an existing instance,
                      * or created our own. This is useful for detachement, we don't want
@@ -118,7 +118,7 @@ All the changes from server are also received and propagated to your HTML.
                             this.onPatchApplied([{ op: 'replace', path: '', value: obj }], [{ removed: this.obj }])
                         }
                     });
-                    if(!PalindromDOM.instances){
+                    if (!PalindromDOM.instances) {
                         PalindromDOM.instances = new Map();
                     }
                     PalindromDOM.instances.set(this.remoteUrl, palindrom);
@@ -127,18 +127,18 @@ All the changes from server are also received and propagated to your HTML.
                     // with already established connection we cannot change listenTo parameter
 
                     this.palindrom = palindrom;
-                    palindrom.onLocalChange =  this.onLocalChange.bind(this);
-                    palindrom.onRemoteChange =  this.onPatchApplied.bind(this);
-                    palindrom.onPatchReceived =  this.onPatchReceived.bind(this);
-                    palindrom.onIncomingPatchValidationError =  this.onGenericError.bind(this);
-                    palindrom.onOutgoingPatchValidationError =  this.onGenericError.bind(this);
-                    palindrom.onError =  this.onGenericError.bind(this);
-                    palindrom.onPatchSent =  this.onPatchSent.bind(this);
-                    palindrom.onSocketStateChanged =  this.onSocketStateChanged.bind(this);
-                    palindrom.onConnectionError =  this.onConnectionError.bind(this);
-                    palindrom.onReconnectionCountdown =  this.onReconnectionCountdown.bind(this);
-                    palindrom.onReconnectionEnd =  this.onReconnectionEnd.bind(this);
-                    palindrom.onStateReset =  obj => {
+                    palindrom.onLocalChange = this.onLocalChange.bind(this);
+                    palindrom.onRemoteChange = this.onPatchApplied.bind(this);
+                    palindrom.onPatchReceived = this.onPatchReceived.bind(this);
+                    palindrom.onIncomingPatchValidationError = this.onGenericError.bind(this);
+                    palindrom.onOutgoingPatchValidationError = this.onGenericError.bind(this);
+                    palindrom.onError = this.onGenericError.bind(this);
+                    palindrom.onPatchSent = this.onPatchSent.bind(this);
+                    palindrom.onSocketStateChanged = this.onSocketStateChanged.bind(this);
+                    palindrom.onConnectionError = this.onConnectionError.bind(this);
+                    palindrom.onReconnectionCountdown = this.onReconnectionCountdown.bind(this);
+                    palindrom.onReconnectionEnd = this.onReconnectionEnd.bind(this);
+                    palindrom.onStateReset = obj => {
                         this.obj = obj;
                         if (whereToBind) {
                             this.bindTo(whereToBind);
@@ -146,15 +146,15 @@ All the changes from server are also received and propagated to your HTML.
                         this.onPatchApplied([{ op: 'replace', path: '', value: obj }], [{ removed: this.obj }])
                     }
                     // if already established (re-)set state
-                    if(palindrom.obj){
+                    if (palindrom.obj) {
                         palindrom.onStateReset(palindrom.obj);
                     }
                 }
                 this.network = palindrom.network;
                 this.morphUrl = palindrom.morphUrl.bind(palindrom)
             }
-            disconnectedCallback(){
-                if(this.isUsingOwnInstanceOfPalindrom) {
+            disconnectedCallback() {
+                if (this.isUsingOwnInstanceOfPalindrom) {
                     this.palindrom.unlisten();
                     // hacky way to stop Palindrom connection
                     this.palindrom.useWebSocket = false;
@@ -184,7 +184,7 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             fire(name, detail) {
-                this.dispatchEvent(new CustomEvent(name, {detail}));
+                this.dispatchEvent(new CustomEvent(name, { detail }));
             }
 
             onPatchReceived(data, url, method) {
@@ -246,9 +246,7 @@ All the changes from server are also received and propagated to your HTML.
             onPatchApplied(patches, results) {
                 this.propagateDomBind({ patches, results });
                 this.fire("patch-applied", {
-                    bubbles: true,
-                    cancelable: true,
-                    detail: patches
+                    patches
                 });
             }
 
