@@ -75,9 +75,10 @@ patch-applied | Fired when patch gets applied
 patchreceived | Fired when patch gets received
 patchsent | Fired when patch gets send
 socketstatechanged | Fired when web socket state changes
-connectionerror | Fired when unrecoverable connection error happens
+connection-error | Fired when unrecoverable connection error happens
 reconnection-countdown | Fired when reconnecting. has `milliseconds` property in details, denoting number of milliseconds to scheduled reconnection
 reconnection-end | Fired after successful reconnection
+generic-error | Fired when a generic Palindrom error occurs (server error, patch validation error, etc..)
 
 :warning: Please note, that Polymer applies changes (especially array ones) asynchronously, so those could happen after `patch-applied` event was triggered.
 

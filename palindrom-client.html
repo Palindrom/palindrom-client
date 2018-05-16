@@ -218,14 +218,13 @@ All the changes from server are also received and propagated to your HTML.
                     palindromConnectionError,
                     handled: false
                 };
-                this.fire("connectionerror", eventDetail);
-
-                if (!eventDetail.handled) {
-                    console.error(palindromConnectionError);
-                }
+                this.fire("connection-error", eventDetail);
             }
             onGenericError(error) {
-                console.error(error);
+                const eventDetail = {
+                    error
+                };
+                this.fire("generic-error", eventDetail);
             }
 
             onReconnectionCountdown(milliseconds) {
@@ -235,12 +234,6 @@ All the changes from server are also received and propagated to your HTML.
                 };
 
                 this.fire("reconnection-countdown", eventDetail);
-
-                if (!eventDetail.handled) {
-                    this.showReconnectingNow = milliseconds == 0;
-                    this.showReconnectingIn = milliseconds != 0;
-                    this.reconnectionSeconds = milliseconds / 1000;
-                }
             }
 
             onReconnectionEnd() {
@@ -248,11 +241,6 @@ All the changes from server are also received and propagated to your HTML.
                     handled: false
                 };
                 this.fire("reconnection-end", eventDetail);
-
-                if (!eventDetail.handled) {
-                    this.showReconnectingNow = false;
-                    this.showReconnectingIn = false;
-                }
             }
 
             onPatchApplied(patches, results) {
