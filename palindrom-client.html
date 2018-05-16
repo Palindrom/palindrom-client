@@ -215,7 +215,7 @@ All the changes from server are also received and propagated to your HTML.
 
             onConnectionError(palindromConnectionError) {
                 const eventDetail = {
-                    palindromConnectionError,
+                    error: palindromConnectionError,
                     handled: false
                 };
                 this.fire("connection-error", eventDetail);
