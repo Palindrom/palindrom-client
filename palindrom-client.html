@@ -1,4 +1,4 @@
-<!-- palindrom-polymer-client version: 6.0.0 | MIT License -->
+<!-- palindrom-polymer-client version: 7.0.0 | MIT License -->
 
 <!--
 `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/2.0/docs/devguide/templates.html).
@@ -16,101 +16,13 @@ in browser are sent to the server via WebSocket or HTTP, as
 [JSON Patch](https://tools.ietf.org/html/rfc6902)es.
 All the changes from server are also received and propagated to your HTML.
 
-@demo demo/index.html
 -->
+<script src="../Palindrom/dist/palindrom-dom.min.js"></script>
 
-<template id="palindrom-client">
-    <style>
-        .box-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .box-container[hidden] {
-            display: none;
-        }
-
-        .box {
-            padding: 5px 5px;
-        }
-
-        .notice {
-            background-color: #fff4cc;
-            border-color: #ffe070;
-            color: #000;
-        }
-
-        .error {
-            background-color: #fee;
-            border: 1px solid #f9c1c1;
-            border-top: none;
-            color: #444;
-        }
-
-        .hourglass {
-            animation: rotateHG 2s cubic-bezier(.03, 1, 1, 0) infinite;
-            transform-origin: 50% 50%;
-            display: inline-block;
-            text-decoration: none!important;
-        }
-
-        @keyframes rotateHG {
-            100% {
-                transform: rotate(360deg)
-            }
-        }
-
-        .tappable {
-            cursor: pointer;
-        }
-
-        .tappable span {
-            text-decoration: underline;
-        }
-    </style>
-    <div class="box-container reconnect-pane" hidden>
-        <div class="box notice tappable" on-tap="reconnectNow">
-            <strong>
-                <span class="hourglass">⏳</span> Not connected.
-            </strong>
-            Connecting in <span class="reconnection-seconds">5</span>s...
-            <span>Retry now</span>
-        </div>
-    </div>
-    <div class="box-container reconnecting-now-pane" hidden>
-        <div class="box notice">
-            <strong>
-                <span class="hourglass">⏳</span> Connecting now...
-            </strong>
-        </div>
-    </div>
-    <div class="box-container error-pane" hidden>
-        <div class="box error tappable">
-            <span class="hourglass">⏳</span> Connection error.</strong> See console for details.
-            <a class="reloading-in-message">
-                Reloading page in <span class="reconnection-seconds">5</span>...
-                • <span on-tap="cancelReloading">Do not reload</span> •
-            </a>
-            <span on-tap="reload">Reload now</span>
-        </div>
-    </div>
-    <div class="box-container generic-error-pane" hidden>
-        <div class="box error tappable" on-tap="reload">
-            <strong>⚠️ An error has occurred.</strong> See console for details.
-            <span>Click here to reload</span>
-        </div>
-    </div>
-</template>
 <script>
 
 
-    (function() {
-
-        const template = document.currentScript.ownerDocument.querySelector('#palindrom-client');
-
+    (function () {
         const defaultProps = {
             "useWebSocket": true,
             "debug": false,
@@ -132,22 +44,6 @@ All the changes from server are also received and propagated to your HTML.
 
                 // assign default properties
                 Object.assign(this, defaultProps);
-
-                // Creates the shadow root
-                const shadowRoot = this.attachShadow({ mode: 'open' });
-                const clone = document.importNode(template.content, true);
-                shadowRoot.appendChild(clone);
-
-                this.reconnectingNowPane = shadowRoot.querySelector('.reconnecting-now-pane');
-                this.errorPane = shadowRoot.querySelector('.error-pane');
-                this.genericErrorPane = shadowRoot.querySelector('.generic-error-pane');
-                this.reloadingInMessage = shadowRoot.querySelector('.reloading-in-message');
-                this.reconnectionSecondsSpans =  shadowRoot.querySelectorAll('.reconnection-seconds');
-
-                // attach event handlers
-                for(const el of shadowRoot.querySelectorAll('[on-tap]')) {
-                    el.addEventListener('click', this[el.getAttribute('on-tap')].bind(this));
-                }
             }
 
             reconnectNow() {
@@ -159,7 +55,6 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             cancelReloading() {
-                this.errorPane.setAttribute('hidden', '');
                 clearInterval(this.reloadingInterval);
                 delete this.reloadingInterval;
             }
@@ -186,7 +81,7 @@ All the changes from server are also received and propagated to your HTML.
                     listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
                 }
                 let palindrom = PalindromDOM.instances && PalindromDOM.instances.get(this.remoteUrl);
-                if(!palindrom) {
+                if (!palindrom) {
                     /**
                      * To tell whether we connected to an existing instance,
                      * or created our own. This is useful for detachement, we don't want
@@ -202,9 +97,7 @@ All the changes from server are also received and propagated to your HTML.
                         purity: this.purity,
                         localVersionPath: this.localVersionPath,
                         remoteVersionPath: this.remoteVersionPath,
-
                         listenTo,
-
                         onLocalChange: this.onLocalChange.bind(this),
                         onRemoteChange: this.onPatchApplied.bind(this),
                         onPatchReceived: this.onPatchReceived.bind(this),
@@ -224,7 +117,7 @@ All the changes from server are also received and propagated to your HTML.
                             this.onPatchApplied([{ op: 'replace', path: '', value: obj }], [{ removed: this.obj }])
                         }
                     });
-                    if(!PalindromDOM.instances){
+                    if (!PalindromDOM.instances) {
                         PalindromDOM.instances = new Map();
                     }
                     PalindromDOM.instances.set(this.remoteUrl, palindrom);
@@ -233,18 +126,18 @@ All the changes from server are also received and propagated to your HTML.
                     // with already established connection we cannot change listenTo parameter
 
                     this.palindrom = palindrom;
-                    palindrom.onLocalChange =  this.onLocalChange.bind(this);
-                    palindrom.onRemoteChange =  this.onPatchApplied.bind(this);
-                    palindrom.onPatchReceived =  this.onPatchReceived.bind(this);
-                    palindrom.onIncomingPatchValidationError =  this.onGenericError.bind(this);
-                    palindrom.onOutgoingPatchValidationError =  this.onGenericError.bind(this);
-                    palindrom.onError =  this.onGenericError.bind(this);
-                    palindrom.onPatchSent =  this.onPatchSent.bind(this);
-                    palindrom.onSocketStateChanged =  this.onSocketStateChanged.bind(this);
-                    palindrom.onConnectionError =  this.onConnectionError.bind(this);
-                    palindrom.onReconnectionCountdown =  this.onReconnectionCountdown.bind(this);
-                    palindrom.onReconnectionEnd =  this.onReconnectionEnd.bind(this);
-                    palindrom.onStateReset =  obj => {
+                    palindrom.onLocalChange = this.onLocalChange.bind(this);
+                    palindrom.onRemoteChange = this.onPatchApplied.bind(this);
+                    palindrom.onPatchReceived = this.onPatchReceived.bind(this);
+                    palindrom.onIncomingPatchValidationError = this.onGenericError.bind(this);
+                    palindrom.onOutgoingPatchValidationError = this.onGenericError.bind(this);
+                    palindrom.onError = this.onGenericError.bind(this);
+                    palindrom.onPatchSent = this.onPatchSent.bind(this);
+                    palindrom.onSocketStateChanged = this.onSocketStateChanged.bind(this);
+                    palindrom.onConnectionError = this.onConnectionError.bind(this);
+                    palindrom.onReconnectionCountdown = this.onReconnectionCountdown.bind(this);
+                    palindrom.onReconnectionEnd = this.onReconnectionEnd.bind(this);
+                    palindrom.onStateReset = obj => {
                         this.obj = obj;
                         if (whereToBind) {
                             this.bindTo(whereToBind);
@@ -252,15 +145,15 @@ All the changes from server are also received and propagated to your HTML.
                         this.onPatchApplied([{ op: 'replace', path: '', value: obj }], [{ removed: this.obj }])
                     }
                     // if already established (re-)set state
-                    if(palindrom.obj){
+                    if (palindrom.obj) {
                         palindrom.onStateReset(palindrom.obj);
                     }
                 }
                 this.network = palindrom.network;
                 this.morphUrl = palindrom.morphUrl.bind(palindrom)
             }
-            disconnectedCallback(){
-                if(this.isUsingOwnInstanceOfPalindrom) {
+            disconnectedCallback() {
+                if (this.isUsingOwnInstanceOfPalindrom) {
                     this.palindrom.unlisten();
                     // hacky way to stop Palindrom connection
                     this.palindrom.useWebSocket = false;
@@ -290,7 +183,7 @@ All the changes from server are also received and propagated to your HTML.
             }
 
             fire(name, detail) {
-                this.dispatchEvent(new CustomEvent(name, {detail}));
+                this.dispatchEvent(new CustomEvent(name, { detail }));
             }
 
             onPatchReceived(data, url, method) {
@@ -319,48 +212,18 @@ All the changes from server are also received and propagated to your HTML.
                 });
             }
 
-            updateReconnectionSeconds(seconds) {
-                for(const span of this.reconnectionSecondsSpans) {
-                    span.textContent = seconds;
-                }
-            }
             onConnectionError(palindromConnectionError) {
                 const eventDetail = {
-                    palindromConnectionError,
+                    error: palindromConnectionError,
                     handled: false
                 };
-                this.fire("connectionerror", eventDetail);
-
-                if (!eventDetail.handled) {
-                    console.error(palindromConnectionError);
-
-                    this.errorPane.removeAttribute('hidden');
-
-                    this.reloadingInMessage.removeAttribute('hidden');
-
-                    let timeout = this.fatalErrorReloadAfterS;
-
-                    this.updateReconnectionSeconds(timeout--);
-
-                    this.reloadingInterval = setInterval(() => {
-                        if(!this.reloadingInterval) {
-
-                            // to make sure to skip even before interval clears
-                            return;
-                        }
-                        this.updateReconnectionSeconds(timeout);
-                        if (timeout-- <= 0) {
-                            clearInterval(this.reloadingInterval);
-                            this.reload();
-                        }
-                    }, 1000);
-                }
-                }
-
-
+                this.fire("connection-error", eventDetail);
+            }
             onGenericError(error) {
-                this.showGenericError = true;
-                console.error(error);
+                const eventDetail = {
+                    error
+                };
+                this.fire("generic-error", eventDetail);
             }
 
             onReconnectionCountdown(milliseconds) {
@@ -370,12 +233,6 @@ All the changes from server are also received and propagated to your HTML.
                 };
 
                 this.fire("reconnection-countdown", eventDetail);
-
-                if (!eventDetail.handled) {
-                    this.showReconnectingNow = milliseconds == 0;
-                    this.showReconnectingIn = milliseconds != 0;
-                    this.reconnectionSeconds = milliseconds / 1000;
-                }
             }
 
             onReconnectionEnd() {
@@ -383,20 +240,13 @@ All the changes from server are also received and propagated to your HTML.
                     handled: false
                 };
                 this.fire("reconnection-end", eventDetail);
-
-                if (!eventDetail.handled) {
-                    this.showReconnectingNow = false;
-                    this.showReconnectingIn = false;
-                }
             }
 
             onPatchApplied(patches, results) {
                 this.propagateDomBind({ patches, results });
-                this.dispatchEvent(new CustomEvent("patch-applied", {
-                    bubbles: true,
-                    cancelable: true,
-                    detail: patches
-                }));
+                this.fire("patch-applied", {
+                    patches
+                });
             }
 
             notifyTemplateDomBind(tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
