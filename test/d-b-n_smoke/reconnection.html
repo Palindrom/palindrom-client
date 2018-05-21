@@ -72,11 +72,6 @@
                 console.error.restore();
             });
 
-            it('when connection is broken with a reason log error reason to the console', function () {
-                var closeEvent = { reason: 'thereason', code: 1 };
-                palindrom.network._ws.close(closeEvent);
-                expect(consoleErrorSpy.getCall(0).args[0].message).to.contain(closeEvent.reason);
-            });
             describe('when connection is broken', function () {
                 it('it should dispatch an event when the connection dies', function () {
                     var closeEvent = { reason: 'thereason', code: 1 };
