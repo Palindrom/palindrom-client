@@ -110,8 +110,7 @@ In order to develop it locally we suggest to use [polyserve](https://npmjs.com/p
 3. Go to the directory: `cd palindrom-client`
 4. Install the local dependencies: `bower install`
 5. Start the development server: `polyserve -p 8000`
-6. Open the demo: [http://localhost:8000/components/palindrom-client/](http://localhost:8000/components/palindrom-client/)
-7. Open the test suite: [http://localhost:8000/components/palindrom-client/test/](http://localhost:8000/components/palindrom-client/test/)
+6. Open the test suite: [http://localhost:8000/components/palindrom-client/test/](http://localhost:8000/components/palindrom-client/test/)
 
 ## History
 
