@@ -252,6 +252,9 @@ All the changes from server are also received and propagated to your HTML.
             notifyTemplateDomBind(tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
                 let operation;
                 let polymerPath;
+                const splices = {};
+                const notifications = {};
+
                 for (let operationNo = 0, len = patchesAndResults.patches.length; operationNo < len; operationNo++) {
                     operation = patchesAndResults.patches[operationNo];
                     const result = patchesAndResults.results[operationNo];
@@ -273,6 +276,9 @@ All the changes from server are also received and propagated to your HTML.
 
                     polymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path);
 
+                    /**
+                    *  STEP 1: COLLECT THE UPDATES, UNIQ THEM BY PATH
+                    * */
                     if (operation.op === 'test') {
                         // we assume that jsonpatch covered it already
                     } else if (operation.op === 'move' || operation.op === 'copy') {
@@ -284,65 +290,82 @@ All the changes from server are also received and propagated to your HTML.
                         const parentsPolymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path.substring(0, lastSeparator));
 
                         const parent = templateDomBind.get(parentsPolymerPath);
+
                         if (Array.isArray(parent) && (name === '-' || isNormalInteger(name))) {
+                            if (!splices[parentsPolymerPath]) {
+                                splices[parentsPolymerPath] = [];
+                            }
                             switch (operation.op) {
                                 case 'add':
                                     // JSONPatch push
                                     if (name === '-') {
                                         name = result.index;
                                     }
-                                    templateDomBind.notifySplices(parentsPolymerPath,
-                                        [{
-                                            index: parseInt(name, 10),
-                                            removed: [],
-                                            addedCount: 1,
-                                            object: parent,
-                                            type: 'splice'
-                                        }]
-                                    );
+                                    splices[parentsPolymerPath].push({
+                                        index: parseInt(name, 10),
+                                        removed: [],
+                                        addedCount: 1,
+                                        object: parent,
+                                        type: 'splice'
+                                    })
                                     break;
                                 case 'replace':
-                                    templateDomBind.notifySplices(parentsPolymerPath,
-                                        [{
-                                            index: parseInt(name, 10),
-                                            removed: (result && [result.removed]) || [],
-                                            addedCount: 1,
-                                            object: parent,
-                                            type: 'splice'
-                                        }]
-                                    );
+                                    splices[parentsPolymerPath].push({
+                                        index: parseInt(name, 10),
+                                        removed: (result && [result.removed]) || [],
+                                        addedCount: 1,
+                                        object: parent,
+                                        type: 'splice'
+                                    });
                                     break;
                                 case 'remove':
-                                    templateDomBind.notifySplices(parentsPolymerPath,
-                                        [{
-                                            index: parseInt(name, 10),
-                                            removed: (result && [result.removed]) || [],
-                                            addedCount: 0,
-                                            object: parent,
-                                            type: 'splice'
-                                        }]
-                                    );
+                                    splices[parentsPolymerPath].push({
+                                        index: parseInt(name, 10),
+                                        removed: (result && [result.removed]) || [],
+                                        addedCount: 0,
+                                        object: parent,
+                                        type: 'splice'
+                                    });
                                     break;
                             }
                         } else {
                             switch (operation.op) {
-
                                 case 'add':
                                 case 'replace':
                                     if (typeof operation.value === 'object') {
-                                        templateDomBind.notifyPath(polymerPath);
+                                        notifications[polymerPath] = [];
                                     } else {
-                                        templateDomBind.notifyPath(polymerPath, operation.value, false);
+                                        notifications[polymerPath] = [operation.value, false];
                                     }
                                     break;
                                 case 'remove':
-                                    //console.warn('Polymer does not support unsetting properties https://github.com/Polymer/polymer/issues/2565');
-                                    //console.warn('remove is translated to JSON incompatible set to `undefined`, as there is no remove method in Polymer.')
-                                    templateDomBind.notifyPath(polymerPath, null, false);
-                                    templateDomBind.notifyPath(polymerPath, undefined, false);
+                                    notifications[polymerPath] = [null, false];
                                     break;
                             }
                         }
+                    }
+                }
+                /**
+                *  STEP 2: APPLY THE UPDATES
+                * */
+                const spliceEntries = Object.entries(splices);
+                const notificationEntries = Object.entries(notifications);
+                if (spliceEntries.length + notificationEntries.length > 100) {
+                    console.warn(`palindrom-client has noticed a huge patch of ${patchesAndResults.patches.length} operations, for better performance palindrom-client will replace the whole palindrom object instead of applying your updates individually`);
+                    // clone to prevent flash of content
+                    templateDomBind.set('model', JSON.parse(JSON.stringify(this.obj)));
+                    // Polymer 2 is sync
+                    if (Polymer.Element) {
+                        templateDomBind.set('model', this.obj);
+                    } else { // Polymer 1 is async
+                        setTimeout(() => templateDomBind.set('model', this.obj));
+                    }
+                } else {
+                    for (const [path, parameters] of spliceEntries) {
+                        templateDomBind.notifySplices(path, parameters);
+                    }
+                    for (const [path, parameters] of notificationEntries) {
+                        templateDomBind.notifyPath(path, ...parameters);
                     }
                 }
             }
