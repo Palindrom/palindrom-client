@@ -4,24 +4,17 @@
 `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/2.0/docs/devguide/templates.html).
 That keeps your Polymer app, or just `dom-bind` template in sync with any server-side
 data-model using Palindrom & [JSON Patch](https://tools.ietf.org/html/rfc6902) flow.
-
 You get three-way data binding server - JS - HTML, kept in flawless sync.
-
     <palindrom-client
         obj="{{model}}"></palindrom-client>
-
-
 It establishes the Palindrom connection when attached. All the changes made
 in browser are sent to the server via WebSocket or HTTP, as
 [JSON Patch](https://tools.ietf.org/html/rfc6902)es.
 All the changes from server are also received and propagated to your HTML.
-
 -->
 <script src="../Palindrom/dist/palindrom-dom.min.js"></script>
 
 <script>
-
-
     (function () {
         const defaultProps = {
             "useWebSocket": true,
@@ -33,50 +26,50 @@ All the changes from server are also received and propagated to your HTML.
             "pingIntervalS": 60,
             "path": '/',
             "devToolsOpen": false,
-            "fatalErrorReloadAfterS": 5
+            "fatalErrorReloadAfterS": 5,
+            "mergedNotificationsThreshold": 100
         }
-        const defaultAttributes = ['remote-url', 'use-web-socket', 'debug', 'local-version-path', 'remote-version-path', 'ot', 'purity', 'listen-to', 'ping-interval-s', 'purity', 'fatal-error-reload-after-s', 'path'];
-
         class PalindromClient extends HTMLElement {
-
             constructor() {
                 super();
-
                 // assign default properties
                 Object.assign(this, defaultProps);
             }
-
+            static get observedAttributes() {
+                return ['merged-notifications-threshold', 'remote-url', 'use-web-socket', 'debug', 'local-version-path', 'remote-version-path', 'ot', 'purity', 'listen-to', 'ping-interval-s', 'purity', 'fatal-error-reload-after-s', 'path'];
+            }
             reconnectNow() {
                 this.palindrom.reconnectNow();
             }
-
             reload() {
                 window.location.reload();
             }
-
+            attributeChangedCallback(name, oldValue, value) {
+                this.copyAttribsToProps([{ name, value }]);
+            }
+            copyAttribsToProps(attribs) {
+                for (const attrib of attribs) {
+                    if (PalindromClient.observedAttributes.includes(attrib.name)) {
+                        const prop = kebebCaseToCamelCase(attrib.name);
+                        this[prop] = attrib.value;
+                    }
+                };
+            }
             cancelReloading() {
                 clearInterval(this.reloadingInterval);
                 delete this.reloadingInterval;
             }
-
             /**
              * assigns an instance of Palindrom according to given params, attaches it to .palindrom property
              *
              */
             connectedCallback() {
-
-                // assign default attributes
-                for (const attrib of this.attributes) {
-                    if (defaultAttributes.includes(attrib.name)) {
-                        const prop = kebebCaseToCamelCase(attrib.name);
-                        this[prop] = attrib.value;
-                    }
-                };
+                // assign attributes to props
+                this.copyAttribsToProps(this.attributes);
 
                 const whereToBind = this.getAttribute("ref");
                 let listenTo = this.listenTo;
                 const pingIntervalS = this.pingIntervalS / 1;
-
                 if (listenTo) {
                     listenTo = typeof listenTo == "string" ? document.getElementById(listenTo) : listenTo;
                 }
@@ -124,7 +117,6 @@ All the changes from server are also received and propagated to your HTML.
                 } else {
                     this.isUsingOwnInstanceOfPalindrom = false;
                     // with already established connection we cannot change listenTo parameter
-
                     this.palindrom = palindrom;
                     palindrom.onLocalChange = this.onLocalChange.bind(this);
                     palindrom.onRemoteChange = this.onPatchApplied.bind(this);
@@ -163,11 +155,9 @@ All the changes from server are also received and propagated to your HTML.
             bindTo(element) {
                 // use node id or node itself;
                 element = typeof element == "string" ? document.getElementById(element) : element;
-
                 element.model = this.obj;
                 this.bound = element;
             }
-
             propagateDomBind(sequence) {
                 if (this.bound) {
                     this.notifyTemplateDomBind(this.bound.model, sequence, this.bound, "model");
@@ -176,16 +166,13 @@ All the changes from server are also received and propagated to your HTML.
                     this.notifyTemplateDomBind(this.obj, sequence, this, "obj");
                 }
             }
-
             onLocalChange(patches) {
                 // todo #26
                 this.propagateDomBind({ patches, results: patches.map(() => { }) });
             }
-
             fire(name, detail) {
                 this.dispatchEvent(new CustomEvent(name, { detail }));
             }
-
             onPatchReceived(data, url, method) {
                 this.fire("patchreceived", {
                     data,
@@ -193,7 +180,6 @@ All the changes from server are also received and propagated to your HTML.
                     method
                 });
             }
-
             onPatchSent(data, url, method) {
                 this.fire("patchsent", {
                     data,
@@ -201,7 +187,6 @@ All the changes from server are also received and propagated to your HTML.
                     method
                 });
             }
-
             onSocketStateChanged(state, url, data, statusCode, reason) {
                 this.fire("socketstatechanged", {
                     state,
@@ -211,7 +196,6 @@ All the changes from server are also received and propagated to your HTML.
                     reason
                 });
             }
-
             onConnectionError(palindromConnectionError) {
                 const eventDetail = {
                     error: palindromConnectionError,
@@ -225,36 +209,40 @@ All the changes from server are also received and propagated to your HTML.
                 };
                 this.fire("generic-error", eventDetail);
             }
-
             onReconnectionCountdown(milliseconds) {
                 const eventDetail = {
                     milliseconds,
                     handled: false
                 };
-
                 this.fire("reconnection-countdown", eventDetail);
             }
-
             onReconnectionEnd() {
                 const eventDetail = {
                     handled: false
                 };
                 this.fire("reconnection-end", eventDetail);
             }
-
             onPatchApplied(patches, results) {
                 this.propagateDomBind({ patches, results });
                 this.fire("patch-applied", {
                     patches
                 });
             }
-
             notifyTemplateDomBind(tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
+                if (patchesAndResults.patches.length > this.mergedNotificationsThreshold) {
+                    console.warn(`palindrom-client has noticed a huge patch of ${patchesAndResults.patches.length} operations, for better performance palindrom-client will replace the whole palindrom object instead of applying your updates individually`);
+                    // clone to prevent flash of content
+                    templateDomBind.set('model', JSON.parse(JSON.stringify(this.obj)));
+                    // Polymer 2 is sync
+                    if (Polymer.Element) {
+                        templateDomBind.set('model', this.obj);
+                    } else { // Polymer 1 is async
+                        setTimeout(() => templateDomBind.set('model', this.obj));
+                    }
+                    return;
+                }
                 let operation;
                 let polymerPath;
-                const splices = {};
-                const notifications = {};
-
                 for (let operationNo = 0, len = patchesAndResults.patches.length; operationNo < len; operationNo++) {
                     operation = patchesAndResults.patches[operationNo];
                     const result = patchesAndResults.results[operationNo];
@@ -273,12 +261,7 @@ All the changes from server are also received and propagated to your HTML.
                         this.notifyTemplateDomBind(tree, newSequence, templateDomBind, polymerPathPrefix);
                         continue;
                     }
-
                     polymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path);
-
-                    /**
-                    *  STEP 1: COLLECT THE UPDATES, UNIQ THEM BY PATH
-                    * */
                     if (operation.op === 'test') {
                         // we assume that jsonpatch covered it already
                     } else if (operation.op === 'move' || operation.op === 'copy') {
@@ -288,44 +271,45 @@ All the changes from server are also received and propagated to your HTML.
                         const lastSeparator = operation.path.lastIndexOf('/');
                         let name = operation.path.substr(lastSeparator + 1);
                         const parentsPolymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path.substring(0, lastSeparator));
-
                         const parent = templateDomBind.get(parentsPolymerPath);
-
                         if (Array.isArray(parent) && (name === '-' || isNormalInteger(name))) {
-                            if (!splices[parentsPolymerPath]) {
-                                splices[parentsPolymerPath] = [];
-                            }
                             switch (operation.op) {
                                 case 'add':
                                     // JSONPatch push
                                     if (name === '-') {
                                         name = result.index;
                                     }
-                                    splices[parentsPolymerPath].push({
-                                        index: parseInt(name, 10),
-                                        removed: [],
-                                        addedCount: 1,
-                                        object: parent,
-                                        type: 'splice'
-                                    })
+                                    templateDomBind.notifySplices(parentsPolymerPath,
+                                        [{
+                                            index: parseInt(name, 10),
+                                            removed: [],
+                                            addedCount: 1,
+                                            object: parent,
+                                            type: 'splice'
+                                        }]
+                                    );
                                     break;
                                 case 'replace':
-                                    splices[parentsPolymerPath].push({
-                                        index: parseInt(name, 10),
-                                        removed: (result && [result.removed]) || [],
-                                        addedCount: 1,
-                                        object: parent,
-                                        type: 'splice'
-                                    });
+                                    templateDomBind.notifySplices(parentsPolymerPath,
+                                        [{
+                                            index: parseInt(name, 10),
+                                            removed: (result && [result.removed]) || [],
+                                            addedCount: 1,
+                                            object: parent,
+                                            type: 'splice'
+                                        }]
+                                    );
                                     break;
                                 case 'remove':
-                                    splices[parentsPolymerPath].push({
-                                        index: parseInt(name, 10),
-                                        removed: (result && [result.removed]) || [],
-                                        addedCount: 0,
-                                        object: parent,
-                                        type: 'splice'
-                                    });
+                                    templateDomBind.notifySplices(parentsPolymerPath,
+                                        [{
+                                            index: parseInt(name, 10),
+                                            removed: (result && [result.removed]) || [],
+                                            addedCount: 0,
+                                            object: parent,
+                                            type: 'splice'
+                                        }]
+                                    );
                                     break;
                             }
                         } else {
@@ -333,59 +317,33 @@ All the changes from server are also received and propagated to your HTML.
                                 case 'add':
                                 case 'replace':
                                     if (typeof operation.value === 'object') {
-                                        notifications[polymerPath] = [];
+                                        templateDomBind.notifyPath(polymerPath);
                                     } else {
-                                        notifications[polymerPath] = [operation.value, false];
+                                        templateDomBind.notifyPath(polymerPath, operation.value, false);
                                     }
                                     break;
                                 case 'remove':
-                                    notifications[polymerPath] = [null, false];
+                                    //console.warn('Polymer does not support unsetting properties https://github.com/Polymer/polymer/issues/2565');
+                                    //console.warn('remove is translated to JSON incompatible set to `undefined`, as there is no remove method in Polymer.')
+                                    templateDomBind.notifyPath(polymerPath, null, false);
+                                    templateDomBind.notifyPath(polymerPath, undefined, false);
                                     break;
                             }
                         }
                     }
                 }
-                /**
-                *  STEP 2: APPLY THE UPDATES
-                * */
-                const spliceEntries = Object.entries(splices);
-                const notificationEntries = Object.entries(notifications);
-                if (spliceEntries.length + notificationEntries.length > 100) {
-                    console.warn(`palindrom-client has noticed a huge patch of ${patchesAndResults.patches.length} operations, for better performance palindrom-client will replace the whole palindrom object instead of applying your updates individually`);
-                    // clone to prevent flash of content
-                    templateDomBind.set('model', JSON.parse(JSON.stringify(this.obj)));
-                    // Polymer 2 is sync
-                    if (Polymer.Element) {
-                        templateDomBind.set('model', this.obj);
-                    } else { // Polymer 1 is async
-                        setTimeout(() => templateDomBind.set('model', this.obj));
-                    }
-                } else {
-                    for (const [path, parameters] of spliceEntries) {
-                        templateDomBind.notifySplices(path, parameters);
-                    }
-                    for (const [path, parameters] of notificationEntries) {
-                        templateDomBind.notifyPath(path, ...parameters);
-                    }
-                }
             }
         }
-
         customElements.define('palindrom-client', PalindromClient);
-
         function translateJSONPointerToPolymerPath(pointer) {
             return pointer.replace(/\//g, '.');
         }
-
         function isNormalInteger(str) {
             const n = ~~Number(str);
             return String(n) === str && n >= 0;
         }
-
         function kebebCaseToCamelCase(str) {
             return str.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
         }
-
     })();
-
 </script>
