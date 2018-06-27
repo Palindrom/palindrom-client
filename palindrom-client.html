@@ -29,6 +29,7 @@ All the changes from server are also received and propagated to your HTML.
             "fatalErrorReloadAfterS": 5,
             "mergedNotificationsThreshold": 100
         }
+        const defaultAttribs = ['merged-notifications-threshold', 'remote-url', 'use-web-socket', 'debug', 'local-version-path', 'remote-version-path', 'ot', 'purity', 'listen-to', 'ping-interval-s', 'purity', 'fatal-error-reload-after-s', 'path'];
         class PalindromClient extends HTMLElement {
             constructor() {
                 super();
@@ -36,7 +37,7 @@ All the changes from server are also received and propagated to your HTML.
                 Object.assign(this, defaultProps);
             }
             static get observedAttributes() {
-                return ['merged-notifications-threshold', 'remote-url', 'use-web-socket', 'debug', 'local-version-path', 'remote-version-path', 'ot', 'purity', 'listen-to', 'ping-interval-s', 'purity', 'fatal-error-reload-after-s', 'path'];
+                return ['merged-notifications-threshold'];
             }
             reconnectNow() {
                 this.palindrom.reconnectNow();
@@ -45,15 +46,8 @@ All the changes from server are also received and propagated to your HTML.
                 window.location.reload();
             }
             attributeChangedCallback(name, oldValue, value) {
-                this.copyAttribsToProps([{ name, value }]);
-            }
-            copyAttribsToProps(attribs) {
-                for (const attrib of attribs) {
-                    if (PalindromClient.observedAttributes.includes(attrib.name)) {
-                        const prop = kebebCaseToCamelCase(attrib.name);
-                        this[prop] = attrib.value;
-                    }
-                };
+                // it will only be called for merged-notifications-threshold attribute. See observedAttributes method
+                this.mergedNotificationsThreshold = value;
             }
             cancelReloading() {
                 clearInterval(this.reloadingInterval);
@@ -65,7 +59,12 @@ All the changes from server are also received and propagated to your HTML.
              */
             connectedCallback() {
                 // assign attributes to props
-                this.copyAttribsToProps(this.attributes);
+                for (const attrib of this.attributes) {
+                    if (defaultAttribs.includes(attrib.name)) {
+                        const prop = kebebCaseToCamelCase(attrib.name);
+                        this[prop] = attrib.value;
+                    }
+                }
 
                 const whereToBind = this.getAttribute("ref");
                 let listenTo = this.listenTo;
