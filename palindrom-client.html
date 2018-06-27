@@ -230,7 +230,7 @@ All the changes from server are also received and propagated to your HTML.
             }
             notifyTemplateDomBind(tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
                 if (patchesAndResults.patches.length > this.mergedNotificationsThreshold) {
-                    console.warn(`palindrom-client has noticed a huge patch of ${patchesAndResults.patches.length} operations, for better performance palindrom-client will replace the whole palindrom object instead of applying your updates individually`);
+                    console.warn(`palindrom-client has noticed a huge patch of ${patchesAndResults.patches.length} operations. For better performance palindrom-client will replace the whole palindrom object instead of applying your updates individually`);
                     // clone to prevent flash of content
                     templateDomBind.set('model', JSON.parse(JSON.stringify(this.obj)));
                     // Polymer 2 is sync
