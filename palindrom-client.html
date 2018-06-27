@@ -92,6 +92,15 @@ All the changes from server are also received and propagated to your HTML.
                     type: String,
                     value: '/_ver#s'
                 },
+                
+                /**
+                 * {Number} The minimum number of operations in the patch where `palindrom-client` stops applying updates individually and resets the whole state object for better performance. This limits the number of DOM interactions for bigger patches.
+                 */
+                mergedNotificationsThreshold: {
+                    type: Number,
+                    value: 100,
+                    notify: true
+                },   
                 /**
                  * `false` to disable OT
                  */
@@ -356,6 +365,18 @@ All the changes from server are also received and propagated to your HTML.
                 }));
             },
             notifyTemplateDomBind(tree, patchesAndResults, templateDomBind, polymerPathPrefix) {
+                if (patchesAndResults.patches.length > this.mergedNotificationsThreshold) {
+                    console.warn(`palindrom-client has noticed a huge patch of ${patchesAndResults.patches.length} operations. For better performance palindrom-client will replace the whole state object instead of applying your updates individually`);
+                    // clone to prevent flash of content
+                    templateDomBind.set('model', JSON.parse(JSON.stringify(this.obj)));
+                    // Polymer 2 is sync
+                    if (Polymer.Element) {
+                        templateDomBind.set('model', this.obj);
+                    } else { // Polymer 1 is async
+                        setTimeout(() => templateDomBind.set('model', this.obj));
+                    }
+                    return;
+                }
                 var operation, polymerPath;
                 for (var operationNo = 0, len = patchesAndResults.patches.length; operationNo < len; operationNo++) {
                     operation = patchesAndResults.patches[operationNo];
