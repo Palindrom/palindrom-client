@@ -14,10 +14,8 @@
 </head>
 
 <body>
-
     <puppet-client remote-url="/palindrom" ref="backward-comp" ping-interval-s="0"></puppet-client>
     <template is="dom-bind" id="backward-comp">
-
         <h4>Welcome to
             <span>{{model.name}}</span>!</h4>
         <template is="dom-if" if="{{model.name}}">
