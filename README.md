@@ -57,6 +57,7 @@ ref   | `String` or `HTMLElement` | element itself | To which element (polymer e
 debug | `Boolean` | `false` | Set to `true` to enable debugging mode
 listenTo | `String` | `document.body` | DOM node to listen to (see PalindromDOM listenTo attribute)
 localVersionPath | `JSONPointer` | `/_ver#c$` | local version path, set to falsy do disable Versioned JSON Patch communication
+mergedNotificationsThreshold | `Number` | 100 | The minimum number of operations in the patch where `palindrom-client` stops applying updates individually and resets the whole state object for better performance. This limits the number of DOM interactions for bigger patches.
 obj | `Object` | `{}` | **notifies** Object that will be synced
 ot | `Boolean` | `true` | `false` to disable OT
 path | `String` | `/` | Path to given obj
