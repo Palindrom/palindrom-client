@@ -1,4 +1,4 @@
-<!-- palindrom-polymer-client version: 7.1.0 | MIT License -->
+<!-- palindrom-polymer-client version: 7.1.1 | MIT License -->
 
 <!--
 `palindrom-client` element binds [Palindrom](https://github.com/Palindrom/Palindrom) with [Polymer's template binding](https://www.polymer-project.org/2.0/docs/devguide/templates.html).
@@ -59,13 +59,13 @@ All the changes from server are also received and propagated to your HTML.
              */
             connectedCallback() {
                 // assign attributes to props
-                for (const attrib of this.attributes) {
+                for (let i = 0; i < this.attributes.length; i++) {
+                    const attrib = this.attributes[i];
                     if (defaultAttribs.includes(attrib.name)) {
                         const prop = kebebCaseToCamelCase(attrib.name);
                         this[prop] = attrib.value;
                     }
                 }
-
                 const whereToBind = this.getAttribute("ref");
                 let listenTo = this.listenTo;
                 const pingIntervalS = this.pingIntervalS / 1;
