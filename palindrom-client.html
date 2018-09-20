@@ -243,7 +243,12 @@ All the changes from server are also received and propagated to your HTML.
                     if (operation.path == "") {
                         // Replate the original object with the new one.
                         templateDomBind.set('model', this.obj);
-                        continue;
+                        // By the time we're here all the operations in the patch
+                        // are applied to the object by Palindrom.
+                        // As we notified the root about the entire object change,
+                        // there is no need to notify individual  properties.
+                        // https://github.com/Palindrom/Palindrom/blob/c38cf23/src/palindrom.js#L814-L843
+                        return;
                     }
                     polymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path);
                     if (operation.op === 'test') {
