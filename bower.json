@@ -35,7 +35,7 @@
     "Palindrom": "Palindrom/Palindrom#^v5.0.0"
   },
   "devDependencies": {
-    "polymer": "Polymer/polymer#1.9 - 2",
+    "polymer": "^2.6.1",
     "iron-component-page": "PolymerElements/iron-component-page#1 - 2",
     "paper-styles": "polymerelements/paper-styles#1 - 2",
     "test-fixture": "PolymerElements/test-fixture#^3.0.0",

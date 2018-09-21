@@ -77,7 +77,7 @@ All the changes from server are also received and propagated to your HTML.
                     /**
                      * To tell whether we connected to an existing instance,
                      * or created our own. This is useful for detachement, we don't want
-                     * to destroy Palindrom instances that we don't own 
+                     * to destroy Palindrom instances that we don't own
                      * */
                     this.isUsingOwnInstanceOfPalindrom = true;
                     this.palindrom = palindrom = new PalindromDOM({
@@ -232,12 +232,7 @@ All the changes from server are also received and propagated to your HTML.
                     console.warn(`palindrom-client has noticed a huge patch of ${patchesAndResults.patches.length} operations. For better performance palindrom-client will replace the whole state object instead of applying your updates individually`);
                     // clone to prevent flash of content
                     templateDomBind.set('model', JSON.parse(JSON.stringify(this.obj)));
-                    // Polymer 2 is sync
-                    if (Polymer.Element) {
-                        templateDomBind.set('model', this.obj);
-                    } else { // Polymer 1 is async
-                        setTimeout(() => templateDomBind.set('model', this.obj));
-                    }
+                    templateDomBind.set('model', this.obj);
                     return;
                 }
                 let operation;
@@ -246,19 +241,14 @@ All the changes from server are also received and propagated to your HTML.
                     operation = patchesAndResults.patches[operationNo];
                     const result = patchesAndResults.results[operationNo];
                     if (operation.path == "") {
-                        //in case of root path, Polymer replaces the original obj, which detaches it from Palindrom
-                        const newSequence = { patches: [], results: [] };
-                        for (const prop in operation.value) {
-                            if (operation.value.hasOwnProperty(prop)) {
-                                newSequence.patches.push({
-                                    op: "add",
-                                    path: `/${prop}`,
-                                    value: operation.value[prop]
-                                });
-                            }
-                        }
-                        this.notifyTemplateDomBind(tree, newSequence, templateDomBind, polymerPathPrefix);
-                        continue;
+                        // Replate the original object with the new one.
+                        templateDomBind.set('model', this.obj);
+                        // By the time we're here all the operations in the patch
+                        // are applied to the object by Palindrom.
+                        // As we notified the root about the entire object change,
+                        // there is no need to notify individual  properties.
+                        // https://github.com/Palindrom/Palindrom/blob/c38cf23/src/palindrom.js#L814-L843
+                        return;
                     }
                     polymerPath = polymerPathPrefix + translateJSONPointerToPolymerPath(operation.path);
                     if (operation.op === 'test') {
