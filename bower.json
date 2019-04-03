@@ -32,7 +32,7 @@
     "Gruntfile.js"
   ],
   "dependencies": {
-    "Palindrom": "Palindrom/Palindrom#^v5.0.0"
+    "Palindrom": "Palindrom/Palindrom#^v6.0.0"
   },
   "devDependencies": {
     "polymer": "^2.6.1",
