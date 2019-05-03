@@ -72,10 +72,13 @@
                         container = fixture('palindrom-polymer-array');
                         ppclient = container.querySelector("palindrom-client");
                         palindrom = ppclient.palindrom;
-                        initPalindrom(palindrom, model);
+                        
                         setTimeout(() => {
+                        initPalindrom(palindrom, model);
+
                         domBind = container.querySelector('dom-bind');
                         // Polymer werido(m)bind attaches to dom asynchronously
+
                         setTimeout(done, 10)
                         }, 10);
                     });
