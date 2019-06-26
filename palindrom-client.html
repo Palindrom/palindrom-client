@@ -17,6 +17,7 @@ All the changes from server are also received and propagated to your HTML.
 <script>
     (function () {
         const defaultProps = {
+            "remoteUrl": window.location.href,
             "useWebSocket": true,
             "debug": false,
             "localVersionPath": '/_ver#c$',
@@ -58,7 +59,12 @@ All the changes from server are also received and propagated to your HTML.
                     const attrib = this.attributes[i];
                     if (defaultAttribs.includes(attrib.name)) {
                         const prop = kebebCaseToCamelCase(attrib.name);
-                        this[prop] = attrib.value;
+                        if (typeof this[prop] === "boolean") {
+                            this[prop] = (attrib.value === "true");
+                        }
+                        else {
+                            this[prop] = attrib.value;
+                        }
                     }
                 }
                 const whereToBind = this.getAttribute("ref");
@@ -152,9 +158,9 @@ All the changes from server are also received and propagated to your HTML.
                 if (!element) {
                     throw new Error("Provided 'ref' configuration is not a valid element or existing element's id");
                 }
-                element.model = this.obj;
-                this.bound = element;
-            }
+                    element.model = this.obj;
+                    this.bound = element;
+                }
             propagateDomBind(sequence) {
                 if (this.bound) {
                     this.notifyTemplateDomBind(this.bound.model, sequence, this.bound, "model");

@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <title>Test suite for deep array operations</title>
+    <!-- Importing Web Component's Polyfill -->
+    <script src="../../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <!-- mock server responses -->
+    <script src="../../../sinonjs/sinon.js"></script>
+    <script src="../mockServer.js"></script>
+    <script src="../../../fast-json-patch/dist/fast-json-patch.min.js"></script>
+
+    <link rel="import" href="../shared/helpers.html">
+
+    <script src="../../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../../../polymer/polymer.html">
+
+    <!-- Step 1: import the element to test -->
+    <script src="../../../Palindrom/dist/palindrom-dom.min.js"></script>
+
+    <link rel="import" href="../../palindrom-client.html">
+</head>
+
+<body>
+    <test-fixture id="my-fixture-no-remote-url">
+        <template>
+            <div><palindrom-client ref="empty_dom_bind"></palindrom-client>
+            <dom-bind id="empty_dom_bind"></dom-bind></div>
+        </template>
+    </test-fixture>
+
+    <test-fixture id="my-fixture-boolean-attributes">
+        <template>
+            <div><palindrom-client remote-url="/palindrom-exists" ref="empty_dom_bind" use-web-socket="false" ot="false" purity="true"></palindrom-client>
+                <dom-bind id="empty_dom_bind"></dom-bind></div>
+        </template>
+    </test-fixture>
+
+    <script>
+        describe('Attributes', function () {
+            var container;
+            it('Should use current page as the remote URL if not specified', function (done) {
+                container = fixture('my-fixture-no-remote-url');
+                setTimeout(() => {
+                    ppclient = document.querySelector("palindrom-client");
+                    expect(ppclient.remoteUrl).to.equal(window.location.href);
+                    done();
+                }, 10);
+            });
+
+            it('Should convert string value of an attribute to boolean, if the default value of the corresponding property is boolean', function (done) {
+                container = fixture('my-fixture-boolean-attributes');
+                setTimeout(() => {
+                    ppclient = document.querySelector("palindrom-client");
+                    expect(ppclient.useWebSocket).to.equal(false);
+                    expect(ppclient.ot).to.equal(false);
+                    expect(ppclient.purity).to.equal(true);
+                    done();
+                }, 10);
+            });
+        });
+    </script>
+
+</body>
+
+</html>
