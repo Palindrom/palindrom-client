@@ -28,8 +28,6 @@
     enableServerReplies = false;
   };
 
-  window.lastRequestContent;
-
   function handlePageLoad(url) {
     if (url.indexOf('subpage.html') > -1) {
       full.user.firstName$ = 'Nikola';
@@ -43,44 +41,39 @@
     }
   }
 
+  function generateResponse(json, headersObj, type = 'application/json', status = 200) {
+    const bodyString = JSON.stringify(json);
+    const headers = new Headers(headersObj);
+    const bodyBlob = new Blob([bodyString], { type })
+    const res = new Response(bodyBlob, { status, headers });
+    return res;
+  }
+
   var lastUrl = window.location.href;
   handlePageLoad(lastUrl);
 
-
-
-  // pass-through all requests that are not meant for palindrom
-  sinon.FakeXMLHttpRequest.useFilters = true;
-  sinon.FakeXMLHttpRequest.addFilter(function (method, url) {
-    return !(/.*palindrom(\/reconnect)?$/.test(url));
-  });
-
-  // default implementation fires onload event. see https://github.com/sinonjs/sinon/issues/432
-  sinon.FakeXMLHttpRequest.prototype.abort = function(){};
-
-  var sinonFakeServer = sinon.fakeServer.create();
-
-
-  sinonFakeServer.respondWith(function(request) {
-    if(request.requestHeaders['Accept'] == 'application/json') {
-      window.lastRequestContent = request.requestBody;
-      var fullCopy = JSON.parse(JSON.stringify(full));
-      fullCopy['_ver#s'] = serverVersionNumber;
-      fullCopy['_ver#c'] = clientVersionNumber;
-      request.respond(200, [{name: "Location", value: this.url},{name: "X-Referer", value: lastUrl}], JSON.stringify(fullCopy));
-    } else if(request.requestHeaders['Accept'] == 'application/json-patch+json') {
-      var outPatches = [];
-      handlePageLoad(this.url);
-      outPatches.push({op: 'replace', path: '_ver#s', value: ++serverVersionNumber});
-      outPatches.push({op: 'test', path: '_ver#c$', value: clientVersionNumber});
-      outPatches.push({op: 'replace', path: '/user/firstName$', value: full.user.firstName$});
-      outPatches.push({op: 'replace', path: '/user/lastName$', value: full.user.lastName$});
-      outPatches.push({op: 'replace', path: '/user/fullName', value: full.user.fullName});
-      request.respond(200, [], JSON.stringify(outPatches));
-    } else {
-      throw new Error("unexpected request - url matches palindrom (=" + request.url + "), yet Accept header is not json nor json patch (=" + request.requestHeaders['Accept'] + ")");
-    }
-  });
-  sinonFakeServer.autoRespond = true;
+  window.fetch = function(url, options) {
+      // serve reconnection requests as normal requests (do not change the location header)
+      url = url.replace('/reconnect', '');
+      if(options.headers['Accept'] == 'application/json') {
+        window.lastRequestContent = options.body;
+        var fullCopy = JSON.parse(JSON.stringify(full));
+        fullCopy['_ver#s'] = serverVersionNumber;
+        fullCopy['_ver#c'] = clientVersionNumber;
+        return generateResponse(fullCopy, {"Location": url, "X-Referer": lastUrl}, 'application/json');
+      } else if(options.headers['Accept'] == 'application/json-patch+json') {
+        var outPatches = [];
+        handlePageLoad(url);
+        outPatches.push({op: 'replace', path: '_ver#s', value: ++serverVersionNumber});
+        outPatches.push({op: 'test', path: '_ver#c$', value: clientVersionNumber});
+        outPatches.push({op: 'replace', path: '/user/firstName$', value: full.user.firstName$});
+        outPatches.push({op: 'replace', path: '/user/lastName$', value: full.user.lastName$});
+        outPatches.push({op: 'replace', path: '/user/fullName', value: full.user.fullName});
+        return generateResponse(fullCopy, {}, 'application/json-patch+json');
+      } else {
+        throw new Error("unexpected request - url matches palindrom (=" + url + "), yet Accept header is not json nor json patch (=" + options.headers['Accept'] + ")");
+      }
+  }  
 
   WebSocket.prototype.send = function (data) {
     console.info("Mock WebSocket .send ",data);
