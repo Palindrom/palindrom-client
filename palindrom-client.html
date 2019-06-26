@@ -146,9 +146,12 @@ All the changes from server are also received and propagated to your HTML.
                     PalindromDOM.instances.delete(this.remoteUrl);
                 }
             }
-            bindTo(element) {
+            bindTo(elementOrId) {
                 // use node id or node itself;
-                element = typeof element == "string" ? document.getElementById(element) : element;
+                const element = typeof elementOrId == "string" ? document.getElementById(elementOrId) : elementOrId;
+                if (!element) {
+                    throw new Error("Provided 'ref' configuration is not a valid element or existing element's id");
+                }
                 element.model = this.obj;
                 this.bound = element;
             }
